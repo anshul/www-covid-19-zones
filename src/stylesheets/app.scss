@@ -1,0 +1,77 @@
+@import "./colors";
+
+body {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+h1 {
+  font-family: "Poppins", sans-serif;
+  font-weight: 800;
+}
+
+h2 {
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+}
+
+h3 {
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+}
+
+h4 {
+  font-family: "Poppins", sans-serif;
+  font-weight: 800;
+}
+
+h5 {
+  font-family: "Poppins", sans-serif;
+  font-weight: 800;
+}
+
+h6 {
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+}
+
+p,
+a,
+li,
+label {
+  font-family: "Poppins", sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin: 0;
+}
+
+button {
+  border: none;
+  color: white;
+  font-weight: 600;
+  padding: 8px 15px;
+  border-radius: 12px;
+  font-family: "Poppins", sans-serif;
+  background-color: #212121;
+  transition-duration: 0.3s;
+}
+
+button:hover {
+  background-color: lighten($color: #212121, $amount: 7);
+}
+
+button:active,
+button:focus {
+  outline: none;
+}
