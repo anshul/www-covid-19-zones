@@ -6,28 +6,34 @@
     "@material-ui/styles": "4.9.10",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
+    "@types/axios": "^0.14.0",
+    "@types/chart.js": "^2.9.19",
     "@types/node": "^12.0.0",
     "@types/node-sass": "^4.11.0",
     "@types/react": "^16.9.0",
     "@types/react-autocomplete": "^1.8.5",
     "@types/react-dom": "^16.9.0",
+    "@types/react-relay": "^7.0.3",
     "@types/react-router-dom": "^5.1.4",
+    "@types/relay-runtime": "^8.0.6",
+    "axios": "^0.19.2",
     "chart.js": "^2.9.3",
     "clsx": "^1.1.0",
     "node-sass": "^4.13.1",
     "react": "^16.13.1",
-    "react-autocomplete": "^1.8.1",
-    "react-chartjs-2": "^2.9.0",
     "react-dom": "^16.13.1",
     "react-flexbox-grid": "^2.1.2",
     "react-icons": "^3.9.0",
+    "react-relay": "^9.0.0",
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.4.1",
+    "relay-runtime": "^9.0.0",
     "typescript": "~3.7.2"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^2.27.0",
     "@typescript-eslint/parser": "^2.27.0",
+    "babel-plugin-relay": "^9.0.0",
     "eslint": "^6.6.0",
     "eslint-config-prettier": "^6.10.1",
     "eslint-config-react-app": "^5.2.1",
@@ -38,17 +44,25 @@
     "eslint-plugin-prettier": "^3.1.2",
     "eslint-plugin-react": "7.19.0",
     "eslint-plugin-react-hooks": "^1.6.1",
+    "get-graphql-schema": "^2.1.2",
+    "graphql-compiler": "^1.7.0",
     "husky": "^4.2.5",
-    "prettier": "^2.0.4"
+    "prettier": "^2.0.4",
+    "relay-compiler": "8.0.0",
+    "relay-compiler-language-typescript": "^10.1.5",
+    "relay-config": "^9.0.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "REACT_APP_API_URL=http://localhost:6400 PORT=7200 react-scripts start",
+    "build": "REACT_APP_API_URL=https://covid-19-zones.com react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "fix": "eslint 'src/**/*.{js,ts,tsx}' --fix",
     "lint": "eslint --ignore-pattern 'src/**/*.{js,ts,tsx}'",
-    "lint:ci": "yarn run eslint --ext .tsx,.ts,.js,.jsx --ignore-pattern src"
+    "lint:ci": "yarn run eslint --ext .tsx,.ts,.js,.jsx --ignore-pattern src",
+    "update-schema": "yarn --silent get-graphql-schema http://localhost:6400/graphql > schema.graphql",
+    "relay": "yarn run relay-compiler --language typescript --artifactDirectory ./src/__generated__ --schema ./schema.graphql --src ./src/ $@",
+    "relay-watch": "yarn run relay-compiler --language typescript --artifactDirectory ./src/__generated__ --schema ./schema.graphql --src ./src/ --watch $@"
   },
   "eslintConfig": {
     "extends": [
@@ -111,6 +125,11 @@
   "husky": {
     "hooks": {
       "pre-commit": "yarn lint"
+    }
+  },
+  "babelMacros": {
+    "relay": {
+      "artifactDirectory": "./src/__generated__"
     }
   }
 }

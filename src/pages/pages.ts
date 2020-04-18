@@ -1,5 +1,5 @@
-import Home from './Home'
 import { RouteComponentProps } from 'react-router-dom'
+import Home from './Home'
 import Zone from './Zone'
 
 export interface Page {
@@ -15,7 +15,7 @@ export const pages: Page[] = [
     displayName: 'Home',
   },
   {
-    path: '/zone/:slug',
+    path: '/zone/:zone',
     view: Zone,
     displayName: 'Zone',
   },
