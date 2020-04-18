@@ -83,13 +83,7 @@ const Searchbar: React.FC = () => {
   return (
     <>
       <div className={classes.inputRoot}>
-        <input
-          value={value}
-          placeholder='How is your country/city doing?'
-          className={classes.input}
-          onChange={onChange}
-
-        />
+        <input value={value} placeholder='How is your country/city doing?' className={classes.input} onChange={onChange} />
         <FiSearch className={classes.inputIcon} />
       </div>
 
