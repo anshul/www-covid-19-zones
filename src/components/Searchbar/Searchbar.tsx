@@ -94,6 +94,7 @@ const Searchbar: React.FC = () => {
             zonesList(searchQuery: $searchQuery) {
               slug
               name
+              code
               parentZone {
                 name
               }
@@ -110,10 +111,9 @@ const Searchbar: React.FC = () => {
               <div className={classes.menu}>
                 {open &&
                   items.map((item) => {
-                    const path = item.slug.split('/')[item.slug.split('/').length - 1]
                     return (
                       item && (
-                        <Link className={classes.linkText} key={item.slug} to={`zone/${path}`}>
+                        <Link className={classes.linkText} key={item.slug} to={`/zone/${item.code}`}>
                           <div className={clsx(classes.menuItem)}>
                             <p>{item.name}</p>
                             <p className={classes.parentZone}>{item.parentZone && item.parentZone.name}</p>

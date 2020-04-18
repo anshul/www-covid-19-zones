@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-/* @relayHash 92f15c8e7e5baf8a6c8ae557f3c14a37 */
+/* @relayHash 8e35bb221dab02ea3e12dedee43b0d69 */
 
 import { ConcreteRequest } from "relay-runtime";
 export type SearchbarQueryVariables = {
@@ -10,6 +10,7 @@ export type SearchbarQueryResponse = {
     readonly zonesList: ReadonlyArray<{
         readonly slug: string;
         readonly name: string;
+        readonly code: string;
         readonly parentZone: {
             readonly name: string;
         } | null;
@@ -29,6 +30,7 @@ query SearchbarQuery(
   zonesList(searchQuery: $searchQuery) {
     slug
     name
+    code
     parentZone {
       name
     }
@@ -77,6 +79,13 @@ v2 = [
       },
       (v1/*: any*/),
       {
+        "kind": "ScalarField",
+        "alias": null,
+        "name": "code",
+        "args": null,
+        "storageKey": null
+      },
+      {
         "kind": "LinkedField",
         "alias": null,
         "name": "parentZone",
@@ -111,10 +120,10 @@ return {
     "operationKind": "query",
     "name": "SearchbarQuery",
     "id": null,
-    "text": "query SearchbarQuery(\n  $searchQuery: String\n) {\n  zonesList(searchQuery: $searchQuery) {\n    slug\n    name\n    parentZone {\n      name\n    }\n  }\n}\n",
+    "text": "query SearchbarQuery(\n  $searchQuery: String\n) {\n  zonesList(searchQuery: $searchQuery) {\n    slug\n    name\n    code\n    parentZone {\n      name\n    }\n  }\n}\n",
     "metadata": {}
   }
 };
 })();
-(node as any).hash = '816bc332ad06dd0072a0e0843be44ff1';
+(node as any).hash = '27e0386c722126dc5a5dc86d6b1160e1';
 export default node;
