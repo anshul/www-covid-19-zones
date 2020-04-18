@@ -15,7 +15,7 @@ const HomeRoot: React.FC<Props> = ({ home }) => {
     <Grid>
       <Row>
         <Col xs={12} xl={6} xlOffset={3}>
-          <Searchbar onSearch={() => { }} />
+          <Searchbar />
         </Col>
       </Row>
       <Row>

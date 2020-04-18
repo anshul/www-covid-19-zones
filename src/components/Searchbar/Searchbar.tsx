@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { graphql } from 'babel-plugin-relay/macro'
 
 import { makeStyles, createStyles } from '@material-ui/styles'
-import Autocomplete from 'react-autocomplete'
 import { FiSearch } from 'react-icons/fi'
 import clsx from 'clsx'
 import { Link } from 'react-router-dom'
@@ -10,10 +9,6 @@ import ErrorBox from '../ErrorBox'
 import { QueryRenderer } from 'react-relay'
 import environment from '../../relayEnvironment'
 import { SearchbarQuery } from '../../__generated__/SearchbarQuery.graphql'
-
-interface Props {
-  onSearch: () => void
-}
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -74,71 +69,76 @@ const useStyles = makeStyles(() =>
   })
 )
 
-const Searchbar: React.FC<Props> = ({ onSearch }) => {
+const Searchbar: React.FC = () => {
+  const [open, setOpen] = useState(false)
   const [value, setValue] = useState('')
 
   const classes = useStyles()
 
-  const onChange = (value: string) => {
-    setValue(value)
+  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setOpen(true)
+    setValue(e.target.value)
   }
 
   return (
-    <QueryRenderer<SearchbarQuery>
-      environment={environment}
-      query={graphql`
-        query SearchbarQuery($searchQuery: String) {
-          zonesList(searchQuery: $searchQuery) {
-            slug
-            name
-            parentZone {
+    <>
+      <div className={classes.inputRoot}>
+        <input
+          value={value}
+          placeholder='How is your country/city doing?'
+          className={classes.input}
+          onChange={onChange}
+
+        />
+        <FiSearch className={classes.inputIcon} />
+      </div>
+
+      <QueryRenderer<SearchbarQuery>
+        environment={environment}
+        query={graphql`
+          query SearchbarQuery($searchQuery: String) {
+            zonesList(searchQuery: $searchQuery) {
+              slug
               name
+              parentZone {
+                name
+              }
             }
           }
-        }
-      `}
-      variables={{ searchQuery: value }}
-      render={({ error, props }) => {
-        if (error) {
-          return <ErrorBox error={error} />
-        } else if (props) {
+        `}
+        variables={{ searchQuery: value }}
+        render={({ error, props }) => {
+          if (error) {
+            return <ErrorBox error={error} />
+          } else if (props) {
+            const items = props.zonesList
+            return (
+              <div className={classes.menu}>
+                {open &&
+                  items.map((item) => {
+                    const path = item.slug.split('/')[item.slug.split('/').length - 1]
+                    return (
+                      item && (
+                        <Link className={classes.linkText} key={item.slug} to={`zone/${path}`}>
+                          <div className={clsx(classes.menuItem)}>
+                            <p>{item.name}</p>
+                            <p className={classes.parentZone}>{item.parentZone && item.parentZone.name}</p>
+                          </div>
+                        </Link>
+                      )
+                    )
+                  })}
+              </div>
+            )
+          }
           return (
-            <Autocomplete
-              autoHighlight
-              wrapperStyle={{}}
-              value={value}
-              items={(props.zonesList as any[]) || []}
-              getItemValue={(item) => item.name}
-              onChange={(e) => onChange(e.target.value)}
-              onSelect={(_, item) => setValue(item.slug)}
-              renderInput={(props) => (
-                <div className={classes.inputRoot}>
-                  <input {...props} placeholder='How is your country/city doing?' className={classes.input} />
-                  <FiSearch className={classes.inputIcon} />
-                  <button onClick={onSearch} className={classes.button}>
-                    Search
-                  </button>
-                </div>
-              )}
-              renderItem={(item, isHighlighted) => {
-                const path = item.slug.split('/')[item.slug.split('/').length - 1]
-
-                return (
-                  <Link className={classes.linkText} key={item.slug} to={`zone/${path}`}>
-                    <div className={clsx(classes.menuItem, { [classes.menuItemHighlighted]: isHighlighted })}>
-                      <p>{item.name}</p>
-                      <p className={classes.parentZone}>{item.parentZone.name}</p>
-                    </div>
-                  </Link>
-                )
-              }}
-              renderMenu={(children) => <div className={classes.menu}>{children}</div>}
-            />
+            <div className={clsx(classes.menuItem)}>
+              <p>Loading</p>
+            </div>
           )
-        }
-        return 'Loading'
-      }}
-    />
+        }}
+      />
+    </>
   )
 }
 
