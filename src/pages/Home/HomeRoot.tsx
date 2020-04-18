@@ -15,14 +15,8 @@ const HomeRoot: React.FC<Props> = ({ home }) => {
     <Grid>
       <Row>
         <Col xs={12} xl={6} xlOffset={3}>
-          <Searchbar onSearch={() => { }} />
+          <Searchbar />
         </Col>
-      </Row>
-      <Row>
-        <Col xs={12} xl={6}></Col>
-        <Col xs={12} xl={6}></Col>
-        <Col xs={12} xl={6}></Col>
-        <Col xs={12} xl={6}></Col>
       </Row>
       <Row style={{ margin: '8px 0' }}>
         <Col xs={12} xl={4}>
