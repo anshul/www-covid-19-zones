@@ -54,7 +54,7 @@
   },
   "scripts": {
     "start": "REACT_APP_API_URL=http://localhost:6400 PORT=7200 react-scripts start",
-    "build": "REACT_APP_API_URL=https://covid-19-zones.com react-scripts build",
+    "build": "REACT_APP_API_URL=https://api.covid19zones.com react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "fix": "eslint 'src/**/*.{js,ts,tsx}' --fix",
