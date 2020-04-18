@@ -1,3 +1,6 @@
+"""Represents an unconstrained type. No coercion is performed"""
+scalar Any
+
 type Cases {
   label: String!
   name: String!
@@ -43,6 +46,12 @@ type HomeData {
   ): CasesConnection!
 }
 
+type LineChart {
+  data: [Any!]!
+  lineKeys: [String!]!
+  xAxisKey: String!
+}
+
 type Mutation {
   """An example field added by the generator"""
   testField: String!
@@ -68,6 +77,7 @@ type Query {
 
   """Zone data"""
   zone(slug: String!): Zone!
+  zoneStats(code: String!): ZoneStats!
 
   """List of all zones"""
   zonesList(searchQuery: String): [Zone!]!
@@ -75,6 +85,7 @@ type Query {
 
 type Zone {
   area: String
+  code: String!
   density: String
   name: String!
   parentZone: Zone
@@ -82,5 +93,11 @@ type Zone {
   searchName: String
   slug: String!
   zoneMd: String
+}
+
+type ZoneStats {
+  cumulativeConfirmedCases: LineChart!
+  newCases: LineChart!
+  zone: Zone!
 }
 

@@ -15,7 +15,7 @@ export const pages: Page[] = [
     displayName: 'Home',
   },
   {
-    path: '/zone/:zone',
+    path: '/zone/:code*',
     view: Zone,
     displayName: 'Zone',
   },
