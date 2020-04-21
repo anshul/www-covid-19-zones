@@ -15,7 +15,7 @@ interface Props {
 }
 type DateRangeT = 'all_time' | 'last_30_days' | 'last_7_days'
 
-const lineColors = [slateGrey, slateBlue, summerSky, mountainMeadow, fireBush, flamingo, jaffa, orchid, purple]
+const lineColors = [slateBlue, slateGrey, summerSky, mountainMeadow, fireBush, flamingo, jaffa, orchid, purple]
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -44,7 +44,7 @@ const CustomLineChart: React.FC<Props> = ({ width, height, title, chart }) => {
   ]
 
   const [logScale, setLogScale] = useState(false)
-  const yAxisProps: YAxisProps = logScale ? { scale: 'log', domain: ['auto', 'auto'] } : {}
+  const yAxisProps: YAxisProps = logScale ? { scale: 'log', domain: [0.1, 'dataMax'] } : {}
   const filteredDate = useMemo(() => {
     switch (dateRange) {
       case 'all_time':
@@ -78,9 +78,9 @@ const CustomLineChart: React.FC<Props> = ({ width, height, title, chart }) => {
         <LineChart data={filteredDate as any[]}>
           <CartesianGrid strokeDasharray='3 3' />
           <XAxis dataKey={chart.xAxisKey} />
-          <YAxis interval='preserveStartEnd' {...yAxisProps} />
+          <YAxis interval="preserveStartEnd" allowDataOverflow={true} {...yAxisProps} orientation="right" />
           <Tooltip />
-          <Legend verticalAlign='top' align='right' />
+          <Legend verticalAlign='top' align='left' />
           {chart.lineKeys.map((dataKey, idx) => {
             const color = lineColors[idx % lineColors.length][500]
             return <Line key={dataKey} type='monotone' dataKey={dataKey} stroke={color} strokeWidth={3} dot={{ strokeWidth: 1, fill: color }} />
