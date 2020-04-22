@@ -9,6 +9,7 @@ import ErrorBox from '../ErrorBox'
 import { QueryRenderer } from 'react-relay'
 import environment from '../../relayEnvironment'
 import { SearchbarQuery } from '../../__generated__/SearchbarQuery.graphql'
+import { LinearProgress } from '@material-ui/core'
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -125,11 +126,7 @@ const Searchbar: React.FC = () => {
               </div>
             )
           }
-          return (
-            <div className={clsx(classes.menuItem)}>
-              <p>Loading</p>
-            </div>
-          )
+          return <LinearProgress />
         }}
       />
     </>

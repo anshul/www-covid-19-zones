@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-/* @relayHash 404e8e4399db3a109b7dcedae05fe998 */
+/* @relayHash 1e84ead5a3eaaa4aa1877bfcf09fa5ef */
 
 import { ConcreteRequest } from "relay-runtime";
 import { FragmentRefs } from "relay-runtime";
@@ -36,9 +36,18 @@ fragment CustomLineChart_chart on LineChart {
 
 fragment ZoneRoot_zoneStats on ZoneStats {
   zone {
+    code
     slug
+    name
+    parentZone {
+      slug
+      code
+      name
+    }
   }
   newCases {
+    data
+    lineKeys
     ...CustomLineChart_chart
   }
 }
@@ -59,7 +68,28 @@ v1 = [
     "name": "code",
     "variableName": "code"
   }
-];
+],
+v2 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "code",
+  "args": null,
+  "storageKey": null
+},
+v3 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "slug",
+  "args": null,
+  "storageKey": null
+},
+v4 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "name",
+  "args": null,
+  "storageKey": null
+};
 return {
   "kind": "Request",
   "fragment": {
@@ -110,12 +140,22 @@ return {
             "concreteType": "Zone",
             "plural": false,
             "selections": [
+              (v2/*: any*/),
+              (v3/*: any*/),
+              (v4/*: any*/),
               {
-                "kind": "ScalarField",
+                "kind": "LinkedField",
                 "alias": null,
-                "name": "slug",
+                "name": "parentZone",
+                "storageKey": null,
                 "args": null,
-                "storageKey": null
+                "concreteType": "Zone",
+                "plural": false,
+                "selections": [
+                  (v3/*: any*/),
+                  (v2/*: any*/),
+                  (v4/*: any*/)
+                ]
               }
             ]
           },
@@ -131,7 +171,7 @@ return {
               {
                 "kind": "ScalarField",
                 "alias": null,
-                "name": "xAxisKey",
+                "name": "data",
                 "args": null,
                 "storageKey": null
               },
@@ -145,7 +185,7 @@ return {
               {
                 "kind": "ScalarField",
                 "alias": null,
-                "name": "data",
+                "name": "xAxisKey",
                 "args": null,
                 "storageKey": null
               }
@@ -159,7 +199,7 @@ return {
     "operationKind": "query",
     "name": "ZoneQuery",
     "id": null,
-    "text": "query ZoneQuery(\n  $code: String!\n) {\n  zoneStats(code: $code) {\n    ...ZoneRoot_zoneStats\n  }\n}\n\nfragment CustomLineChart_chart on LineChart {\n  xAxisKey\n  lineKeys\n  data\n}\n\nfragment ZoneRoot_zoneStats on ZoneStats {\n  zone {\n    slug\n  }\n  newCases {\n    ...CustomLineChart_chart\n  }\n}\n",
+    "text": "query ZoneQuery(\n  $code: String!\n) {\n  zoneStats(code: $code) {\n    ...ZoneRoot_zoneStats\n  }\n}\n\nfragment CustomLineChart_chart on LineChart {\n  xAxisKey\n  lineKeys\n  data\n}\n\nfragment ZoneRoot_zoneStats on ZoneStats {\n  zone {\n    code\n    slug\n    name\n    parentZone {\n      slug\n      code\n      name\n    }\n  }\n  newCases {\n    data\n    lineKeys\n    ...CustomLineChart_chart\n  }\n}\n",
     "metadata": {}
   }
 };
