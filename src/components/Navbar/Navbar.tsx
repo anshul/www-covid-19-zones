@@ -1,5 +1,6 @@
 import React from 'react'
 import { makeStyles, createStyles } from '@material-ui/styles'
+import { Col } from 'react-flexbox-grid'
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -23,11 +24,11 @@ const Navbar: React.FC = () => {
   const classes = useStyles()
 
   return (
-    <div className={classes.navbar}>
+    <Col xs={12} xl={8} xlOffset={2} className={classes.navbar}>
       <h3 className={classes.title}>
         COVID-19 <span>Zones</span>
       </h3>
-    </div>
+    </Col>
   )
 }
 
