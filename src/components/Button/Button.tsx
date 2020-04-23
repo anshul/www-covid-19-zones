@@ -13,14 +13,13 @@ interface Props {
 const useStyles = makeStyles(() =>
   createStyles({
     root: {
-      fontWeight: 500,
+      fontWeight: 400,
     },
     button: {
       border: 'none',
-      fontWeight: 600,
+      fontWeight: 400,
       padding: '4px 16px',
       borderRadius: '24px',
-      fontFamily: 'Montserrat, sans-serif',
       textTransform: 'unset',
       transitionDuration: '0.3s',
       '&:active,&:focus': {

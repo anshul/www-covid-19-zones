@@ -48,9 +48,14 @@ const useStyles = makeStyles((theme: Theme) =>
       borderRadius: theme.spacing(0.5),
       boxShadow: '0 10px 24px 0 rgba(0,0,0, 0.12)',
     },
+    tootipTitle: {
+      fontSize: '14px',
+      paddingBottom: '8px',
+    },
     tooltipItemContainer: {
       display: 'flex',
       alignItems: 'center',
+      padding: '4px 0',
     },
     tooltipItemIcon: {
       width: theme.spacing(1.5),
@@ -105,7 +110,7 @@ const CustomLineChart: React.FC<Props> = ({ width, height, title, chart }) => {
     <Grid className={classes.root}>
       <Row>
         <Col xs={12}>
-          <h5>Total Confirmed Cases</h5>
+          <h6>Total Confirmed Cases</h6>
           <h3>
             {chart.data
               .map((d: any) => d[chart.lineKeys[0]])
@@ -120,10 +125,10 @@ const CustomLineChart: React.FC<Props> = ({ width, height, title, chart }) => {
           {dateRanges.map((range) => (
             <Button
               disableElevation
+              key={range.value}
               variant={range.value === dateRange ? 'contained' : 'text'}
               color={range.value === dateRange ? 'primary' : 'default'}
               onClick={() => setDateRange(range.value)}
-              key={range.value}
             >
               {range.label}
             </Button>
@@ -148,96 +153,91 @@ const CustomLineChart: React.FC<Props> = ({ width, height, title, chart }) => {
           </Button>
         </Col>
       </Row>
-      <Col xs={12}>
-        <ResponsiveContainer width={width ?? '100%'} height={height ?? '100%'}>
-          <LineChart data={filteredDate as any[]}>
-            <CartesianGrid strokeOpacity={0.5} vertical={false} />
-            <XAxis
-              padding={{ left: 16, right: 16 }}
-              dataKey={chart.xAxisKey}
-              tick={({ x, y, payload }: any) => (
-                <g transform={`translate(${x},${y})`}>
-                  <text x={0} y={0} dx={16} dy={16} fontSize={12} textAnchor='end' fill='#666'>
-                    {payload.value}
-                  </text>
-                </g>
-              )}
-            />
-            <YAxis
-              padding={{ top: 16, bottom: 0 }}
-              interval='preserveStartEnd'
-              allowDecimals={false}
-              allowDataOverflow={true}
-              {...yAxisProps}
-              orientation='left'
-              tick={({ x, y, payload }: any) => (
-                <g transform={`translate(${x},${y})`}>
-                  <text x={0} y={0} dx={0} dy={4} fontSize={12} textAnchor='end' fill='#666'>
-                    {logScale ? Number.parseFloat(payload.value).toFixed(2) : payload.value}
-                  </text>
-                </g>
-              )}
-            />
-            <Tooltip
-              content={({ payload }: TooltipProps) => (
+      <ResponsiveContainer width={width ?? '100%'} height={height ?? '100%'}>
+        <LineChart data={filteredDate as any[]} style={{ paddingTop: '16px' }}>
+          <CartesianGrid strokeOpacity={0.5} vertical={false} />
+          <XAxis
+            padding={{ left: 16, right: 16 }}
+            dataKey={chart.xAxisKey}
+            tick={({ x, y, payload }) => (
+              <g transform={`translate(${x},${y})`}>
+                <text x={0} y={0} dx={16} dy={16} fontSize={12} textAnchor='end' fill='#666'>
+                  {payload.value}
+                </text>
+              </g>
+            )}
+          />
+          <YAxis
+            type='number'
+            width={40}
+            padding={{ top: 16, bottom: 0 }}
+            interval='preserveStartEnd'
+            allowDecimals={false}
+            allowDataOverflow={true}
+            {...yAxisProps}
+            orientation='left'
+            tick={({ x, y, payload }) => (
+              <g transform={`translate(${x},${y})`}>
+                <text x={0} y={0} dx={0} dy={4} fontSize={12} textAnchor='end' fill='#666'>
+                  {logScale ? Number.parseFloat(payload.value).toFixed(2) : payload.value}
+                </text>
+              </g>
+            )}
+          />
+          <Tooltip
+            content={({ payload }: TooltipProps) =>
+              payload && (
                 <div className={classes.tooltipContent}>
-                  {payload?.map((pl) => (
-                    <div className={classes.tooltipItemContainer}>
+                  <h4 className={classes.tootipTitle}>{payload.map((pl) => pl.payload.date)[0]}</h4>
+                  {payload.map((pl) => (
+                    <div key={pl.name} className={classes.tooltipItemContainer}>
                       <div className={classes.tooltipItemIcon} style={{ backgroundColor: pl.color }} />
                       <p>{pl.value} cases</p>
                     </div>
                   ))}
                 </div>
-              )}
-            />
-            <Legend
-              verticalAlign='top'
-              align='right'
-              iconType='square'
-              wrapperStyle={{
-                marginBottom: '16px',
-                borderBottom: '1px solid #e4e4e4',
-              }}
-              content={({ payload }: LegendProps) => (
-                <Row>
-                  <Col xs={12}>
-                    <h3>{title}</h3>
-                  </Col>
-                  <Col xs={12} xl={6}>
-                    <p>some details</p>
-                  </Col>
-                  <Col xs={12} xl={6}>
-                    <div className={classes.legendItemContainer}>
-                      {payload?.map((pl) => (
-                        <div className={classes.legendItem}>
-                          <div className={classes.legendItemIcon} style={{ backgroundColor: pl.color }} />
-                          <p>{pl.value}</p>
-                        </div>
-                      ))}
+              )
+            }
+          />
+          <Legend
+            verticalAlign='top'
+            align='right'
+            iconType='square'
+            wrapperStyle={{
+              marginBottom: '16px',
+              borderBottom: '1px solid #e4e4e4',
+            }}
+            content={({ payload }: LegendProps) => (
+              <Row start='xl'>
+                {payload?.map((pl) => (
+                  <Col key={pl.id} xs={12} xl>
+                    <div className={classes.legendItem}>
+                      <div className={classes.legendItemIcon} style={{ backgroundColor: pl.color }} />
+                      <p>{pl.value}</p>
                     </div>
                   </Col>
-                </Row>
-              )}
-            />
-            {chart.lineKeys.map((dataKey, idx) => {
-              const color = lineColors[idx % lineColors.length][500]
-              return (
-                <Line
-                  key={dataKey}
-                  type='monotone'
-                  dataKey={dataKey}
-                  connectNulls={true}
-                  animationDuration={300}
-                  stroke={color}
-                  strokeWidth={4}
-                  dot={false}
-                  activeDot={{ strokeWidth: 7, fill: fireBush[500], r: 7, boxShadow: '0 3px 8px 0 rgba(0,0,0,0.24)' }}
-                />
-              )
-            })}
-          </LineChart>
-        </ResponsiveContainer>
-      </Col>
+                ))}
+              </Row>
+            )}
+          />
+          {chart.lineKeys.map((dataKey, idx) => {
+            const color = lineColors[idx % lineColors.length][500]
+            return (
+              <Line
+                key={dataKey}
+                type='monotone'
+                dataKey={dataKey}
+                connectNulls={true}
+                animationDuration={300}
+                stroke={color}
+                strokeWidth={4}
+                dot={false}
+                activeDot={{ strokeWidth: 7, fill: fireBush[500], r: 7, boxShadow: '0 3px 8px 0 rgba(0,0,0,0.24)' }}
+              />
+            )
+          })}
+        </LineChart>
+      </ResponsiveContainer>
     </Grid>
   )
 }
