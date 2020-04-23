@@ -2,22 +2,26 @@ import React, { useState } from 'react'
 import { graphql } from 'babel-plugin-relay/macro'
 
 import { makeStyles, createStyles } from '@material-ui/styles'
-import { FiSearch } from 'react-icons/fi'
+import { IoIosSearch, IoIosClose } from 'react-icons/io'
 import clsx from 'clsx'
-import { Link } from 'react-router-dom'
 import ErrorBox from '../ErrorBox'
 import { QueryRenderer } from 'react-relay'
 import environment from '../../relayEnvironment'
 import { SearchbarQuery } from '../../__generated__/SearchbarQuery.graphql'
-import { LinearProgress } from '@material-ui/core'
+import { LinearProgress, Theme } from '@material-ui/core'
 
-const useStyles = makeStyles(() =>
+interface Props {
+  onSearch: (code: string, name: string) => void
+}
+
+const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     inputRoot: {
+      position: 'relative',
       display: 'flex',
       alignItems: 'center',
       backgroundColor: '#fafafa',
-      borderRadius: '12px',
+      borderRadius: '24px',
       boxShadow: 'rgba(0, 0, 0, 0.1) 0px 2px 12px',
     },
     input: {
@@ -29,14 +33,22 @@ const useStyles = makeStyles(() =>
       border: 'none',
       padding: '12px',
       fontSize: '16px',
-      borderRadius: '12px',
-      fontFamily: 'Poppins, sans-serif',
+      borderRadius: '24px',
+      fontFamily: theme.typography.fontFamily,
     },
-    inputIcon: {
+    searchIcon: {
       width: '24px',
       height: '24px',
       position: 'absolute',
       marginLeft: '16px',
+    },
+    closeIcon: {
+      cursor: 'pointer',
+      position: 'absolute',
+      right: '0',
+      width: '24px',
+      height: '24px',
+      marginRight: '16px',
     },
     button: {
       height: '48px',
@@ -70,7 +82,7 @@ const useStyles = makeStyles(() =>
   })
 )
 
-const Searchbar: React.FC = () => {
+const Searchbar: React.FC<Props> = ({ onSearch }) => {
   const [open, setOpen] = useState(false)
   const [value, setValue] = useState('')
 
@@ -85,7 +97,16 @@ const Searchbar: React.FC = () => {
     <>
       <div className={classes.inputRoot}>
         <input value={value} placeholder='How is your country/city doing?' className={classes.input} onChange={onChange} />
-        <FiSearch className={classes.inputIcon} />
+        <IoIosSearch className={classes.searchIcon} />
+        {open && (
+          <IoIosClose
+            className={classes.closeIcon}
+            onClick={() => {
+              setOpen(false)
+              setValue('')
+            }}
+          />
+        )}
       </div>
 
       <QueryRenderer<SearchbarQuery>
@@ -114,12 +135,18 @@ const Searchbar: React.FC = () => {
                   items.map((item) => {
                     return (
                       item && (
-                        <Link className={classes.linkText} key={item.slug} to={`/zone/${item.code}`}>
-                          <div className={clsx(classes.menuItem)}>
-                            <p>{item.name}</p>
-                            <p className={classes.parentZone}>{item.parentZone && item.parentZone.name}</p>
-                          </div>
-                        </Link>
+                        <div
+                          key={item.slug}
+                          className={clsx(classes.menuItem)}
+                          onClick={() => {
+                            onSearch(item.code, item.name)
+                            setValue('')
+                            setOpen(false)
+                          }}
+                        >
+                          <p>{item.name}</p>
+                          <p className={classes.parentZone}>{item.parentZone && item.parentZone.name}</p>
+                        </div>
                       )
                     )
                   })}

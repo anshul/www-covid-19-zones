@@ -1,6 +1,11 @@
 """Represents an unconstrained type. No coercion is performed"""
 scalar Any
 
+type CaseCount {
+  count: Int!
+  zoneName: String!
+}
+
 type Cases {
   label: String!
   name: String!
@@ -26,6 +31,13 @@ type CasesEdge {
 
   """The item at the end of the edge."""
   node: Cases
+}
+
+type CompareStats {
+  cumulativeConfirmedCases: LineChart!
+  newCases: LineChart!
+  totalCases: [CaseCount!]!
+  zones: [Zone!]!
 }
 
 type HomeData {
@@ -73,6 +85,7 @@ type PageInfo {
 }
 
 type Query {
+  compare(codes: [String!]!): CompareStats!
   home: HomeData!
 
   """Zone data"""
@@ -98,6 +111,7 @@ type Zone {
 type ZoneStats {
   cumulativeConfirmedCases: LineChart!
   newCases: LineChart!
+  totalCases: Int!
   zone: Zone!
 }
 

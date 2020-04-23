@@ -1,35 +1,35 @@
 /* tslint:disable */
 /* eslint-disable */
-/* @relayHash fbee6665c0a3936f151d1d59f8093c9a */
+/* @relayHash 0bf2529528141d6f11533067d717cb23 */
 
 import { ConcreteRequest } from "relay-runtime";
 import { FragmentRefs } from "relay-runtime";
-export type ZoneQueryVariables = {
-    code: string;
+export type CompareQueryVariables = {
+    codes: Array<string>;
 };
-export type ZoneQueryResponse = {
-    readonly zoneStats: {
-        readonly " $fragmentRefs": FragmentRefs<"ZoneRoot_zoneStats">;
+export type CompareQueryResponse = {
+    readonly compare: {
+        readonly " $fragmentRefs": FragmentRefs<"CompareRoot_data">;
     };
 };
-export type ZoneQuery = {
-    readonly response: ZoneQueryResponse;
-    readonly variables: ZoneQueryVariables;
+export type CompareQuery = {
+    readonly response: CompareQueryResponse;
+    readonly variables: CompareQueryVariables;
 };
 
 
 
 /*
-query ZoneQuery(
-  $code: String!
+query CompareQuery(
+  $codes: [String!]!
 ) {
-  zoneStats(code: $code) {
-    ...ZoneRoot_zoneStats
+  compare(codes: $codes) {
+    ...CompareRoot_data
   }
 }
 
-fragment ZoneRoot_zoneStats on ZoneStats {
-  zone {
+fragment CompareRoot_data on CompareStats {
+  zones {
     code
     slug
     name
@@ -38,6 +38,10 @@ fragment ZoneRoot_zoneStats on ZoneStats {
       code
       name
     }
+  }
+  totalCases {
+    zoneName
+    count
   }
   newCases {
     data
@@ -51,16 +55,16 @@ const node: ConcreteRequest = (function(){
 var v0 = [
   {
     "kind": "LocalArgument",
-    "name": "code",
-    "type": "String!",
+    "name": "codes",
+    "type": "[String!]!",
     "defaultValue": null
   }
 ],
 v1 = [
   {
     "kind": "Variable",
-    "name": "code",
-    "variableName": "code"
+    "name": "codes",
+    "variableName": "codes"
   }
 ],
 v2 = {
@@ -88,7 +92,7 @@ return {
   "kind": "Request",
   "fragment": {
     "kind": "Fragment",
-    "name": "ZoneQuery",
+    "name": "CompareQuery",
     "type": "Query",
     "metadata": null,
     "argumentDefinitions": (v0/*: any*/),
@@ -96,15 +100,15 @@ return {
       {
         "kind": "LinkedField",
         "alias": null,
-        "name": "zoneStats",
+        "name": "compare",
         "storageKey": null,
         "args": (v1/*: any*/),
-        "concreteType": "ZoneStats",
+        "concreteType": "CompareStats",
         "plural": false,
         "selections": [
           {
             "kind": "FragmentSpread",
-            "name": "ZoneRoot_zoneStats",
+            "name": "CompareRoot_data",
             "args": null
           }
         ]
@@ -113,26 +117,26 @@ return {
   },
   "operation": {
     "kind": "Operation",
-    "name": "ZoneQuery",
+    "name": "CompareQuery",
     "argumentDefinitions": (v0/*: any*/),
     "selections": [
       {
         "kind": "LinkedField",
         "alias": null,
-        "name": "zoneStats",
+        "name": "compare",
         "storageKey": null,
         "args": (v1/*: any*/),
-        "concreteType": "ZoneStats",
+        "concreteType": "CompareStats",
         "plural": false,
         "selections": [
           {
             "kind": "LinkedField",
             "alias": null,
-            "name": "zone",
+            "name": "zones",
             "storageKey": null,
             "args": null,
             "concreteType": "Zone",
-            "plural": false,
+            "plural": true,
             "selections": [
               (v2/*: any*/),
               (v3/*: any*/),
@@ -150,6 +154,31 @@ return {
                   (v2/*: any*/),
                   (v4/*: any*/)
                 ]
+              }
+            ]
+          },
+          {
+            "kind": "LinkedField",
+            "alias": null,
+            "name": "totalCases",
+            "storageKey": null,
+            "args": null,
+            "concreteType": "CaseCount",
+            "plural": true,
+            "selections": [
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "name": "zoneName",
+                "args": null,
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "name": "count",
+                "args": null,
+                "storageKey": null
               }
             ]
           },
@@ -191,12 +220,12 @@ return {
   },
   "params": {
     "operationKind": "query",
-    "name": "ZoneQuery",
+    "name": "CompareQuery",
     "id": null,
-    "text": "query ZoneQuery(\n  $code: String!\n) {\n  zoneStats(code: $code) {\n    ...ZoneRoot_zoneStats\n  }\n}\n\nfragment ZoneRoot_zoneStats on ZoneStats {\n  zone {\n    code\n    slug\n    name\n    parentZone {\n      slug\n      code\n      name\n    }\n  }\n  newCases {\n    data\n    lineKeys\n    xAxisKey\n  }\n}\n",
+    "text": "query CompareQuery(\n  $codes: [String!]!\n) {\n  compare(codes: $codes) {\n    ...CompareRoot_data\n  }\n}\n\nfragment CompareRoot_data on CompareStats {\n  zones {\n    code\n    slug\n    name\n    parentZone {\n      slug\n      code\n      name\n    }\n  }\n  totalCases {\n    zoneName\n    count\n  }\n  newCases {\n    data\n    lineKeys\n    xAxisKey\n  }\n}\n",
     "metadata": {}
   }
 };
 })();
-(node as any).hash = '81fed95ab96b4711ec1526a61010c5bc';
+(node as any).hash = '3551c4a4bf64c182d80764ef442ac565';
 export default node;

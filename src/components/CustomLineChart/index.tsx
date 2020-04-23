@@ -1,8 +1,5 @@
-import React, { useState, useMemo } from 'react'
-import { graphql } from 'babel-plugin-relay/macro'
-import { createFragmentContainer } from 'react-relay'
+import React from 'react'
 
-import { CustomLineChart_chart } from '../../__generated__/CustomLineChart_chart.graphql'
 import { Theme } from '@material-ui/core'
 import {
   LineChart,
@@ -12,23 +9,24 @@ import {
   Line,
   Tooltip,
   Legend,
-  YAxisProps,
   ResponsiveContainer,
   TooltipProps,
   LegendProps,
+  YAxisProps,
 } from 'recharts'
 import { makeStyles, createStyles } from '@material-ui/styles'
 import { slateBlue, summerSky, mountainMeadow, fireBush, flamingo, jaffa, orchid, purple } from '../../utils/ColorFactory'
-import Button from '../Button'
 import { Grid, Col, Row } from 'react-flexbox-grid'
 
 interface Props {
   width?: number
   height?: number
   title?: string
-  chart: CustomLineChart_chart
+  lineKeys: ReadonlyArray<string>
+  xAxisKey: string
+  data: any
+  logScale?: boolean
 }
-type DateRangeT = 'all_time' | 'last_30_days' | 'last_7_days'
 
 const lineColors = [slateBlue, mountainMeadow, summerSky, fireBush, flamingo, jaffa, orchid, purple]
 
@@ -84,81 +82,18 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-const CustomLineChart: React.FC<Props> = ({ width, height, title, chart }) => {
+const CustomLineChart: React.FC<Props> = ({ width, height, title, data, xAxisKey, lineKeys, logScale = false }) => {
   const classes = useStyles()
-  const [dateRange, setDateRange] = useState<DateRangeT>('all_time')
-  const dateRanges: { label: string; value: DateRangeT }[] = [
-    { label: 'All Time', value: 'all_time' },
-    { label: '1 Month', value: 'last_30_days' },
-    { label: '7 Days', value: 'last_7_days' },
-  ]
-
-  const [logScale, setLogScale] = useState(false)
   const yAxisProps: YAxisProps = logScale ? { scale: 'log', domain: [0.1, 'dataMax'] } : {}
-  const filteredDate = useMemo(() => {
-    switch (dateRange) {
-      case 'all_time':
-        return chart.data
-      case 'last_30_days':
-        return chart.data.slice(chart.data.length - 30)
-      case 'last_7_days':
-        return chart.data.slice(chart.data.length - 7)
-    }
-  }, [chart.data, dateRange])
 
   return (
     <Grid className={classes.root}>
-      <Row>
-        <Col xs={12}>
-          <h6>Total Confirmed Cases</h6>
-          <h3>
-            {chart.data
-              .map((d: any) => d[chart.lineKeys[0]])
-              .reduce((a, b) => {
-                return a + b
-              }, 0)}
-          </h3>
-        </Col>
-      </Row>
-      <Row>
-        <Col xs={12} md={6} xl={6} style={{ margin: '8px 0' }}>
-          {dateRanges.map((range) => (
-            <Button
-              disableElevation
-              key={range.value}
-              variant={range.value === dateRange ? 'contained' : 'text'}
-              color={range.value === dateRange ? 'primary' : 'default'}
-              onClick={() => setDateRange(range.value)}
-            >
-              {range.label}
-            </Button>
-          ))}
-        </Col>
-        <Col xs={12} md={6} xl={6} style={{ margin: '8px 0' }}>
-          <Button
-            disableElevation
-            variant={!logScale ? 'contained' : 'text'}
-            color={!logScale ? 'secondary' : 'default'}
-            onClick={() => setLogScale(false)}
-          >
-            Linear Scale
-          </Button>
-          <Button
-            disableElevation
-            variant={logScale ? 'contained' : 'text'}
-            color={logScale ? 'secondary' : 'default'}
-            onClick={() => setLogScale(true)}
-          >
-            Log Scale
-          </Button>
-        </Col>
-      </Row>
       <ResponsiveContainer width={width ?? '100%'} height={height ?? '100%'}>
-        <LineChart data={filteredDate as any[]} style={{ paddingTop: '16px' }}>
-          <CartesianGrid strokeOpacity={0.5} vertical={false} />
+        <LineChart data={data as any[]} style={{ paddingTop: '16px' }}>
+          <CartesianGrid strokeOpacity={0.5} horizontal={false} />
           <XAxis
             padding={{ left: 16, right: 16 }}
-            dataKey={chart.xAxisKey}
+            dataKey={xAxisKey}
             tick={({ x, y, payload }) => (
               <g transform={`translate(${x},${y})`}>
                 <text x={0} y={0} dx={16} dy={16} fontSize={12} textAnchor='end' fill='#666'>
@@ -179,7 +114,11 @@ const CustomLineChart: React.FC<Props> = ({ width, height, title, chart }) => {
             tick={({ x, y, payload }) => (
               <g transform={`translate(${x},${y})`}>
                 <text x={0} y={0} dx={0} dy={4} fontSize={12} textAnchor='end' fill='#666'>
-                  {logScale ? Number.parseFloat(payload.value).toFixed(2) : payload.value}
+                  {logScale
+                    ? Number.parseFloat(payload.value) < 1
+                      ? Number.parseFloat(payload.value).toFixed(1)
+                      : Number.parseFloat(payload.value).toFixed(0)
+                    : payload.value}
                 </text>
               </g>
             )}
@@ -188,6 +127,7 @@ const CustomLineChart: React.FC<Props> = ({ width, height, title, chart }) => {
             content={({ payload }: TooltipProps) =>
               payload && (
                 <div className={classes.tooltipContent}>
+                  <h5>{title}</h5>
                   <h4 className={classes.tootipTitle}>{payload.map((pl) => pl.payload.date)[0]}</h4>
                   {payload.map((pl) => (
                     <div key={pl.name} className={classes.tooltipItemContainer}>
@@ -209,18 +149,23 @@ const CustomLineChart: React.FC<Props> = ({ width, height, title, chart }) => {
             }}
             content={({ payload }: LegendProps) => (
               <Row start='xl'>
-                {payload?.map((pl) => (
-                  <Col key={pl.id} xs={12} xl>
-                    <div className={classes.legendItem}>
-                      <div className={classes.legendItemIcon} style={{ backgroundColor: pl.color }} />
-                      <p>{pl.value}</p>
-                    </div>
-                  </Col>
-                ))}
+                <Col xl={4} xs={12} style={{ padding: '0' }}>
+                  <p>{title}</p>
+                </Col>
+                <Col xs>
+                  <Row end='xl'>
+                    {payload?.map((pl) => (
+                      <div key={pl.value} className={classes.legendItem}>
+                        <div className={classes.legendItemIcon} style={{ backgroundColor: pl.color }} />
+                        <p>{pl.value}</p>
+                      </div>
+                    ))}
+                  </Row>
+                </Col>
               </Row>
             )}
           />
-          {chart.lineKeys.map((dataKey, idx) => {
+          {lineKeys.map((dataKey, idx) => {
             const color = lineColors[idx % lineColors.length][500]
             return (
               <Line
@@ -242,12 +187,4 @@ const CustomLineChart: React.FC<Props> = ({ width, height, title, chart }) => {
   )
 }
 
-export default createFragmentContainer(CustomLineChart, {
-  chart: graphql`
-    fragment CustomLineChart_chart on LineChart {
-      xAxisKey
-      lineKeys
-      data
-    }
-  `,
-})
+export default CustomLineChart

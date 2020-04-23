@@ -3,8 +3,8 @@
 
 import { ReaderFragment } from "relay-runtime";
 import { FragmentRefs } from "relay-runtime";
-export type ZoneRoot_zoneStats = {
-    readonly zone: {
+export type CompareRoot_data = {
+    readonly zones: ReadonlyArray<{
         readonly code: string;
         readonly slug: string;
         readonly name: string;
@@ -13,18 +13,22 @@ export type ZoneRoot_zoneStats = {
             readonly code: string;
             readonly name: string;
         } | null;
-    };
+    }>;
+    readonly totalCases: ReadonlyArray<{
+        readonly zoneName: string;
+        readonly count: number;
+    }>;
     readonly newCases: {
         readonly data: ReadonlyArray<unknown>;
         readonly lineKeys: ReadonlyArray<string>;
         readonly xAxisKey: string;
     };
-    readonly " $refType": "ZoneRoot_zoneStats";
+    readonly " $refType": "CompareRoot_data";
 };
-export type ZoneRoot_zoneStats$data = ZoneRoot_zoneStats;
-export type ZoneRoot_zoneStats$key = {
-    readonly " $data"?: ZoneRoot_zoneStats$data;
-    readonly " $fragmentRefs": FragmentRefs<"ZoneRoot_zoneStats">;
+export type CompareRoot_data$data = CompareRoot_data;
+export type CompareRoot_data$key = {
+    readonly " $data"?: CompareRoot_data$data;
+    readonly " $fragmentRefs": FragmentRefs<"CompareRoot_data">;
 };
 
 
@@ -53,19 +57,19 @@ v2 = {
 };
 return {
   "kind": "Fragment",
-  "name": "ZoneRoot_zoneStats",
-  "type": "ZoneStats",
+  "name": "CompareRoot_data",
+  "type": "CompareStats",
   "metadata": null,
   "argumentDefinitions": [],
   "selections": [
     {
       "kind": "LinkedField",
       "alias": null,
-      "name": "zone",
+      "name": "zones",
       "storageKey": null,
       "args": null,
       "concreteType": "Zone",
-      "plural": false,
+      "plural": true,
       "selections": [
         (v0/*: any*/),
         (v1/*: any*/),
@@ -83,6 +87,31 @@ return {
             (v0/*: any*/),
             (v2/*: any*/)
           ]
+        }
+      ]
+    },
+    {
+      "kind": "LinkedField",
+      "alias": null,
+      "name": "totalCases",
+      "storageKey": null,
+      "args": null,
+      "concreteType": "CaseCount",
+      "plural": true,
+      "selections": [
+        {
+          "kind": "ScalarField",
+          "alias": null,
+          "name": "zoneName",
+          "args": null,
+          "storageKey": null
+        },
+        {
+          "kind": "ScalarField",
+          "alias": null,
+          "name": "count",
+          "args": null,
+          "storageKey": null
         }
       ]
     },
@@ -121,5 +150,5 @@ return {
   ]
 };
 })();
-(node as any).hash = '33f5c228e53da02d7f2d294a88e02ee5';
+(node as any).hash = '8de8d48ceabf469f82bf12f9339be655';
 export default node;

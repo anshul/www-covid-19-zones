@@ -8,8 +8,16 @@ import { RouteComponentProps } from 'react-router-dom'
 import ZoneRoot from './ZoneRoot'
 import { ZoneQuery } from '../../__generated__/ZoneQuery.graphql'
 
-const Zone: React.FC<RouteComponentProps<{ code: string }>> = ({ match }) => {
+const Zone: React.FC<RouteComponentProps<{ code: string }>> = ({ match, history }) => {
   const code = match.params.code
+
+  const onSearch = (code: string) => {
+    history.push(`/zone/${code}`)
+  }
+
+  const gotoCompare = (code: string) => {
+    history.push(`/compare?codes=${code}`)
+  }
 
   console.log('Rendering Zone', code)
 
@@ -28,7 +36,7 @@ const Zone: React.FC<RouteComponentProps<{ code: string }>> = ({ match }) => {
         if (error) {
           return <ErrorBox error={error} />
         } else if (props) {
-          return <ZoneRoot zoneStats={props.zoneStats} />
+          return <ZoneRoot zoneStats={props.zoneStats} onSearch={onSearch} gotoCompare={gotoCompare} />
         }
         return 'Loading'
       }}
