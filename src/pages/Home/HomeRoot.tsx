@@ -3,7 +3,7 @@ import { graphql } from 'babel-plugin-relay/macro'
 import { createFragmentContainer } from 'react-relay'
 
 import { Row, Grid, Col } from 'react-flexbox-grid'
-import Searchbar from '../../components/Searchbar'
+// import Searchbar from '../../components/Searchbar'
 import { HomeRoot_home } from '../../__generated__/HomeRoot_home.graphql'
 
 interface Props {
@@ -15,7 +15,7 @@ const HomeRoot: React.FC<Props> = ({ home }) => {
     <Grid>
       <Row>
         <Col xs={12} xl={6} xlOffset={3}>
-          <Searchbar />
+          {/* <Searchbar /> */}
         </Col>
       </Row>
       <Row>

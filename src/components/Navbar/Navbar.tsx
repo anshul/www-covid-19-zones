@@ -25,9 +25,9 @@ const Navbar: React.FC = () => {
 
   return (
     <Col xs={12} xl={8} xlOffset={2} className={classes.navbar}>
-      <h3 className={classes.title}>
+      <h4 className={classes.title}>
         COVID-19 <span>Zones</span>
-      </h3>
+      </h4>
     </Col>
   )
 }

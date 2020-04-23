@@ -24,6 +24,9 @@ function App() {
             contrastText: '#fff',
           },
         },
+        typography: {
+          fontFamily: ['Poppins', 'Helvetica', 'Arial', 'sans-serif'].join(','),
+        },
       })}
     >
       <Router>
