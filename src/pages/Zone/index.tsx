@@ -12,7 +12,7 @@ const Zone: React.FC<RouteComponentProps<{ code: string }>> = ({ match, history 
   const code = match.params.code
 
   const onSearch = (code: string) => {
-    history.push(`/zone/${code}`)
+    history.push(`/zones/${code}`)
   }
 
   const gotoCompare = (code: string) => {

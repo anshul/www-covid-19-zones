@@ -111,6 +111,7 @@ type Zone {
 type ZoneStats {
   cumulativeConfirmedCases: LineChart!
   newCases: LineChart!
+  asOf: String!
   totalCases: Int!
   zone: Zone!
 }

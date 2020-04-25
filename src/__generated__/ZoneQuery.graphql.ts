@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-/* @relayHash fbee6665c0a3936f151d1d59f8093c9a */
+/* @relayHash 1052c6b9554159b424f1adefda865102 */
 
 import { ConcreteRequest } from "relay-runtime";
 import { FragmentRefs } from "relay-runtime";
@@ -39,6 +39,8 @@ fragment ZoneRoot_zoneStats on ZoneStats {
       name
     }
   }
+  totalCases
+  asOf
   newCases {
     data
     lineKeys
@@ -154,6 +156,20 @@ return {
             ]
           },
           {
+            "kind": "ScalarField",
+            "alias": null,
+            "name": "totalCases",
+            "args": null,
+            "storageKey": null
+          },
+          {
+            "kind": "ScalarField",
+            "alias": null,
+            "name": "asOf",
+            "args": null,
+            "storageKey": null
+          },
+          {
             "kind": "LinkedField",
             "alias": null,
             "name": "newCases",
@@ -193,7 +209,7 @@ return {
     "operationKind": "query",
     "name": "ZoneQuery",
     "id": null,
-    "text": "query ZoneQuery(\n  $code: String!\n) {\n  zoneStats(code: $code) {\n    ...ZoneRoot_zoneStats\n  }\n}\n\nfragment ZoneRoot_zoneStats on ZoneStats {\n  zone {\n    code\n    slug\n    name\n    parentZone {\n      slug\n      code\n      name\n    }\n  }\n  newCases {\n    data\n    lineKeys\n    xAxisKey\n  }\n}\n",
+    "text": "query ZoneQuery(\n  $code: String!\n) {\n  zoneStats(code: $code) {\n    ...ZoneRoot_zoneStats\n  }\n}\n\nfragment ZoneRoot_zoneStats on ZoneStats {\n  zone {\n    code\n    slug\n    name\n    parentZone {\n      slug\n      code\n      name\n    }\n  }\n  totalCases\n  asOf\n  newCases {\n    data\n    lineKeys\n    xAxisKey\n  }\n}\n",
     "metadata": {}
   }
 };

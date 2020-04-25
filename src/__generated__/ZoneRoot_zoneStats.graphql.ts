@@ -14,6 +14,8 @@ export type ZoneRoot_zoneStats = {
             readonly name: string;
         } | null;
     };
+    readonly totalCases: number;
+    readonly asOf: string;
     readonly newCases: {
         readonly data: ReadonlyArray<unknown>;
         readonly lineKeys: ReadonlyArray<string>;
@@ -87,6 +89,20 @@ return {
       ]
     },
     {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "totalCases",
+      "args": null,
+      "storageKey": null
+    },
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "name": "asOf",
+      "args": null,
+      "storageKey": null
+    },
+    {
       "kind": "LinkedField",
       "alias": null,
       "name": "newCases",
@@ -121,5 +137,5 @@ return {
   ]
 };
 })();
-(node as any).hash = '33f5c228e53da02d7f2d294a88e02ee5';
+(node as any).hash = 'd1ac461ee6be2a99f221db9b103d5783';
 export default node;

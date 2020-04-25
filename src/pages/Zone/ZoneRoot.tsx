@@ -71,7 +71,7 @@ const ZoneRoot: React.FC<Props> = ({ zoneStats, onSearch, gotoCompare }) => {
         <Col xs={12} xl={8} xlOffset={2}>
           <Breadcrumbs>
             {zoneStats.zone.parentZone && (
-              <Link className={classes.parentZoneLinkText} color='inherit' to={`/zone/${zoneStats.zone.parentZone.code}`}>
+              <Link className={classes.parentZoneLinkText} color='inherit' to={`/zones/${zoneStats.zone.parentZone.code}`}>
                 {zoneStats.zone.parentZone.name}
               </Link>
             )}
@@ -82,13 +82,10 @@ const ZoneRoot: React.FC<Props> = ({ zoneStats, onSearch, gotoCompare }) => {
       <Row>
         <Col xs={10} xl={6} xlOffset={2}>
           <h6>Total Confirmed Cases</h6>
-          <h3>
-            {zoneStats.newCases.data
-              .map((d: any) => d[zoneStats.newCases.lineKeys[0]])
-              .reduce((a, b) => {
-                return a + b
-              }, 0)}
-          </h3>
+          <h3>{zoneStats.totalCases}</h3>
+          <h6>
+            as of <span style={{ backgroundColor: '#fdfd96' }}>{zoneStats.asOf}</span>
+          </h6>
         </Col>
         <Col xs={2}>
           <Button
@@ -150,6 +147,9 @@ const ZoneRoot: React.FC<Props> = ({ zoneStats, onSearch, gotoCompare }) => {
             logScale={logScale}
           />
         </Col>
+        <Col xs={12} xl={8} xlOffset={4} style={{ marginTop: '15px' }}>
+          <h6>Source: covid19india.org, mohfw.gov.in and various state governments</h6>
+        </Col>
       </Row>
     </>
   )
@@ -168,6 +168,8 @@ export default createFragmentContainer(ZoneRoot, {
           name
         }
       }
+      totalCases
+      asOf
       newCases {
         data
         lineKeys
