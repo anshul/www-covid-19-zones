@@ -13,7 +13,7 @@ import { Link } from 'react-router-dom'
 import { IoIosAdd } from 'react-icons/io'
 
 interface Props {
-  zoneStats: ZoneRoot_zoneStats
+  zoneStats: ZoneRoot_zoneStats | null
   onSearch: (code: string) => void
   gotoCompare: (code: string) => void
 }
@@ -50,6 +50,7 @@ const ZoneRoot: React.FC<Props> = ({ zoneStats, onSearch, gotoCompare }) => {
 
   const [logScale, setLogScale] = useState(false)
   const filteredDate = useMemo(() => {
+    if (!zoneStats) return []
     switch (dateRange) {
       case 'all_time':
         return zoneStats.newCases.data
@@ -58,7 +59,39 @@ const ZoneRoot: React.FC<Props> = ({ zoneStats, onSearch, gotoCompare }) => {
       case 'last_7_days':
         return zoneStats.newCases.data.slice(zoneStats.newCases.data.length - 7)
     }
-  }, [zoneStats.newCases.data, dateRange])
+  }, [zoneStats, dateRange])
+
+  const cumFilteredDate = useMemo(() => {
+    if (!zoneStats) return []
+    switch (dateRange) {
+      case 'all_time':
+        return zoneStats.cumCases.data
+      case 'last_30_days':
+        return zoneStats.cumCases.data.slice(zoneStats.cumCases.data.length - 30)
+      case 'last_7_days':
+        return zoneStats.cumCases.data.slice(zoneStats.cumCases.data.length - 7)
+    }
+  }, [zoneStats, dateRange])
+
+  if (!zoneStats) {
+    return (
+      <>
+        <Row>
+          <Col xs={12} xl={8} xlOffset={2}>
+            <Searchbar onSearch={onSearch} />
+          </Col>
+        </Row>
+        <Row>
+          <Col xs={12} xl={8} xlOffset={2} style={{ marginTop: '50px' }}>
+            <h5>No such zone!</h5>
+            <p>
+              <small>Try another search ...</small>
+            </p>
+          </Col>
+        </Row>
+      </>
+    )
+  }
 
   return (
     <>
@@ -136,14 +169,29 @@ const ZoneRoot: React.FC<Props> = ({ zoneStats, onSearch, gotoCompare }) => {
           </Row>
         </Col>
       </Row>
-      <Row>
+      <Row style={{ marginTop: '20px' }}>
         <Col xs={12} xl={8} xlOffset={2} className={classes.newCasesContainer}>
           <CustomLineChart
-            title='New Cases'
+            title='Daily new cases'
             height={350}
             xAxisKey={zoneStats.newCases.xAxisKey}
             lineKeys={zoneStats.newCases.lineKeys}
             data={filteredDate}
+            logScale={logScale}
+          />
+        </Col>
+        <Col xs={12} xl={8} xlOffset={4} style={{ marginTop: '15px' }}>
+          <h6>Source: covid19india.org, mohfw.gov.in and various state governments</h6>
+        </Col>
+      </Row>
+      <Row style={{ marginTop: '50px' }}>
+        <Col xs={12} xl={8} xlOffset={2} className={classes.newCasesContainer}>
+          <CustomLineChart
+            title='Total cases (cumulative)'
+            height={350}
+            xAxisKey={zoneStats.cumCases.xAxisKey}
+            lineKeys={zoneStats.cumCases.lineKeys}
+            data={cumFilteredDate}
             logScale={logScale}
           />
         </Col>
@@ -170,6 +218,11 @@ export default createFragmentContainer(ZoneRoot, {
       }
       totalCases
       asOf
+      cumCases {
+        data
+        lineKeys
+        xAxisKey
+      }
       newCases {
         data
         lineKeys

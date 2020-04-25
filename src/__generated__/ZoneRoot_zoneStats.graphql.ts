@@ -16,6 +16,11 @@ export type ZoneRoot_zoneStats = {
     };
     readonly totalCases: number;
     readonly asOf: string;
+    readonly cumCases: {
+        readonly data: ReadonlyArray<unknown>;
+        readonly lineKeys: ReadonlyArray<string>;
+        readonly xAxisKey: string;
+    };
     readonly newCases: {
         readonly data: ReadonlyArray<unknown>;
         readonly lineKeys: ReadonlyArray<string>;
@@ -52,7 +57,30 @@ v2 = {
   "name": "name",
   "args": null,
   "storageKey": null
-};
+},
+v3 = [
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "data",
+    "args": null,
+    "storageKey": null
+  },
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "lineKeys",
+    "args": null,
+    "storageKey": null
+  },
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "xAxisKey",
+    "args": null,
+    "storageKey": null
+  }
+];
 return {
   "kind": "Fragment",
   "name": "ZoneRoot_zoneStats",
@@ -105,37 +133,25 @@ return {
     {
       "kind": "LinkedField",
       "alias": null,
+      "name": "cumCases",
+      "storageKey": null,
+      "args": null,
+      "concreteType": "LineChart",
+      "plural": false,
+      "selections": (v3/*: any*/)
+    },
+    {
+      "kind": "LinkedField",
+      "alias": null,
       "name": "newCases",
       "storageKey": null,
       "args": null,
       "concreteType": "LineChart",
       "plural": false,
-      "selections": [
-        {
-          "kind": "ScalarField",
-          "alias": null,
-          "name": "data",
-          "args": null,
-          "storageKey": null
-        },
-        {
-          "kind": "ScalarField",
-          "alias": null,
-          "name": "lineKeys",
-          "args": null,
-          "storageKey": null
-        },
-        {
-          "kind": "ScalarField",
-          "alias": null,
-          "name": "xAxisKey",
-          "args": null,
-          "storageKey": null
-        }
-      ]
+      "selections": (v3/*: any*/)
     }
   ]
 };
 })();
-(node as any).hash = 'd1ac461ee6be2a99f221db9b103d5783';
+(node as any).hash = 'aa08efbe339d614735d40abe96def5a8';
 export default node;

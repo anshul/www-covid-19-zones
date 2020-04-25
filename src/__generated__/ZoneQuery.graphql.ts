@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-/* @relayHash 1052c6b9554159b424f1adefda865102 */
+/* @relayHash 67b2d45f5b3f0823ac456c25c27e57ad */
 
 import { ConcreteRequest } from "relay-runtime";
 import { FragmentRefs } from "relay-runtime";
@@ -41,6 +41,11 @@ fragment ZoneRoot_zoneStats on ZoneStats {
   }
   totalCases
   asOf
+  cumCases {
+    data
+    lineKeys
+    xAxisKey
+  }
   newCases {
     data
     lineKeys
@@ -85,7 +90,30 @@ v4 = {
   "name": "name",
   "args": null,
   "storageKey": null
-};
+},
+v5 = [
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "data",
+    "args": null,
+    "storageKey": null
+  },
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "lineKeys",
+    "args": null,
+    "storageKey": null
+  },
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "xAxisKey",
+    "args": null,
+    "storageKey": null
+  }
+];
 return {
   "kind": "Request",
   "fragment": {
@@ -172,34 +200,22 @@ return {
           {
             "kind": "LinkedField",
             "alias": null,
+            "name": "cumCases",
+            "storageKey": null,
+            "args": null,
+            "concreteType": "LineChart",
+            "plural": false,
+            "selections": (v5/*: any*/)
+          },
+          {
+            "kind": "LinkedField",
+            "alias": null,
             "name": "newCases",
             "storageKey": null,
             "args": null,
             "concreteType": "LineChart",
             "plural": false,
-            "selections": [
-              {
-                "kind": "ScalarField",
-                "alias": null,
-                "name": "data",
-                "args": null,
-                "storageKey": null
-              },
-              {
-                "kind": "ScalarField",
-                "alias": null,
-                "name": "lineKeys",
-                "args": null,
-                "storageKey": null
-              },
-              {
-                "kind": "ScalarField",
-                "alias": null,
-                "name": "xAxisKey",
-                "args": null,
-                "storageKey": null
-              }
-            ]
+            "selections": (v5/*: any*/)
           }
         ]
       }
@@ -209,7 +225,7 @@ return {
     "operationKind": "query",
     "name": "ZoneQuery",
     "id": null,
-    "text": "query ZoneQuery(\n  $code: String!\n) {\n  zoneStats(code: $code) {\n    ...ZoneRoot_zoneStats\n  }\n}\n\nfragment ZoneRoot_zoneStats on ZoneStats {\n  zone {\n    code\n    slug\n    name\n    parentZone {\n      slug\n      code\n      name\n    }\n  }\n  totalCases\n  asOf\n  newCases {\n    data\n    lineKeys\n    xAxisKey\n  }\n}\n",
+    "text": "query ZoneQuery(\n  $code: String!\n) {\n  zoneStats(code: $code) {\n    ...ZoneRoot_zoneStats\n  }\n}\n\nfragment ZoneRoot_zoneStats on ZoneStats {\n  zone {\n    code\n    slug\n    name\n    parentZone {\n      slug\n      code\n      name\n    }\n  }\n  totalCases\n  asOf\n  cumCases {\n    data\n    lineKeys\n    xAxisKey\n  }\n  newCases {\n    data\n    lineKeys\n    xAxisKey\n  }\n}\n",
     "metadata": {}
   }
 };
