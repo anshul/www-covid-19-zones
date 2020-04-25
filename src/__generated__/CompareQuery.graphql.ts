@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-/* @relayHash 0bf2529528141d6f11533067d717cb23 */
+/* @relayHash a44b8a0f515276a4ee2ce050b2ef71d2 */
 
 import { ConcreteRequest } from "relay-runtime";
 import { FragmentRefs } from "relay-runtime";
@@ -10,7 +10,7 @@ export type CompareQueryVariables = {
 export type CompareQueryResponse = {
     readonly compare: {
         readonly " $fragmentRefs": FragmentRefs<"CompareRoot_data">;
-    };
+    } | null;
 };
 export type CompareQuery = {
     readonly response: CompareQueryResponse;
@@ -42,6 +42,12 @@ fragment CompareRoot_data on CompareStats {
   totalCases {
     zoneName
     count
+    asOf
+  }
+  cumCases {
+    data
+    lineKeys
+    xAxisKey
   }
   newCases {
     data
@@ -87,7 +93,30 @@ v4 = {
   "name": "name",
   "args": null,
   "storageKey": null
-};
+},
+v5 = [
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "data",
+    "args": null,
+    "storageKey": null
+  },
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "lineKeys",
+    "args": null,
+    "storageKey": null
+  },
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "xAxisKey",
+    "args": null,
+    "storageKey": null
+  }
+];
 return {
   "kind": "Request",
   "fragment": {
@@ -179,8 +208,25 @@ return {
                 "name": "count",
                 "args": null,
                 "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "name": "asOf",
+                "args": null,
+                "storageKey": null
               }
             ]
+          },
+          {
+            "kind": "LinkedField",
+            "alias": null,
+            "name": "cumCases",
+            "storageKey": null,
+            "args": null,
+            "concreteType": "LineChart",
+            "plural": false,
+            "selections": (v5/*: any*/)
           },
           {
             "kind": "LinkedField",
@@ -190,29 +236,7 @@ return {
             "args": null,
             "concreteType": "LineChart",
             "plural": false,
-            "selections": [
-              {
-                "kind": "ScalarField",
-                "alias": null,
-                "name": "data",
-                "args": null,
-                "storageKey": null
-              },
-              {
-                "kind": "ScalarField",
-                "alias": null,
-                "name": "lineKeys",
-                "args": null,
-                "storageKey": null
-              },
-              {
-                "kind": "ScalarField",
-                "alias": null,
-                "name": "xAxisKey",
-                "args": null,
-                "storageKey": null
-              }
-            ]
+            "selections": (v5/*: any*/)
           }
         ]
       }
@@ -222,7 +246,7 @@ return {
     "operationKind": "query",
     "name": "CompareQuery",
     "id": null,
-    "text": "query CompareQuery(\n  $codes: [String!]!\n) {\n  compare(codes: $codes) {\n    ...CompareRoot_data\n  }\n}\n\nfragment CompareRoot_data on CompareStats {\n  zones {\n    code\n    slug\n    name\n    parentZone {\n      slug\n      code\n      name\n    }\n  }\n  totalCases {\n    zoneName\n    count\n  }\n  newCases {\n    data\n    lineKeys\n    xAxisKey\n  }\n}\n",
+    "text": "query CompareQuery(\n  $codes: [String!]!\n) {\n  compare(codes: $codes) {\n    ...CompareRoot_data\n  }\n}\n\nfragment CompareRoot_data on CompareStats {\n  zones {\n    code\n    slug\n    name\n    parentZone {\n      slug\n      code\n      name\n    }\n  }\n  totalCases {\n    zoneName\n    count\n    asOf\n  }\n  cumCases {\n    data\n    lineKeys\n    xAxisKey\n  }\n  newCases {\n    data\n    lineKeys\n    xAxisKey\n  }\n}\n",
     "metadata": {}
   }
 };

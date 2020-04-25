@@ -2,6 +2,7 @@
 scalar Any
 
 type CaseCount {
+  asOf: String!
   count: Int!
   zoneName: String!
 }
@@ -34,7 +35,7 @@ type CasesEdge {
 }
 
 type CompareStats {
-  cumulativeConfirmedCases: LineChart!
+  cumCases: LineChart!
   newCases: LineChart!
   totalCases: [CaseCount!]!
   zones: [Zone!]!
@@ -85,12 +86,12 @@ type PageInfo {
 }
 
 type Query {
-  compare(codes: [String!]!): CompareStats!
+  compare(codes: [String!]!): CompareStats
   home: HomeData!
 
   """Zone data"""
   zone(slug: String!): Zone!
-  zoneStats(code: String!): ZoneStats!
+  zoneStats(code: String!): ZoneStats
 
   """List of all zones"""
   zonesList(searchQuery: String): [Zone!]!
@@ -109,9 +110,9 @@ type Zone {
 }
 
 type ZoneStats {
+  asOf: String!
   cumCases: LineChart!
   newCases: LineChart!
-  asOf: String!
   totalCases: Int!
   zone: Zone!
 }

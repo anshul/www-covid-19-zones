@@ -17,7 +17,13 @@ export type CompareRoot_data = {
     readonly totalCases: ReadonlyArray<{
         readonly zoneName: string;
         readonly count: number;
+        readonly asOf: string;
     }>;
+    readonly cumCases: {
+        readonly data: ReadonlyArray<unknown>;
+        readonly lineKeys: ReadonlyArray<string>;
+        readonly xAxisKey: string;
+    };
     readonly newCases: {
         readonly data: ReadonlyArray<unknown>;
         readonly lineKeys: ReadonlyArray<string>;
@@ -54,7 +60,30 @@ v2 = {
   "name": "name",
   "args": null,
   "storageKey": null
-};
+},
+v3 = [
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "data",
+    "args": null,
+    "storageKey": null
+  },
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "lineKeys",
+    "args": null,
+    "storageKey": null
+  },
+  {
+    "kind": "ScalarField",
+    "alias": null,
+    "name": "xAxisKey",
+    "args": null,
+    "storageKey": null
+  }
+];
 return {
   "kind": "Fragment",
   "name": "CompareRoot_data",
@@ -112,8 +141,25 @@ return {
           "name": "count",
           "args": null,
           "storageKey": null
+        },
+        {
+          "kind": "ScalarField",
+          "alias": null,
+          "name": "asOf",
+          "args": null,
+          "storageKey": null
         }
       ]
+    },
+    {
+      "kind": "LinkedField",
+      "alias": null,
+      "name": "cumCases",
+      "storageKey": null,
+      "args": null,
+      "concreteType": "LineChart",
+      "plural": false,
+      "selections": (v3/*: any*/)
     },
     {
       "kind": "LinkedField",
@@ -123,32 +169,10 @@ return {
       "args": null,
       "concreteType": "LineChart",
       "plural": false,
-      "selections": [
-        {
-          "kind": "ScalarField",
-          "alias": null,
-          "name": "data",
-          "args": null,
-          "storageKey": null
-        },
-        {
-          "kind": "ScalarField",
-          "alias": null,
-          "name": "lineKeys",
-          "args": null,
-          "storageKey": null
-        },
-        {
-          "kind": "ScalarField",
-          "alias": null,
-          "name": "xAxisKey",
-          "args": null,
-          "storageKey": null
-        }
-      ]
+      "selections": (v3/*: any*/)
     }
   ]
 };
 })();
-(node as any).hash = '8de8d48ceabf469f82bf12f9339be655';
+(node as any).hash = '894a29d98cffaf23b2bd2973b6274299';
 export default node;

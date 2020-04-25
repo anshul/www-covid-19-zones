@@ -41,7 +41,7 @@ type DateRangeT = 'all_time' | 'last_30_days' | 'last_7_days'
 
 const ZoneRoot: React.FC<Props> = ({ zoneStats, onSearch, gotoCompare }) => {
   const classes = useStyles()
-  const [dateRange, setDateRange] = useState<DateRangeT>('all_time')
+  const [dateRange, setDateRange] = useState<DateRangeT>('last_30_days')
   const dateRanges: { label: string; value: DateRangeT }[] = [
     { label: 'All Time', value: 'all_time' },
     { label: '1 Month', value: 'last_30_days' },
@@ -49,7 +49,7 @@ const ZoneRoot: React.FC<Props> = ({ zoneStats, onSearch, gotoCompare }) => {
   ]
 
   const [logScale, setLogScale] = useState(false)
-  const filteredDate = useMemo(() => {
+  const filteredData = useMemo(() => {
     if (!zoneStats) return []
     switch (dateRange) {
       case 'all_time':
@@ -61,7 +61,7 @@ const ZoneRoot: React.FC<Props> = ({ zoneStats, onSearch, gotoCompare }) => {
     }
   }, [zoneStats, dateRange])
 
-  const cumFilteredDate = useMemo(() => {
+  const cumFilteredData = useMemo(() => {
     if (!zoneStats) return []
     switch (dateRange) {
       case 'all_time':
@@ -176,7 +176,7 @@ const ZoneRoot: React.FC<Props> = ({ zoneStats, onSearch, gotoCompare }) => {
             height={350}
             xAxisKey={zoneStats.newCases.xAxisKey}
             lineKeys={zoneStats.newCases.lineKeys}
-            data={filteredDate}
+            data={filteredData}
             logScale={logScale}
           />
         </Col>
@@ -191,7 +191,7 @@ const ZoneRoot: React.FC<Props> = ({ zoneStats, onSearch, gotoCompare }) => {
             height={350}
             xAxisKey={zoneStats.cumCases.xAxisKey}
             lineKeys={zoneStats.cumCases.lineKeys}
-            data={cumFilteredDate}
+            data={cumFilteredData}
             logScale={logScale}
           />
         </Col>

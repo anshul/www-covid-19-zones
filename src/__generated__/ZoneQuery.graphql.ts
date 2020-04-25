@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-/* @relayHash 67b2d45f5b3f0823ac456c25c27e57ad */
+/* @relayHash ee73e0b3749db3bc0e320e3c8ffb1fce */
 
 import { ConcreteRequest } from "relay-runtime";
 import { FragmentRefs } from "relay-runtime";
@@ -10,7 +10,7 @@ export type ZoneQueryVariables = {
 export type ZoneQueryResponse = {
     readonly zoneStats: {
         readonly " $fragmentRefs": FragmentRefs<"ZoneRoot_zoneStats">;
-    };
+    } | null;
 };
 export type ZoneQuery = {
     readonly response: ZoneQueryResponse;
