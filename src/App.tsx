@@ -6,6 +6,7 @@ import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-d
 import { pages } from './pages/pages'
 import { ThemeProvider, createMuiTheme } from '@material-ui/core'
 import { slateBlue, mountainMeadow } from './utils/ColorFactory'
+import GenericNotFound from './pages/GenericNotFound'
 
 function App() {
   return (
@@ -36,12 +37,12 @@ function App() {
               <Row>
                 <Navbar />
               </Row>
-              <Route exact path='/' render={() => <Redirect to='/zone/in' />} />
+              <Route exact path='/' render={() => <Redirect to='/zones/in' />} />
               <Switch location={location}>
                 {pages.map((page) => {
                   return <Route exact key={page.displayName} style={{ marginTop: '8px' }} path={page.path} component={page.view} />
                 })}
-                <Redirect to='/zone/in' />
+                <Route path='*' exact={true} component={GenericNotFound} />
               </Switch>
             </Grid>
           )}
