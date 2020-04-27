@@ -10,6 +10,22 @@ const color7 = '#e37c4c'
 const color8 = '#b76ac4'
 const color9 = '#8f6ed5'
 
+const lines = ['#4C72B0', '#DD8452', '#55A868', '#C44E52', '#8172B3', '#937860', '#DA8BC3', '#8C8C8C', '#CCB974', '#64B5CD']
+const paired = [
+  '#A1C9F4',
+  '#4C72B0',
+  '#8DE5A1',
+  '#55A868',
+  '#FF9F9B',
+  '#C44E52',
+  '#D0BBFF',
+  '#8172B3',
+  '#FFFEA3',
+  '#CCB974',
+  '#B9F2F0',
+  '#64B5CD',
+]
+
 interface Colors {
   [key: number]: string
 }
@@ -23,6 +39,8 @@ const colorGenerator = (color: string): Colors => {
   return colors
 }
 
+export const pairedColors = paired.map((color) => colorGenerator(color))
+export const lineColors = lines.map((color) => colorGenerator(color))
 export const slateGrey = colorGenerator(color1)
 export const slateBlue = colorGenerator(color2)
 export const summerSky = colorGenerator(color3)

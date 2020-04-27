@@ -35,7 +35,7 @@ function App() {
           render={({ location }) => (
             <Grid>
               <Row>
-                <Navbar />
+                <Route path='*' exact component={Navbar} />
               </Row>
               <Route exact path='/' render={() => <Redirect to='/zones/in' />} />
               <Switch location={location}>

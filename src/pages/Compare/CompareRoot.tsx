@@ -3,8 +3,8 @@ import { graphql } from 'babel-plugin-relay/macro'
 import { createFragmentContainer } from 'react-relay'
 import { CompareRoot_data } from '../../__generated__/CompareRoot_data.graphql'
 import { Grid, Row, Col } from 'react-flexbox-grid'
-import { Button } from '@material-ui/core'
 import Searchbar from '../../components/Searchbar'
+import ChartOptionsRow from '../../components/ChartOptionsRow'
 import { slateGrey } from '../../utils/ColorFactory'
 import { IoIosClose } from 'react-icons/io'
 import CustomLineChart from '../../components/CustomLineChart'
@@ -18,12 +18,7 @@ type DateRangeT = 'all_time' | 'last_30_days' | 'last_7_days'
 const CompareRoot: React.FC<Props> = ({ data, onCompare }) => {
   const codes = data ? data.zones.map((zone) => [zone.code, zone.name] || []) || [] : []
   const [logScale, setLogScale] = useState(false)
-  const [dateRange, setDateRange] = useState<DateRangeT>('last_30_days')
-  const dateRanges: { label: string; value: DateRangeT }[] = [
-    { label: 'All Time', value: 'all_time' },
-    { label: '1 Month', value: 'last_30_days' },
-    { label: '7 Days', value: 'last_7_days' },
-  ]
+  const [dateRange, setDateRange] = useState<DateRangeT>('all_time')
   const filteredData = useMemo(() => {
     if (!data) return []
     switch (dateRange) {
@@ -70,12 +65,12 @@ const CompareRoot: React.FC<Props> = ({ data, onCompare }) => {
   return (
     <Grid>
       <Row>
-        <Col xs={12} xl={8} xlOffset={2}>
+        <Col xs={12}>
           <Searchbar onSearch={(code) => onCompare(codes.map((code) => code[0]).concat([code]))} />
         </Col>
       </Row>
-      <Row>
-        <Col xs={12} xl={8} xlOffset={2}>
+      <Row style={{ minHeight: '40px' }}>
+        <Col xs={12}>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {codes.map((code) => (
               <div
@@ -108,58 +103,26 @@ const CompareRoot: React.FC<Props> = ({ data, onCompare }) => {
         </Col>
       </Row>
       <Row>
-        <Col xs={12} xl={8} xlOffset={2}>
-          <Row>
-            <Col xs={12} xl={6} style={{ margin: '8px 0' }}>
-              {dateRanges.map((range) => (
-                <Button
-                  disableElevation
-                  key={range.value}
-                  variant={range.value === dateRange ? 'contained' : 'text'}
-                  color={range.value === dateRange ? 'primary' : 'default'}
-                  onClick={() => setDateRange(range.value)}
-                >
-                  {range.label}
-                </Button>
-              ))}
-            </Col>
-            <Col xs={12} xl={6} style={{ margin: '8px 0' }}>
-              <Button
-                disableElevation
-                variant={!logScale ? 'contained' : 'text'}
-                color={!logScale ? 'secondary' : 'default'}
-                onClick={() => setLogScale(false)}
-              >
-                Linear Scale
-              </Button>
-              <Button
-                disableElevation
-                variant={logScale ? 'contained' : 'text'}
-                color={logScale ? 'secondary' : 'default'}
-                onClick={() => setLogScale(true)}
-              >
-                Log Scale
-              </Button>
-            </Col>
-          </Row>
+        {data.totalCases.map((cases) => (
+          <Col key={cases.zoneName} xs={6} sm={2}>
+            <small style={{ fontWeight: 500 }}>{cases.zoneName}</small>
+            <h6>Total infections</h6>
+            <h3>{cases.count}</h3>
+            <h6>
+              as of <span>{cases.asOf}</span>
+            </h6>
+          </Col>
+        ))}
+        <Col xs={12} sm={Math.max(2, 12 - data.totalCases.length * 2)}>
+          <ChartOptionsRow dateRange={dateRange} setDateRange={setDateRange} logScale={logScale} setLogScale={setLogScale} />
         </Col>
       </Row>
 
       <Row>
-        {data.totalCases.map((cases) => (
-          <Col key={cases.zoneName} xs={12} xl={codes.length > 2 ? 4 : 6}>
-            <p>
-              Total Confirmed Cases (<b>{cases.zoneName}</b>)
-            </p>
-            <h4>{cases.count}</h4>
-            <h6> as of {cases.asOf}</h6>
-          </Col>
-        ))}
-      </Row>
-      <Row>
         <Col xs={12} xl={12} xlOffset={0}>
           <CustomLineChart
-            title='New cases'
+            title={`Infections by day - 5 day average`}
+            palette='normal'
             height={350}
             xAxisKey={data.newCases.xAxisKey}
             lineKeys={data.newCases.lineKeys}
@@ -174,7 +137,8 @@ const CompareRoot: React.FC<Props> = ({ data, onCompare }) => {
       <Row>
         <Col xs={12} xl={12} xlOffset={0}>
           <CustomLineChart
-            title='Total cases (cumulative)'
+            title={`Total infections (cumulative)`}
+            palette='normal'
             height={350}
             xAxisKey={data.cumCases.xAxisKey}
             lineKeys={data.cumCases.lineKeys}

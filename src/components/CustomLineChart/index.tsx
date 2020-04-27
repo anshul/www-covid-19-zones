@@ -15,20 +15,20 @@ import {
   YAxisProps,
 } from 'recharts'
 import { makeStyles, createStyles } from '@material-ui/styles'
-import { slateBlue, summerSky, mountainMeadow, fireBush, flamingo, jaffa, orchid, purple } from '../../utils/ColorFactory'
+import { lineColors, pairedColors, fireBush } from '../../utils/ColorFactory'
 import { Grid, Col, Row } from 'react-flexbox-grid'
 
 interface Props {
+  palette: 'paired' | 'normal'
   width?: number
   height?: number
   title?: string
   lineKeys: ReadonlyArray<string>
   xAxisKey: string
   data: any
+  legend?: { [lineKey: string]: string }
   logScale?: boolean
 }
-
-const lineColors = [slateBlue, mountainMeadow, summerSky, fireBush, flamingo, jaffa, orchid, purple]
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -82,9 +82,10 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-const CustomLineChart: React.FC<Props> = ({ width, height, title, data, xAxisKey, lineKeys, logScale = false }) => {
+const CustomLineChart: React.FC<Props> = ({ width, legend, palette, height, title, data, xAxisKey, lineKeys, logScale = false }) => {
   const classes = useStyles()
   const yAxisProps: YAxisProps = logScale ? { scale: 'log', domain: [0.1, 'dataMax'] } : {}
+  const colors = palette === 'normal' ? lineColors : pairedColors
 
   return (
     <Grid className={classes.root}>
@@ -127,12 +128,15 @@ const CustomLineChart: React.FC<Props> = ({ width, height, title, data, xAxisKey
             content={({ payload }: TooltipProps) =>
               payload && (
                 <div className={classes.tooltipContent}>
-                  <h5>{title}</h5>
-                  <h4 className={classes.tootipTitle}>{payload.map((pl) => pl.payload.date)[0]}</h4>
-                  {payload.map((pl) => (
+                  <h5 className={classes.tootipTitle}>
+                    <strong>{payload.map((pl) => pl.payload.date)[0]}</strong>
+                  </h5>
+                  {payload.map((pl, idx) => (
                     <div key={pl.name} className={classes.tooltipItemContainer}>
                       <div className={classes.tooltipItemIcon} style={{ backgroundColor: pl.color }} />
-                      <p>{pl.value} cases</p>
+                      <small>
+                        {pl.value} {lineKeys[idx].toLowerCase()}
+                      </small>
                     </div>
                   ))}
                 </div>
@@ -150,14 +154,14 @@ const CustomLineChart: React.FC<Props> = ({ width, height, title, data, xAxisKey
             content={({ payload }: LegendProps) => (
               <Row start='xl'>
                 <Col xl={4} xs={12} style={{ padding: '0' }}>
-                  <p>{title}</p>
+                  <p style={{ fontWeight: 500 }}>{title}</p>
                 </Col>
                 <Col xs>
                   <Row end='xl'>
                     {payload?.map((pl) => (
                       <div key={pl.value} className={classes.legendItem}>
                         <div className={classes.legendItemIcon} style={{ backgroundColor: pl.color }} />
-                        <p>{pl.value}</p>
+                        <small>{(legend && legend[pl.value]) || pl.value}</small>
                       </div>
                     ))}
                   </Row>
@@ -166,7 +170,7 @@ const CustomLineChart: React.FC<Props> = ({ width, height, title, data, xAxisKey
             )}
           />
           {lineKeys.map((dataKey, idx) => {
-            const color = lineColors[idx % lineColors.length][500]
+            const color = colors[idx % colors.length][500]
             return (
               <Line
                 key={dataKey}

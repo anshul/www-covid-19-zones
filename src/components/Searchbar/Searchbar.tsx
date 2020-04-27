@@ -96,7 +96,7 @@ const Searchbar: React.FC<Props> = ({ onSearch }) => {
   return (
     <>
       <div className={classes.inputRoot}>
-        <input value={value} placeholder='How is your country/city doing?' className={classes.input} onChange={onChange} />
+        <input value={value} placeholder='How is your state/city doing?' className={classes.input} onChange={onChange} />
         <IoIosSearch className={classes.searchIcon} />
         {open && (
           <IoIosClose
