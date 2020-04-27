@@ -179,7 +179,7 @@ const CustomLineChart: React.FC<Props> = ({ width, legend, palette, height, titl
                 connectNulls={true}
                 animationDuration={300}
                 stroke={color}
-                strokeWidth={4}
+                strokeWidth={3}
                 dot={false}
                 activeDot={{ strokeWidth: 7, fill: fireBush[500], r: 7, boxShadow: '0 3px 8px 0 rgba(0,0,0,0.24)' }}
               />
