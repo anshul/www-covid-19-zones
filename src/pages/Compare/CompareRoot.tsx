@@ -8,6 +8,7 @@ import ChartOptionsRow from '../../components/ChartOptionsRow'
 import { slateGrey } from '../../utils/ColorFactory'
 import { IoIosClose } from 'react-icons/io'
 import CustomLineChart from '../../components/CustomLineChart'
+import { filterData } from '../../utils/filterData'
 
 interface Props {
   data: CompareRoot_data | null
@@ -21,25 +22,11 @@ const CompareRoot: React.FC<Props> = ({ data, onCompare }) => {
   const [dateRange, setDateRange] = useState<DateRangeT>('all_time')
   const filteredData = useMemo(() => {
     if (!data) return []
-    switch (dateRange) {
-      case 'all_time':
-        return data.newCases.data
-      case 'last_30_days':
-        return data.newCases.data.slice(data.newCases.data.length - 30)
-      case 'last_7_days':
-        return data.newCases.data.slice(data.newCases.data.length - 7)
-    }
+    return filterData(dateRange, data.newCases.data)
   }, [data, dateRange])
   const cumFilteredData = useMemo(() => {
     if (!data) return []
-    switch (dateRange) {
-      case 'all_time':
-        return data.cumCases.data
-      case 'last_30_days':
-        return data.cumCases.data.slice(data.cumCases.data.length - 30)
-      case 'last_7_days':
-        return data.cumCases.data.slice(data.cumCases.data.length - 7)
-    }
+    return filterData(dateRange, data.cumCases.data)
   }, [data, dateRange])
 
   if (!data) {

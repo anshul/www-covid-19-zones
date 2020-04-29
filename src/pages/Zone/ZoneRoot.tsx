@@ -12,6 +12,7 @@ import { slateGrey } from '../../utils/ColorFactory'
 import { Breadcrumbs, Button } from '@material-ui/core'
 import { Link } from 'react-router-dom'
 import { IoIosAdd } from 'react-icons/io'
+import { DateRangeT, filterData } from '../../utils/filterData'
 
 interface Props {
   zoneStats: ZoneRoot_zoneStats | null
@@ -38,8 +39,6 @@ const useStyles = makeStyles(() =>
   })
 )
 
-type DateRangeT = 'all_time' | 'last_30_days' | 'last_7_days'
-
 const ZoneRoot: React.FC<Props> = ({ zoneStats, onSearch, gotoCompare }) => {
   const classes = useStyles()
   const [dateRange, setDateRange] = useState<DateRangeT>('all_time')
@@ -47,26 +46,12 @@ const ZoneRoot: React.FC<Props> = ({ zoneStats, onSearch, gotoCompare }) => {
   const [logScale, setLogScale] = useState(false)
   const filteredData = useMemo(() => {
     if (!zoneStats) return []
-    switch (dateRange) {
-      case 'all_time':
-        return zoneStats.newCases.data
-      case 'last_30_days':
-        return zoneStats.newCases.data.slice(zoneStats.newCases.data.length - 30)
-      case 'last_7_days':
-        return zoneStats.newCases.data.slice(zoneStats.newCases.data.length - 7)
-    }
+    return filterData(dateRange, zoneStats.newCases.data)
   }, [zoneStats, dateRange])
 
   const cumFilteredData = useMemo(() => {
     if (!zoneStats) return []
-    switch (dateRange) {
-      case 'all_time':
-        return zoneStats.cumCases.data
-      case 'last_30_days':
-        return zoneStats.cumCases.data.slice(zoneStats.cumCases.data.length - 30)
-      case 'last_7_days':
-        return zoneStats.cumCases.data.slice(zoneStats.cumCases.data.length - 7)
-    }
+    return filterData(dateRange, zoneStats.cumCases.data)
   }, [zoneStats, dateRange])
 
   if (!zoneStats) {
