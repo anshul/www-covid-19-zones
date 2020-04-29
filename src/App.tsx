@@ -33,10 +33,8 @@ function App() {
       <Router>
         <Route
           render={({ location }) => (
-            <Grid>
-              <Row>
-                <Route path='*' exact component={Navbar} />
-              </Row>
+            <>
+              <Route path='*' exact component={Navbar} />
               <Route exact path='/' render={() => <Redirect to='/zones/in' />} />
               <Switch location={location}>
                 {pages.map((page) => {
@@ -44,7 +42,7 @@ function App() {
                 })}
                 <Route path='*' exact={true} component={GenericNotFound} />
               </Switch>
-            </Grid>
+            </>
           )}
         />
       </Router>

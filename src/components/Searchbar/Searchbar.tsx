@@ -16,13 +16,16 @@ interface Props {
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
+    root: {
+      marginBottom: '16px',
+      borderRadius: '4px',
+      backgroundColor: '#fafafa',
+      boxShadow: 'rgba(0, 0, 0, 0.1) 0px 2px 12px',
+    },
     inputRoot: {
       position: 'relative',
       display: 'flex',
       alignItems: 'center',
-      backgroundColor: '#fafafa',
-      borderRadius: '24px',
-      boxShadow: 'rgba(0, 0, 0, 0.1) 0px 2px 12px',
     },
     input: {
       boxSizing: 'border-box',
@@ -33,7 +36,7 @@ const useStyles = makeStyles((theme: Theme) =>
       border: 'none',
       padding: '12px',
       fontSize: '16px',
-      borderRadius: '24px',
+      borderRadius: '4px',
       fontFamily: theme.typography.fontFamily,
     },
     searchIcon: {
@@ -54,9 +57,9 @@ const useStyles = makeStyles((theme: Theme) =>
       height: '48px',
     },
     menu: {
-      marginTop: '8px',
-      marginLeft: '8px',
-      marginRight: '8px',
+      // marginTop: '8px',
+      // marginLeft: '8px',
+      // marginRight: '8px',
     },
     menuItem: {
       display: 'flex',
@@ -94,7 +97,7 @@ const Searchbar: React.FC<Props> = ({ onSearch }) => {
   }
 
   return (
-    <>
+    <div className={classes.root}>
       <div className={classes.inputRoot}>
         <input value={value} placeholder='How is your state/city doing?' className={classes.input} onChange={onChange} />
         <IoIosSearch className={classes.searchIcon} />
@@ -108,7 +111,6 @@ const Searchbar: React.FC<Props> = ({ onSearch }) => {
           />
         )}
       </div>
-
       <QueryRenderer<SearchbarQuery>
         environment={environment}
         query={graphql`
@@ -156,7 +158,7 @@ const Searchbar: React.FC<Props> = ({ onSearch }) => {
           return <LinearProgress />
         }}
       />
-    </>
+    </div>
   )
 }
 

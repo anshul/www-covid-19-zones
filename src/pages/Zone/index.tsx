@@ -7,6 +7,7 @@ import ErrorBox from '../../components/ErrorBox'
 import { RouteComponentProps } from 'react-router-dom'
 import ZoneRoot from './ZoneRoot'
 import { ZoneQuery } from '../../__generated__/ZoneQuery.graphql'
+import { LinearProgress } from '@material-ui/core'
 
 const Zone: React.FC<RouteComponentProps<{ code: string }>> = ({ match, history }) => {
   const code = match.params.code
@@ -38,7 +39,7 @@ const Zone: React.FC<RouteComponentProps<{ code: string }>> = ({ match, history 
         } else if (props) {
           return <ZoneRoot zoneStats={props.zoneStats} onSearch={onSearch} gotoCompare={gotoCompare} />
         }
-        return 'Loading'
+        return <LinearProgress />
       }}
     />
   )

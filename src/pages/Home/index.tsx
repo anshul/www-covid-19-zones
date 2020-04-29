@@ -6,6 +6,7 @@ import environment from '../../relayEnvironment'
 import ErrorBox from '../../components/ErrorBox'
 import HomeRoot from './HomeRoot'
 import { HomeQuery } from '../../__generated__/HomeQuery.graphql'
+import { LinearProgress } from '@material-ui/core'
 
 const Home: React.FC = () => {
   return (
@@ -25,7 +26,7 @@ const Home: React.FC = () => {
         } else if (props) {
           return <HomeRoot home={props.home} />
         }
-        return 'Loading'
+        return <LinearProgress />
       }}
     />
   )

@@ -31,7 +31,7 @@ const CompareRoot: React.FC<Props> = ({ data, onCompare }) => {
 
   if (!data) {
     return (
-      <>
+      <Grid>
         <Row>
           <Col xs={12} xl={8} xlOffset={2}>
             <Searchbar onSearch={(code) => onCompare(codes.map((code) => code[0]).concat([code]))} />
@@ -45,7 +45,7 @@ const CompareRoot: React.FC<Props> = ({ data, onCompare }) => {
             </p>
           </Col>
         </Row>
-      </>
+      </Grid>
     )
   }
 
