@@ -17,7 +17,6 @@
     "@types/react-dom": "^16.9.0",
     "@types/react-relay": "^7.0.3",
     "@types/react-router-dom": "^5.1.4",
-    "@types/recharts": "^1.8.9",
     "@types/relay-runtime": "^8.0.6",
     "axios": "^0.19.2",
     "chart.js": "^2.9.3",
@@ -31,7 +30,6 @@
     "react-relay": "^9.0.0",
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.4.1",
-    "recharts": "^1.8.5",
     "relay-runtime": "^9.0.0",
     "typescript": "~3.7.2"
   },
@@ -67,6 +65,7 @@
     "fix": "eslint 'src/**/*.{js,ts,tsx}' --fix",
     "lint": "eslint --ignore-pattern 'src/**/*.{js,ts,tsx}'",
     "lint:ci": "yarn run eslint --ext .tsx,.ts,.js,.jsx --ignore-pattern src",
+    "update": "yarn update-schema && yarn relay",
     "update-schema": "yarn --silent get-graphql-schema http://localhost:6400/graphql > schema.graphql",
     "relay": "yarn run relay-compiler --language typescript --artifactDirectory ./src/__generated__ --schema ./schema.graphql --src ./src/ $@",
     "relay-watch": "yarn run relay-compiler --language typescript --artifactDirectory ./src/__generated__ --schema ./schema.graphql --src ./src/ --watch $@"

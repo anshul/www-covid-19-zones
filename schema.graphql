@@ -89,7 +89,7 @@ type Query {
   compare(codes: [String!]!): CompareStats
   home: HomeData!
 
-  """Zone data"""
+  """Zone daily_chart"""
   zone(slug: String!): Zone!
   zoneStats(code: String!): ZoneStats
 
