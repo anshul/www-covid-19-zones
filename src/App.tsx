@@ -35,8 +35,8 @@ function App() {
           render={({ location }) => (
             <>
               <Route path='*' exact component={Navbar} />
-              <Route exact path='/' render={() => <Redirect to='/zones/in' />} />
               <Switch location={location}>
+                <Route exact path='/' render={() => <Redirect to='/zones/in' />} />
                 {pages.map((page) => {
                   return <Route exact key={page.displayName} style={{ marginTop: '8px' }} path={page.path} component={page.view} />
                 })}
