@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useMemo } from 'react'
 import { graphql } from 'babel-plugin-relay/macro'
 import { createFragmentContainer } from 'react-relay'
 import { ZoneV2Root_data } from '../../__generated__/ZoneV2Root_data.graphql'
@@ -10,17 +10,17 @@ import { IoIosClose } from 'react-icons/io'
 import CustomLineChart from '../../components/CustomLineChart'
 import { filterData } from '../../utils/filterData'
 
+export type DateRangeT = 'all' | '1m' | '1w'
 interface Props {
   data: ZoneV2Root_data | null
   compareZones: (codes: string[]) => void
   viewZone: (code: string) => void
+  dateRange: DateRangeT
+  logScale: boolean
 }
-type DateRangeT = 'all_time' | 'last_30_days' | 'last_7_days'
 
-const ZoneV2Root: React.FC<Props> = ({ data, compareZones }) => {
+const ZoneV2Root: React.FC<Props> = ({ data, compareZones, dateRange, logScale }) => {
   const codes = data ? data.zones.map((zone) => [zone.code, zone.name] || []) || [] : []
-  const [logScale, setLogScale] = useState(false)
-  const [dateRange, setDateRange] = useState<DateRangeT>('all_time')
   const filteredData = useMemo(() => {
     if (!data) return []
     return filterData(dateRange, data.newCases.data)
@@ -102,7 +102,7 @@ const ZoneV2Root: React.FC<Props> = ({ data, compareZones }) => {
           </Col>
         ))}
         <Col xs={12} sm={Math.max(2, 12 - data.totalCases.length * 2)}>
-          <ChartOptionsRow dateRange={dateRange} setDateRange={setDateRange} logScale={logScale} setLogScale={setLogScale} />
+          <ChartOptionsRow dateRange={dateRange} setDateRange={() => {}} logScale={logScale} setLogScale={() => {}} />
         </Col>
       </Row>
 

@@ -14,12 +14,12 @@ interface Props {
   data: CompareRoot_data | null
   onCompare: (codes: string[]) => void
 }
-type DateRangeT = 'all_time' | 'last_30_days' | 'last_7_days'
+type DateRangeT = 'all' | '1m' | '1w'
 
 const CompareRoot: React.FC<Props> = ({ data, onCompare }) => {
   const codes = data ? data.zones.map((zone) => [zone.code, zone.name] || []) || [] : []
   const [logScale, setLogScale] = useState(false)
-  const [dateRange, setDateRange] = useState<DateRangeT>('all_time')
+  const [dateRange, setDateRange] = useState<DateRangeT>('all')
   const filteredData = useMemo(() => {
     if (!data) return []
     return filterData(dateRange, data.newCases.data)

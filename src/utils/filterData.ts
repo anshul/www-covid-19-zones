@@ -1,13 +1,13 @@
-export type DateRangeT = 'all_time' | 'last_30_days' | 'last_7_days'
+export type DateRangeT = 'all' | '1m' | '1w'
 
 export const filterData = (dateRange: DateRangeT, data: ReadonlyArray<unknown>) => {
   switch (dateRange) {
-    case 'all_time':
+    case 'all':
       return data
-    case 'last_30_days':
+    case '1m':
       if (data.length <= 30) return data
       return data.slice(data.length - 30)
-    case 'last_7_days':
+    case '1w':
       if (data.length <= 7) return data
       return data.slice(data.length - 7)
   }

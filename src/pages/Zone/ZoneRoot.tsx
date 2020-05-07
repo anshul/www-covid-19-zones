@@ -41,7 +41,7 @@ const useStyles = makeStyles(() =>
 
 const ZoneRoot: React.FC<Props> = ({ zoneStats, onSearch, gotoCompare }) => {
   const classes = useStyles()
-  const [dateRange, setDateRange] = useState<DateRangeT>('all_time')
+  const [dateRange, setDateRange] = useState<DateRangeT>('all')
 
   const [logScale, setLogScale] = useState(false)
   const filteredData = useMemo(() => {
