@@ -5,15 +5,17 @@ import { QueryRenderer } from 'react-relay'
 import environment from '../../relayEnvironment'
 import ErrorBox from '../../components/ErrorBox'
 import { RouteComponentProps } from 'react-router-dom'
-import ZoneV2Root, { DateRangeT } from './ZoneV2Root'
+import V2HomeRoot from './V2HomeRoot'
 import { parse } from 'qs'
-import { ZoneV2Query } from '../../__generated__/ZoneV2Query.graphql'
+import { V2HomeQuery } from '../../__generated__/V2HomeQuery.graphql'
+import { DateRangeT, ModeT } from '../../types'
 
-const ZoneV2: React.FC<RouteComponentProps<{ codes: string }>> = ({ location, match, history }) => {
+const V2Home: React.FC<RouteComponentProps<{ codes: string }>> = ({ location, match, history }) => {
   const q = parse(location.search, { ignoreQueryPrefix: true })
   const codes = match.params.codes.split(',')
   const dateRange: string = ['all', '1w', '1m'].find((x) => x === q.t) || 'all'
   const logScale: boolean = `${q.log || ''}`.length > 1 && q.log !== 'no'
+  const mode: ModeT = location.pathname.match(/compare/) ? 'compare' : 'zone'
 
   const viewZone = (code: string) => {
     codes.length > 0 ? history.push(`/v2/zones/${code}`) : history.push(`/v2`)
@@ -23,15 +25,15 @@ const ZoneV2: React.FC<RouteComponentProps<{ codes: string }>> = ({ location, ma
     codes.length > 0 ? history.push(`/v2/compare/${codes.sort().join(',')}`) : history.push(`/v2`)
   }
 
-  console.log('Rendering ZoneV2', codes)
+  console.log('Rendering V2Home', codes)
 
   return (
-    <QueryRenderer<ZoneV2Query>
+    <QueryRenderer<V2HomeQuery>
       environment={environment}
       query={graphql`
-        query ZoneV2Query($codes: [String!]!) {
-          compare(codes: $codes) {
-            ...ZoneV2Root_data
+        query V2HomeQuery($codes: [String!]!) {
+          v2Stats(codes: $codes) {
+            code
           }
         }
       `}
@@ -41,8 +43,9 @@ const ZoneV2: React.FC<RouteComponentProps<{ codes: string }>> = ({ location, ma
           return <ErrorBox error={error} />
         } else if (props) {
           return (
-            <ZoneV2Root
-              data={props.compare}
+            <V2HomeRoot
+              data={props.v2Stats}
+              mode={mode}
               viewZone={viewZone}
               dateRange={dateRange as DateRangeT}
               logScale={logScale}
@@ -56,4 +59,4 @@ const ZoneV2: React.FC<RouteComponentProps<{ codes: string }>> = ({ location, ma
   )
 }
 
-export default ZoneV2
+export default V2Home

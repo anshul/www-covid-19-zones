@@ -88,6 +88,7 @@ type PageInfo {
 type Query {
   compare(codes: [String!]!): CompareStats
   home: HomeData!
+  v2Stats(codes: [String!]!): [ZoneCache!]!
 
   """Zone daily_chart"""
   zone(slug: String!): Zone!
@@ -95,6 +96,20 @@ type Query {
 
   """List of all zones"""
   zonesList(searchQuery: String): [Zone!]!
+}
+
+type V2Zone {
+  area: String
+  children: [V2Zone!]
+  code: String!
+  density: String
+  name: String!
+  parent: V2Zone
+  pop: String
+  related: [V2Zone!]!
+  searchName: String
+  slug: String!
+  zoneMd: String
 }
 
 type Zone {
@@ -107,6 +122,24 @@ type Zone {
   searchName: String
   slug: String!
   zoneMd: String
+}
+
+type ZoneCache {
+  areaSqKm: Int!
+  asOfDt: String!
+  code: String!
+  cumulativeFatalities: Int!
+  cumulativeInfections: Int!
+  cumulativeRecoveries: Int!
+  cumulativeTests: Int!
+  currentActives: Int!
+  perMillionActives: Float!
+  perMillionFatalities: Float!
+  perMillionInfections: Float!
+  perMillionRecoveries: Float!
+  perMillionTests: Float!
+  population: Int!
+  zone: V2Zone
 }
 
 type ZoneStats {
