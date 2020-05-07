@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react'
 import { graphql } from 'babel-plugin-relay/macro'
 
-import { Row, Col } from 'react-flexbox-grid'
+import { Row, Col, Grid } from 'react-flexbox-grid'
 import { createFragmentContainer } from 'react-relay'
 import { ZoneRoot_zoneStats } from '../../__generated__/ZoneRoot_zoneStats.graphql'
 import CustomLineChart from '../../components/CustomLineChart'
@@ -75,7 +75,7 @@ const ZoneRoot: React.FC<Props> = ({ zoneStats, onSearch, gotoCompare }) => {
   }
 
   return (
-    <>
+    <Grid>
       <Row>
         <Col xs={12}>
           <Searchbar onSearch={onSearch} />
@@ -153,7 +153,7 @@ const ZoneRoot: React.FC<Props> = ({ zoneStats, onSearch, gotoCompare }) => {
           <h6>Sources: covid19india.org, mohfw.gov.in and various state governments</h6>
         </Col>
       </Row>
-    </>
+    </Grid>
   )
 }
 
