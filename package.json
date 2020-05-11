@@ -66,9 +66,10 @@
     "analyze": "REACT_APP_API_URL=https://api.covid19zones.com react-scripts build && source-map-explorer 'build/static/js/*.js'",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
+    "pre-commit": "yarn fix || true",
     "fix": "eslint 'src/**/*.{js,ts,tsx}' --fix",
-    "lint": "eslint --ignore-pattern 'src/**/*.{js,ts,tsx}'",
-    "lint:ci": "yarn run eslint --ext .tsx,.ts,.js,.jsx --ignore-pattern src",
+    "lint": "eslint 'src/**/*.{js,ts,tsx}'",
+    "lint:ci": "eslint --ext .tsx,.ts,.js,.jsx --ignore-pattern src",
     "update": "yarn update-schema && yarn relay",
     "update-schema": "yarn --silent get-graphql-schema http://localhost:6400/graphql > schema.graphql",
     "relay": "yarn run relay-compiler --language typescript --artifactDirectory ./src/__generated__ --schema ./schema.graphql --src ./src/ $@",
@@ -134,7 +135,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "yarn lint"
+      "pre-commit": "yarn pre-commit"
     }
   },
   "babelMacros": {

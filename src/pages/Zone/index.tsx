@@ -3,7 +3,7 @@ import { graphql } from 'babel-plugin-relay/macro'
 
 import { QueryRenderer } from 'react-relay'
 import environment from '../../relayEnvironment'
-import ErrorBox from '../../components/ErrorBox'
+import ErrorPage from '../../pages/ErrorPage'
 import { RouteComponentProps } from 'react-router-dom'
 import ZoneRoot from './ZoneRoot'
 import { ZoneQuery } from '../../__generated__/ZoneQuery.graphql'
@@ -34,7 +34,7 @@ const Zone: React.FC<RouteComponentProps<{ code: string }>> = ({ match, history 
       variables={{ code: code }}
       render={({ error, props }) => {
         if (error) {
-          return <ErrorBox error={error} />
+          return <ErrorPage error={error} />
         } else if (props) {
           return <ZoneRoot zoneStats={props.zoneStats} onSearch={onSearch} gotoCompare={gotoCompare} />
         }

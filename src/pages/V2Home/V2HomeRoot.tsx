@@ -1,56 +1,99 @@
 import React, { useMemo } from 'react'
+import { graphql } from 'babel-plugin-relay/macro'
+import { makeStyles, createStyles } from '@material-ui/styles'
+import { createFragmentContainer } from 'react-relay'
+import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
 import { Grid, Row, Col } from 'react-flexbox-grid'
+import { Breadcrumbs, Button } from '@material-ui/core'
 import Searchbar from '../../components/Searchbar'
-import { DateRangeT, ModeT } from '../../types'
-
-interface ZoneCache {
-  code: string
-}
+import ErrorPanel from './ErrorPanel'
+import { IoIosAdd } from 'react-icons/io'
+import { Link } from 'react-router-dom'
+import { slateGrey } from '../../utils/ColorFactory'
+import { DateRangeT, ModeT, UrlT } from '../../types'
 
 interface Props {
-  data: readonly ZoneCache[] | null
-  compareZones: (codes: string[]) => void
-  viewZone: (code: string) => void
+  data: V2HomeRoot_data | null
+  go: (target: UrlT) => void
   mode: ModeT
   dateRange: DateRangeT
   logScale: boolean
 }
 
-const V2HomeRoot: React.FC<Props> = ({ data, mode, compareZones, dateRange, logScale }) => {
-  if (!data) {
-    return (
-      <>
-        <Row>
-          <Col xs={12} xl={8} xlOffset={2}>
-            <Searchbar onSearch={(code) => {}} />
-          </Col>
-        </Row>
-        <Row>
-          <Col xs={12} xl={8} xlOffset={2} style={{ marginTop: '50px' }}>
-            <h5>One or more zones is incorrect!</h5>
-            <p>
-              <small>Try another compare...</small>
-            </p>
-          </Col>
-        </Row>
-      </>
-    )
+const useStyles = makeStyles(() =>
+  createStyles({
+    newCasesContainer: {
+      display: 'flex',
+      justifyContent: 'center',
+    },
+    parentZoneLinkText: {
+      color: slateGrey[500],
+      textDecoration: 'none',
+      fontWeight: 500,
+    },
+    zoneLinkText: {
+      color: slateGrey[700],
+      textDecoration: 'none',
+      fontWeight: 700,
+    },
+  })
+)
+
+const V2HomeRoot: React.FC<Props> = ({ data, mode, go, dateRange, logScale }) => {
+  const classes = useStyles()
+  const onSearch = (code: string) => {
+    go({ codes: mode === 'compare' ? [code] : [code] })
   }
+  if (!data) return <ErrorPanel onSearch={onSearch} />
 
   return (
     <Grid>
       <Row>
         <Col xs={12}>
-          <Searchbar onSearch={(code) => {}} />
+          <Searchbar onSearch={onSearch} />
+        </Col>
+      </Row>
+      <Row style={{ minHeight: '40px' }}>
+        <Col>
+          <Breadcrumbs style={{ marginLeft: '10px' }}>
+            {true && (
+              <Link className={classes.parentZoneLinkText} color='inherit' to={`/zones/parent`}>
+                PARENT
+              </Link>
+            )}
+            <p className={classes.zoneLinkText}>NAME</p>
+          </Breadcrumbs>
+        </Col>
+        <Col xs>
+          <Button
+            style={{ marginLeft: '25px' }}
+            size='small'
+            disableElevation
+            variant='contained'
+            color='secondary'
+            startIcon={<IoIosAdd />}
+            onClick={() => {}}
+          >
+            Compare
+          </Button>
         </Col>
       </Row>
       <Row style={{ minHeight: '40px' }}>
         <Col xs={12}>
-          <pre>{JSON.stringify(data)}</pre>
+          <pre>{JSON.stringify({ mode, data })}</pre>
         </Col>
       </Row>
     </Grid>
   )
 }
 
-export default V2HomeRoot
+export default createFragmentContainer(V2HomeRoot, {
+  data: graphql`
+    fragment V2HomeRoot_data on V2Stats {
+      zones {
+        code
+        name
+      }
+    }
+  `,
+})

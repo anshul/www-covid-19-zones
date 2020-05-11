@@ -56,7 +56,7 @@ const ZoneRoot: React.FC<Props> = ({ zoneStats, onSearch, gotoCompare }) => {
 
   if (!zoneStats) {
     return (
-      <>
+      <Grid>
         <Row>
           <Col xs={12} xl={8} xlOffset={2}>
             <Searchbar onSearch={onSearch} />
@@ -70,7 +70,7 @@ const ZoneRoot: React.FC<Props> = ({ zoneStats, onSearch, gotoCompare }) => {
             </p>
           </Col>
         </Row>
-      </>
+      </Grid>
     )
   }
 
