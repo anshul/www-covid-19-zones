@@ -1,5 +1,7 @@
 import React from 'react'
 import { graphql } from 'babel-plugin-relay/macro'
+import { SWRConfig } from 'swr'
+import { serverUrl } from '../../api/server'
 
 import { QueryRenderer } from 'react-relay'
 import environment from '../../relayEnvironment'
@@ -48,7 +50,15 @@ const V2Home: React.FC<RouteComponentProps<{ mode: string; codes: string }>> = (
         if (error) {
           return <ErrorPage error={error} />
         } else {
-          return <V2HomeRoot data={props ? props.v2Stats : null} mode={mode} go={go} dateRange={dateRange as DateRangeT} logScale={logScale} />
+          return (
+            <SWRConfig
+              value={{
+                fetcher: (url, ...args) => fetch(`${serverUrl}${url}`, ...args).then((res) => res.json()),
+              }}
+            >
+              <V2HomeRoot data={props ? props.v2Stats : null} mode={mode} go={go} dateRange={dateRange as DateRangeT} logScale={logScale} />
+            </SWRConfig>
+          )
         }
       }}
     />
