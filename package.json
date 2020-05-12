@@ -20,6 +20,7 @@
     "@types/react-router-dom": "^5.1.4",
     "@types/recharts": "^1.8.10",
     "@types/relay-runtime": "^8.0.6",
+    "@types/topojson": "^3.2.2",
     "axios": "^0.19.2",
     "chart.js": "^2.9.3",
     "clsx": "^1.1.0",
@@ -36,6 +37,7 @@
     "recharts": "^1.8.5",
     "relay-runtime": "^9.0.0",
     "swr": "^0.2.0",
+    "topojson": "^3.0.2",
     "typescript": "~3.7.2"
   },
   "devDependencies": {
