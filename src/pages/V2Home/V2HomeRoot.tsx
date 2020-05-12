@@ -4,80 +4,46 @@ import { makeStyles, createStyles } from '@material-ui/styles'
 import { createFragmentContainer } from 'react-relay'
 import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
 import { Grid, Row, Col } from 'react-flexbox-grid'
-import { Breadcrumbs, Button } from '@material-ui/core'
-import Searchbar from '../../components/Searchbar'
+import { DateRangeT, UrlT } from '../../types'
+
 import ErrorPanel from './ErrorPanel'
-import { IoIosAdd } from 'react-icons/io'
-import { Link } from 'react-router-dom'
-import { slateGrey } from '../../utils/ColorFactory'
-import { DateRangeT, ModeT, UrlT } from '../../types'
+import ZoneBar from './ZoneBar'
+import CompareBar from './CompareBar'
 
 interface Props {
   data: V2HomeRoot_data | null
   go: (target: UrlT) => void
-  mode: ModeT
+  mode: string
   dateRange: DateRangeT
   logScale: boolean
 }
 
-const useStyles = makeStyles(() =>
-  createStyles({
-    newCasesContainer: {
-      display: 'flex',
-      justifyContent: 'center',
-    },
-    parentZoneLinkText: {
-      color: slateGrey[500],
-      textDecoration: 'none',
-      fontWeight: 500,
-    },
-    zoneLinkText: {
-      color: slateGrey[700],
-      textDecoration: 'none',
-      fontWeight: 700,
-    },
-  })
-)
+const MODES = ['compare', 'zones']
+
+const useStyles = makeStyles(() => createStyles({}))
 
 const V2HomeRoot: React.FC<Props> = ({ data, mode, go, dateRange, logScale }) => {
   const classes = useStyles()
-  const onSearch = (code: string) => {
-    go({ codes: mode === 'compare' ? [code] : [code] })
+  const onSearch = (code: string) => go({ codes: mode === 'compare' ? [code] : [code] })
+
+  const firstZone = data && data.zones.length >= 1 ? data.zones[0] : null
+  if (!data) {
+    console.log('loading...')
+    return (
+      <Grid>
+        <Row>
+          <Col>Loading...</Col>
+        </Row>
+      </Grid>
+    )
   }
-  if (!data) return <ErrorPanel onSearch={onSearch} />
+
+  if (!MODES.find((m) => m === mode)) return <ErrorPanel onSearch={onSearch} message='Page not found!' />
+  if (!firstZone) return <ErrorPanel onSearch={onSearch} message='Invalid zone!' />
 
   return (
     <Grid>
-      <Row>
-        <Col xs={12}>
-          <Searchbar onSearch={onSearch} />
-        </Col>
-      </Row>
-      <Row style={{ minHeight: '40px' }}>
-        <Col>
-          <Breadcrumbs style={{ marginLeft: '10px' }}>
-            {true && (
-              <Link className={classes.parentZoneLinkText} color='inherit' to={`/zones/parent`}>
-                PARENT
-              </Link>
-            )}
-            <p className={classes.zoneLinkText}>NAME</p>
-          </Breadcrumbs>
-        </Col>
-        <Col xs>
-          <Button
-            style={{ marginLeft: '25px' }}
-            size='small'
-            disableElevation
-            variant='contained'
-            color='secondary'
-            startIcon={<IoIosAdd />}
-            onClick={() => {}}
-          >
-            Compare
-          </Button>
-        </Col>
-      </Row>
+      {mode === 'compare' ? <CompareBar zones={data.zones} go={go} /> : <ZoneBar zone={firstZone} go={go} />}
       <Row style={{ minHeight: '40px' }}>
         <Col xs={12}>
           <pre>{JSON.stringify({ mode, data })}</pre>
@@ -93,6 +59,10 @@ export default createFragmentContainer(V2HomeRoot, {
       zones {
         code
         name
+        parent {
+          code
+          name
+        }
       }
     }
   `,

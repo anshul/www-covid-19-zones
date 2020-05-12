@@ -7,6 +7,10 @@ export type V2HomeRoot_data = {
     readonly zones: ReadonlyArray<{
         readonly code: string;
         readonly name: string;
+        readonly parent: {
+            readonly code: string;
+            readonly name: string;
+        } | null;
     }>;
     readonly " $refType": "V2HomeRoot_data";
 };
@@ -18,7 +22,22 @@ export type V2HomeRoot_data$key = {
 
 
 
-const node: ReaderFragment = {
+const node: ReaderFragment = (function(){
+var v0 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "code",
+  "args": null,
+  "storageKey": null
+},
+v1 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "name",
+  "args": null,
+  "storageKey": null
+};
+return {
   "kind": "Fragment",
   "name": "V2HomeRoot_data",
   "type": "V2Stats",
@@ -34,23 +53,25 @@ const node: ReaderFragment = {
       "concreteType": "V2Zone",
       "plural": true,
       "selections": [
+        (v0/*: any*/),
+        (v1/*: any*/),
         {
-          "kind": "ScalarField",
+          "kind": "LinkedField",
           "alias": null,
-          "name": "code",
+          "name": "parent",
+          "storageKey": null,
           "args": null,
-          "storageKey": null
-        },
-        {
-          "kind": "ScalarField",
-          "alias": null,
-          "name": "name",
-          "args": null,
-          "storageKey": null
+          "concreteType": "V2Zone",
+          "plural": false,
+          "selections": [
+            (v0/*: any*/),
+            (v1/*: any*/)
+          ]
         }
       ]
     }
   ]
 };
-(node as any).hash = '7e023c056504ca8234c1dc4488a803d5';
+})();
+(node as any).hash = '0e7cb7fce904cd0d83f1693070cdda76';
 export default node;

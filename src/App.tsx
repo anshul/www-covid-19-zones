@@ -1,7 +1,6 @@
 import React from 'react'
 import './stylesheets/app.scss'
 import Navbar from './components/Navbar'
-import { Grid, Row } from 'react-flexbox-grid'
 import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom'
 import { pages } from './pages/pages'
 import { ThemeProvider, createMuiTheme } from '@material-ui/core'

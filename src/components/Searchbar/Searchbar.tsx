@@ -93,6 +93,8 @@ const Searchbar: React.FC<Props> = ({ onSearch }) => {
     setValue(e.target.value)
   }
 
+  const searchQuery: string | null = value && value.length >= 2 ? value : null
+
   return (
     <>
       <div className={classes.inputRoot}>
@@ -111,24 +113,28 @@ const Searchbar: React.FC<Props> = ({ onSearch }) => {
 
       <QueryRenderer<SearchbarQuery>
         environment={environment}
-        query={graphql`
-          query SearchbarQuery($searchQuery: String) {
-            zonesList(searchQuery: $searchQuery) {
-              slug
-              name
-              code
-              parentZone {
-                name
-              }
-            }
-          }
-        `}
-        variables={{ searchQuery: value }}
+        query={
+          searchQuery
+            ? graphql`
+                query SearchbarQuery($searchQuery: String) {
+                  zonesList(searchQuery: $searchQuery) {
+                    slug
+                    name
+                    code
+                    parentZone {
+                      name
+                    }
+                  }
+                }
+              `
+            : undefined
+        }
+        variables={{ searchQuery }}
         render={({ error, props }) => {
           if (error) {
             return <ErrorBox error={error} />
           } else if (props) {
-            const items = props.zonesList
+            const items = props.zonesList || []
             return (
               <div className={classes.menu}>
                 {open &&

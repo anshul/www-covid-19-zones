@@ -24,13 +24,8 @@ export const pages: Page[] = [
     displayName: 'Compare',
   },
   {
-    path: '/v2/zones/:codes*',
+    path: '/v2/:mode/:codes*',
     view: V2Home,
-    displayName: 'Zone',
-  },
-  {
-    path: '/v2/compare/:codes*',
-    view: V2Home,
-    displayName: 'Compare',
+    displayName: 'Home',
   },
 ]

@@ -4,10 +4,11 @@ import Searchbar from '../../components/Searchbar'
 
 interface Props {
   onSearch: (code: string) => void
+  message?: string
 }
 
-const ErrorPanel: React.FC<Props> = ({ onSearch }) => {
-  console.log('error panel (no data?)')
+const ErrorPanel: React.FC<Props> = ({ onSearch, message }) => {
+  console.log('ErrorPanel', message)
   return (
     <Grid>
       <Row>
@@ -17,7 +18,7 @@ const ErrorPanel: React.FC<Props> = ({ onSearch }) => {
       </Row>
       <Row>
         <Col xs={12} xl={8} xlOffset={2} style={{ marginTop: '50px' }}>
-          <h5>Something is not right...</h5>
+          <h5>{message || 'Something is not right...'}</h5>
           <p>
             <small>
               <a href='/'>Try again!</a>

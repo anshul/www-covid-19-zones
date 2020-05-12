@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-/* @relayHash 8abdbc9fb6d170f55c3fafc3de5fa82e */
+/* @relayHash 622ab11f126007776000871eb21f80e0 */
 
 import { ConcreteRequest } from "relay-runtime";
 import { FragmentRefs } from "relay-runtime";
@@ -32,6 +32,10 @@ fragment V2HomeRoot_data on V2Stats {
   zones {
     code
     name
+    parent {
+      code
+      name
+    }
   }
 }
 */
@@ -51,7 +55,21 @@ v1 = [
     "name": "codes",
     "variableName": "codes"
   }
-];
+],
+v2 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "code",
+  "args": null,
+  "storageKey": null
+},
+v3 = {
+  "kind": "ScalarField",
+  "alias": null,
+  "name": "name",
+  "args": null,
+  "storageKey": null
+};
 return {
   "kind": "Request",
   "fragment": {
@@ -102,19 +120,20 @@ return {
             "concreteType": "V2Zone",
             "plural": true,
             "selections": [
+              (v2/*: any*/),
+              (v3/*: any*/),
               {
-                "kind": "ScalarField",
+                "kind": "LinkedField",
                 "alias": null,
-                "name": "code",
+                "name": "parent",
+                "storageKey": null,
                 "args": null,
-                "storageKey": null
-              },
-              {
-                "kind": "ScalarField",
-                "alias": null,
-                "name": "name",
-                "args": null,
-                "storageKey": null
+                "concreteType": "V2Zone",
+                "plural": false,
+                "selections": [
+                  (v2/*: any*/),
+                  (v3/*: any*/)
+                ]
               }
             ]
           }
@@ -126,7 +145,7 @@ return {
     "operationKind": "query",
     "name": "V2HomeQuery",
     "id": null,
-    "text": "query V2HomeQuery(\n  $codes: [String!]!\n) {\n  v2Stats(codes: $codes) {\n    ...V2HomeRoot_data\n  }\n}\n\nfragment V2HomeRoot_data on V2Stats {\n  zones {\n    code\n    name\n  }\n}\n",
+    "text": "query V2HomeQuery(\n  $codes: [String!]!\n) {\n  v2Stats(codes: $codes) {\n    ...V2HomeRoot_data\n  }\n}\n\nfragment V2HomeRoot_data on V2Stats {\n  zones {\n    code\n    name\n    parent {\n      code\n      name\n    }\n  }\n}\n",
     "metadata": {}
   }
 };
