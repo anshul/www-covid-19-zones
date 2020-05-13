@@ -64,7 +64,7 @@
     "source-map-explorer": "^2.4.2"
   },
   "scripts": {
-    "start": "REACT_APP_API_URL=http://localhost:6400 PORT=7200 react-scripts start",
+    "start": "REACT_APP_API_PORT=6400 PORT=7200 react-scripts start",
     "build": "REACT_APP_API_URL=https://api.covid19zones.com react-scripts build",
     "analyze": "REACT_APP_API_URL=https://api.covid19zones.com react-scripts build && source-map-explorer 'build/static/js/*.js'",
     "test": "react-scripts test",

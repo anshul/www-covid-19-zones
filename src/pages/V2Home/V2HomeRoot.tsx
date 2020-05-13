@@ -40,12 +40,12 @@ const V2HomeRoot: React.FC<Props> = ({ data, mode, go, dateRange, logScale }) =>
     <Grid>
       {mode === 'compare' ? <CompareBar zones={data ? data.zones : []} go={go} /> : <ZoneBar zone={firstZone || emptyZone} go={go} />}
       <Row style={{ minHeight: '40px' }}>
-        <Col xs={12}>
+        <Col xs={12} md={6}>
           <Choropleth data={response.data} error={response.error} />
         </Col>
 
-        <Col xs={12}>
-          <pre>{JSON.stringify({ mode, data })}</pre>
+        <Col xs={12} md={6}>
+          <pre style={{ whiteSpace: 'pre-wrap' }}>{JSON.stringify({ mode, data })}</pre>
         </Col>
       </Row>
     </Grid>

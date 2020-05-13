@@ -2,7 +2,7 @@ import axios, { AxiosError } from 'axios'
 import { ApiRequest, ApiError } from './ApiTypes'
 
 const { CancelToken } = axios
-export const serverUrl: string = process.env.REACT_APP_API_URL || 'http://nobaseurl.example.com/'
+export const serverUrl: string = process.env.REACT_APP_API_URL || `http://${window.location.hostname}:${process.env.REACT_APP_API_PORT || 3000}`
 
 function getString(obj: { [key: string]: string | null | number } | null, key: string): string | null {
   if (obj && key in obj) {
