@@ -10,6 +10,7 @@ import ErrorPanel from './ErrorPanel'
 import ZoneBar from './ZoneBar'
 import CompareBar from './CompareBar'
 import Choropleth, { ChoroplethResponse } from './Choropleth'
+import Chart from './Chart'
 
 interface Props {
   data: V2HomeRoot_data | null
@@ -41,11 +42,11 @@ const V2HomeRoot: React.FC<Props> = ({ data, mode, go, dateRange, logScale }) =>
       {mode === 'compare' ? <CompareBar zones={data ? data.zones : []} go={go} /> : <ZoneBar zone={firstZone || emptyZone} go={go} />}
       <Row style={{ minHeight: '40px' }}>
         <Col xs={12} md={6}>
-          <Choropleth data={response.data} error={response.error} />
+          <Chart mode={mode} data={data} go={go} dateRange={dateRange} logScale={logScale} />
         </Col>
 
         <Col xs={12} md={6}>
-          <pre style={{ whiteSpace: 'pre-wrap' }}>{JSON.stringify({ mode, data })}</pre>
+          {/*<Choropleth data={response.data} error={response.error} /> */}
         </Col>
       </Row>
     </Grid>
