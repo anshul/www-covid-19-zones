@@ -42,11 +42,11 @@ const V2HomeRoot: React.FC<Props> = ({ data, mode, go, dateRange, logScale }) =>
       {mode === 'compare' ? <CompareBar zones={data ? data.zones : []} go={go} /> : <ZoneBar zone={firstZone || emptyZone} go={go} />}
       <Row style={{ minHeight: '40px' }}>
         <Col xs={12} md={6}>
-          <Chart mode={mode} data={data} go={go} dateRange={dateRange} logScale={logScale} />
+          {/*<Chart mode={mode} data={data} go={go} dateRange={dateRange} logScale={logScale} /> */}
         </Col>
 
-        <Col xs={12} md={6}>
-          {/*<Choropleth data={response.data} error={response.error} /> */}
+        <Col xs={12} md={12}>
+          <Choropleth data={response.data} error={response.error} />
         </Col>
       </Row>
     </Grid>
@@ -59,6 +59,12 @@ export default createFragmentContainer(V2HomeRoot, {
       zones {
         code
         name
+        chart {
+          dt
+          newInf
+          newInfSma5
+          totInf
+        }
         parent {
           code
           name
