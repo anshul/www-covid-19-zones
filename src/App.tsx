@@ -1,11 +1,11 @@
+import { createMuiTheme, ThemeProvider } from '@material-ui/core'
 import React from 'react'
-import './stylesheets/app.scss'
+import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom'
 import Navbar from './components/Navbar'
-import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom'
-import { pages } from './pages/pages'
-import { ThemeProvider, createMuiTheme } from '@material-ui/core'
-import { slateBlue, mountainMeadow } from './utils/ColorFactory'
 import GenericNotFound from './pages/GenericNotFound'
+import { pages } from './pages/pages'
+import './stylesheets/app.scss'
+import { mountainMeadow, slateBlue } from './utils/ColorFactory'
 
 function App() {
   return (
@@ -25,7 +25,7 @@ function App() {
           },
         },
         typography: {
-          fontFamily: ['Poppins', 'Helvetica', 'Arial', 'sans-serif'].join(','),
+          fontFamily: ['Poppins', 'Lato', 'Helvetica', 'Arial', 'sans-serif'].join(','),
         },
       })}
     >
