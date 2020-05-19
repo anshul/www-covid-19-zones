@@ -7,6 +7,7 @@ export type V2HomeRoot_data = {
     readonly zones: ReadonlyArray<{
         readonly code: string;
         readonly name: string;
+        readonly unitCodes: ReadonlyArray<string>;
         readonly chart: ReadonlyArray<{
             readonly dt: string;
             readonly newInf: number;
@@ -17,6 +18,7 @@ export type V2HomeRoot_data = {
             readonly code: string;
             readonly name: string;
         } | null;
+        readonly " $fragmentRefs": FragmentRefs<"ZoneCard_zone">;
     }>;
     readonly " $refType": "V2HomeRoot_data";
 };
@@ -61,6 +63,13 @@ return {
       "selections": [
         (v0/*: any*/),
         (v1/*: any*/),
+        {
+          "kind": "ScalarField",
+          "alias": null,
+          "name": "unitCodes",
+          "args": null,
+          "storageKey": null
+        },
         {
           "kind": "LinkedField",
           "alias": null,
@@ -112,11 +121,16 @@ return {
             (v0/*: any*/),
             (v1/*: any*/)
           ]
+        },
+        {
+          "kind": "FragmentSpread",
+          "name": "ZoneCard_zone",
+          "args": null
         }
       ]
     }
   ]
 };
 })();
-(node as any).hash = '09c0b5bf0b84d36572f931b1d3e009ed';
+(node as any).hash = 'b14a2ea54f3a9d6996f1252c21b65013';
 export default node;

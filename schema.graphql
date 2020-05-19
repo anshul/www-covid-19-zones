@@ -110,7 +110,6 @@ type V2Stats {
 }
 
 type V2Zone {
-  areaSqKm: Int!
   attributionMd: String
   chart: [TsPoint!]!
   children: [V2Zone!]
@@ -120,7 +119,10 @@ type V2Zone {
   cumulativeRecoveries: Int!
   cumulativeTests: Int!
   currentActives: Int!
-  formattedAsOf: String!
+  fArea: String!
+  fAsOf: String!
+  fPopulation: String!
+  fPopulationYear: String!
   name: String!
   parent: V2Zone
   perMillionActives: Float!
@@ -128,9 +130,8 @@ type V2Zone {
   perMillionInfections: Float!
   perMillionRecoveries: Float!
   perMillionTests: Float!
-  population: Int!
-  populationYear: Int!
   related: [V2Zone!]!
+  unitCodes: [String!]!
 }
 
 type Zone {

@@ -110,6 +110,14 @@
           "printWidth": 144
         }
       ],
+      "@typescript-eslint/no-empty-function": [
+        "error",
+        {
+          "allow": [
+            "arrowFunctions"
+          ]
+        }
+      ],
       "@typescript-eslint/triple-slash-reference": [
         "error",
         {

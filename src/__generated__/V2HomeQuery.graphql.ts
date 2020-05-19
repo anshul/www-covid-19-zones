@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-/* @relayHash 40b6ba3f9383473c06c23cb709555a8a */
+/* @relayHash b90dcec0fa133438f77233da65dccae1 */
 
 import { ConcreteRequest } from "relay-runtime";
 import { FragmentRefs } from "relay-runtime";
@@ -32,6 +32,8 @@ fragment V2HomeRoot_data on V2Stats {
   zones {
     code
     name
+    ...ZoneCard_zone
+    unitCodes
     chart {
       dt
       newInf
@@ -43,6 +45,15 @@ fragment V2HomeRoot_data on V2Stats {
       name
     }
   }
+}
+
+fragment ZoneCard_zone on V2Zone {
+  code
+  name
+  fPopulation
+  fPopulationYear
+  perMillionInfections
+  cumulativeInfections
 }
 */
 
@@ -129,6 +140,41 @@ return {
               (v2/*: any*/),
               (v3/*: any*/),
               {
+                "kind": "ScalarField",
+                "alias": null,
+                "name": "fPopulation",
+                "args": null,
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "name": "fPopulationYear",
+                "args": null,
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "name": "perMillionInfections",
+                "args": null,
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "name": "cumulativeInfections",
+                "args": null,
+                "storageKey": null
+              },
+              {
+                "kind": "ScalarField",
+                "alias": null,
+                "name": "unitCodes",
+                "args": null,
+                "storageKey": null
+              },
+              {
                 "kind": "LinkedField",
                 "alias": null,
                 "name": "chart",
@@ -190,7 +236,7 @@ return {
     "operationKind": "query",
     "name": "V2HomeQuery",
     "id": null,
-    "text": "query V2HomeQuery(\n  $codes: [String!]!\n) {\n  v2Stats(codes: $codes) {\n    ...V2HomeRoot_data\n  }\n}\n\nfragment V2HomeRoot_data on V2Stats {\n  zones {\n    code\n    name\n    chart {\n      dt\n      newInf\n      newInfSma5\n      totInf\n    }\n    parent {\n      code\n      name\n    }\n  }\n}\n",
+    "text": "query V2HomeQuery(\n  $codes: [String!]!\n) {\n  v2Stats(codes: $codes) {\n    ...V2HomeRoot_data\n  }\n}\n\nfragment V2HomeRoot_data on V2Stats {\n  zones {\n    code\n    name\n    ...ZoneCard_zone\n    unitCodes\n    chart {\n      dt\n      newInf\n      newInfSma5\n      totInf\n    }\n    parent {\n      code\n      name\n    }\n  }\n}\n\nfragment ZoneCard_zone on V2Zone {\n  code\n  name\n  fPopulation\n  fPopulationYear\n  perMillionInfections\n  cumulativeInfections\n}\n",
     "metadata": {}
   }
 };

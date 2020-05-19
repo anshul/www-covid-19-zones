@@ -1,28 +1,50 @@
 // @ts-nocheck
+import React, { useEffect, useMemo, memo } from 'react'
 import { createStyles, makeStyles } from '@material-ui/styles'
 import * as d3 from 'd3'
-import React, { useEffect, useRef, useState } from 'react'
 import * as topojson from 'topojson'
+import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
+import { MapDataT } from '../../types'
+import useResponsiveView from '../../hooks/useResponsiveView'
+import colorLegend from './colorLegend'
+import ZoneCard from './ZoneCard'
+import { Row, Col } from 'react-flexbox-grid'
 
-export interface ChoroplethResponse {
-  data?: any
-  error?: string
+import './Choropleth.css'
+
+interface Props {
+  map: MapDataT | null
+  colorMap: {
+    [code: string]: string
+  }
+  data: V2HomeRoot_data | null
+  go: (target: UrlT) => void
+  mode: string
+  dateRange: DateRangeT
+  logScale: boolean
 }
-
-type Props = ChoroplethResponse
 
 const useStyles = makeStyles(() =>
   createStyles({
     mapRoot: {
-      border: '1px solid black',
+      height: 'calc(100vh - 300px)',
+      maxHeight: 'calc(100vh - 300px)',
+      minHeight: '400px',
+      minWidth: '400px',
     },
-    region: {
-      strokeWidth: 0.2,
-      stroke: 'black',
+    svgRoot: {
+      border: '1px solid #eee',
     },
-    regionSelected: {
-      strokeWidth: 1.5,
-      stroke: 'black',
+    colorLegend: {
+      fontSize: '55%',
+    },
+    legendShape: {
+      border: '2px solid #999',
+    },
+    pre: {
+      whiteSpace: 'pre-wrap',
+      maxWidth: '300px',
+      overflow: 'scroll',
     },
   })
 )
@@ -34,83 +56,63 @@ declare global {
 
 window.choropleth = window.choropleth || { topojson, d3 }
 
-const colors = ['#FFFFFF', '#FFFBDC', '#FFEDB8', '#FFDD94', '#FBBF69', '#F5A057', '#ED6942', '#D73534', '#BF1B3E', '#952742', '#641A2C']
+const colors = {
+  palette: ['#fffcf9', '#fff5eb', '#fee6ce', '#fdd0a2', '#fdae6b', '#fd8d3c', '#f16913', '#d94801', '#a63603', '#7f2704', '#641A2C'],
+}
+const thresholds = [3, 5, 10, 20, 40, 60, 80, 100, 250, 1000]
 
-const Choropleth: React.FC<Props> = ({ data, error }) => {
+const Choropleth: React.FC<Props> = ({ map, data, go, mode, dateRange, logScale, colorMap }) => {
   const classes = useStyles()
-  const mapRef = useRef(null)
-  const [districtName, setDistrictName] = useState('India')
-  const [ipm, setIpm] = useState(data && data.max_ipm)
+  const view = useResponsiveView({ marginTop: 10 })
+  const color = useMemo(() => d3.scaleThreshold().domain(thresholds).range(colors.palette), [])
+  const colorHex = (count: number): string => color(count)
 
   useEffect(() => {
-    const maybeDiv: unknown = mapRef.current
-    if (!data || !maybeDiv) return
+    console.log('render choropleth', { map, data })
+    const maybeDiv: unknown = view.ref.current
+    if (!map || !maybeDiv) return
     const el: HTMLElement = maybeDiv as HTMLElement
-    const mapData = data['map']
+    const svg = d3.select(el).select('svg')
+    console.log('d3 update', svg)
 
-    const svg = d3.select(el)
-    const districts = svg.select('.districts')
-    const districtsTopo = topojson.feature(mapData, mapData.objects.districts) || { features: [] }
-
-    const states = svg.select('.states')
-    const statesTopo = topojson.feature(mapData, mapData.objects.states) || { features: [] }
-
-    const projection = d3.geoMercator()
-    projection.fitHeight(500, statesTopo)
-    const box = d3.geoPath(projection).bounds(statesTopo)
-    svg.attr('viewBox', `0 0 ${box[1][0]} ${box[1][1]}`)
-
-    const path = d3.geoPath(projection)
-    const color = d3.scaleQuantize().domain([0, data.max_ipm]).range(colors)
-
-    districts
-      .selectAll('path')
-      .data(districtsTopo.features)
-      .enter()
-      .append('path')
-      .attr('d', path)
-      .attr('id', (d) => `${d.properties.slug}`)
-      .style('fill', (d, i) => color(d.properties.ipm * i))
-      .on('mouseenter', (d) => {
-        const region = d.properties.district
-        setDistrictName(region)
-        setIpm(d.properties.ipm)
-        d3.select(`#${d.properties.slug}`).classed(classes.regionSelected, true).raise()
+    const gLegend = svg.select('.colorLegend')
+    gLegend
+      .call(colorLegend, {
+        color: color,
+        title: 'Infections per million population',
+        width: 320,
       })
-      .on('mouseleave', (d) => {
-        const region = d.properties.district
-        setDistrictName(region)
-        setIpm(d.properties.ipm)
-        d3.select(`#${d.properties.slug}`).classed(classes.regionSelected, false).lower()
-      })
-
-    states
-      .selectAll('path')
-      .data(statesTopo.features)
-      .enter()
-      .append('path')
-      .attr('d', path)
-      .classed(classes.region, true)
-      .style('fill', 'transparent')
-
-    console.log('d3 update', el, data, error)
+      .attr('transform', `translate(${view.innerWidth - 340},20)`)
 
     return () => {
       console.log('d3 cleanup')
-      // d3.select(el).select('svg').remove()
     }
-  }, [classes.region, classes.regionSelected, classes.state, classes.stateSelected, data, error])
+  }, [color, data, map, view.innerWidth, view.ref])
 
   return (
-    <div className={classes.mapRoot}>
-      <p>{districtName}</p>
-      <p>{ipm}</p>
-      <svg ref={mapRef} preserveAspectRatio='xMidYMid meet' style={{ maxHeight: '500px' }}>
-        <g className='states' />
-        <g className='districts' />
-      </svg>
-    </div>
+    <>
+      <Row start='xs'>
+        {data &&
+          data.zones.map((zone) => (
+            <Col className='fade' xs={6} sm={4} md={3} lg={2} key={zone.code}>
+              <ZoneCard lineColor={colorMap[zone.code]} ipmColor={colorHex} zone={zone} />
+            </Col>
+          ))}
+      </Row>
+
+      <div ref={view.ref} className={classes.mapRoot}>
+        <svg className={classes.svgRoot} preserveAspectRatio='xMidYMid meet' width={view.width} height={view.height}>
+          <g className='colorLegend' />
+          <g className='states' />
+          <g className='districts' />
+        </svg>
+        <pre className={classes.pre}>
+          {view.width} x {view.height}
+          {JSON.stringify(data, null, null)}
+        </pre>
+      </div>
+    </>
   )
 }
 
-export default Choropleth
+export default memo(Choropleth)

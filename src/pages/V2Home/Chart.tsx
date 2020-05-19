@@ -4,7 +4,7 @@ import { createStyles, makeStyles } from '@material-ui/styles'
 import * as d3 from 'd3'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import Button from '../../components/Button'
-import { useChartDimensions } from '../../hooks/useChartDimensions'
+import useResponsiveView from '../../hooks/useResponsiveView'
 import { DateRangeT, UrlT } from '../../types'
 import { filterData } from '../../utils/filterData'
 import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
@@ -54,15 +54,14 @@ const chartSettings = {
   marginLeft: 50,
   marginBottom: 30,
   marginTop: 10,
-  marginRight: -40,
+  marginRight: 0,
 }
 
 const Chart: React.FC<Props> = ({ mode, data, go, dateRange, logScale }) => {
   const [chartData, setChartData] = useState([])
   const [dtRange, setdtRange] = useState(dateRange)
   const classes = useStyles()
-  const chartRef = useRef(null)
-  const dms = useChartDimensions(chartRef, chartSettings)
+  const view = useResponsiveView(chartSettings)
 
   const transformData = useCallback(
     (data) => {
@@ -81,7 +80,7 @@ const Chart: React.FC<Props> = ({ mode, data, go, dateRange, logScale }) => {
 
   const generateChart = useCallback(
     (values) => {
-      const maybeDiv: unknown = chartRef.current
+      const maybeDiv: unknown = view.ref.current
       if (!values || !maybeDiv) return
       const el: HTMLElement = maybeDiv as HTMLElement
 
@@ -96,19 +95,19 @@ const Chart: React.FC<Props> = ({ mode, data, go, dateRange, logScale }) => {
       const allDates = [...new Set(values.map((d) => new Date(d.dt)))].map((d) => new Date(d))
       const dateMin = d3.min(allDates)
       const dateMax = new Date()
-      const numTicksX = dms.width < 480 ? 4 : 7
+      const numTicksX = view.width < 480 ? 4 : 7
 
-      const x = d3.scaleUtc().domain([dateMin, dateMax]).range([dms.marginLeft, dms.boundedWidth])
+      const x = d3.scaleUtc().domain([dateMin, dateMax]).range([view.marginLeft, view.innerWidth])
 
       const y = d3
         .scaleLinear()
         .domain([0, d3.max(values, (d) => +d.newInf)])
-        .range([dms.boundedHeight, dms.marginTop])
+        .range([view.innerHeight, view.marginTop])
         .nice()
 
       const xAxis = (g) =>
         g
-          .attr('transform', `translate(0,${dms.boundedHeight + 15})`)
+          .attr('transform', `translate(0,${view.innerHeight + 15})`)
           .call(d3.axisBottom(x).ticks(numTicksX).tickFormat(d3.utcFormat('%b %d')).tickSizeOuter(0))
           .call((g) => g.select('.domain').attr('stroke', '#A4A4A4'))
           .call((g) => g.selectAll('.tick').select('line').attr('stroke', '#A4A4A4'))
@@ -117,15 +116,15 @@ const Chart: React.FC<Props> = ({ mode, data, go, dateRange, logScale }) => {
 
       const yAxis = (g) =>
         g
-          .attr('transform', `translate(${dms.marginLeft - 10},0)`)
+          .attr('transform', `translate(${view.marginLeft - 10},0)`)
           .call(d3.axisLeft(y).ticks(null, 's'))
           .call((g) => g.select('.domain').remove())
           .call((g) => g.selectAll('.tick').select('line').remove())
-          .call((g) => g.append('text').attr('x', -dms.marginLeft).attr('y', 10).attr('text-anchor', 'start').text(data.y))
+          .call((g) => g.append('text').attr('x', -view.marginLeft).attr('y', 10).attr('text-anchor', 'start').text(data.y))
 
       yAxisG.call(yAxis)
 
-      const barWidth = dms.width < 480 ? 2 : 4
+      const barWidth = view.width < 480 ? 2 : 4
 
       rect
         .enter()
@@ -136,7 +135,7 @@ const Chart: React.FC<Props> = ({ mode, data, go, dateRange, logScale }) => {
         .attr('width', barWidth)
         .attr('fill', (d) => (d.newInf > 500 ? '#F07F80' : '#6772e5'))
     },
-    [data, chartRef, dms]
+    [data, view]
   )
 
   useEffect(() => {
@@ -156,8 +155,8 @@ const Chart: React.FC<Props> = ({ mode, data, go, dateRange, logScale }) => {
           1W
         </Button>
       </div>
-      <div ref={chartRef} className={classes.chartRoot} style={{ height: '300px' }}>
-        <svg preserveAspectRatio='xMidYMid meet' width={dms.width} height={dms.height}>
+      <div ref={view.ref} className={classes.chartRoot} style={{ height: '300px' }}>
+        <svg preserveAspectRatio='xMidYMid meet' width={view.width} height={view.height}>
           <g className='newInf' />
           <g className='xAxis' />
           <g className='yAxis' />

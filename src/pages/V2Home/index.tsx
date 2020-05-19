@@ -38,6 +38,7 @@ const V2Home: React.FC<RouteComponentProps<{ mode: string; codes: string }>> = (
   return (
     <QueryRenderer<V2HomeQuery>
       environment={environment}
+      fetchPolicy='store-and-network'
       query={graphql`
         query V2HomeQuery($codes: [String!]!) {
           v2Stats(codes: $codes) {
@@ -56,7 +57,14 @@ const V2Home: React.FC<RouteComponentProps<{ mode: string; codes: string }>> = (
                 fetcher: (url, ...args) => fetch(`${serverUrl}${url}`, ...args).then((res) => res.json()),
               }}
             >
-              <V2HomeRoot data={props ? props.v2Stats : null} mode={mode} go={go} dateRange={dateRange as DateRangeT} logScale={logScale} />
+              <V2HomeRoot
+                data={props ? props.v2Stats : null}
+                codes={codes}
+                mode={mode}
+                go={go}
+                dateRange={dateRange as DateRangeT}
+                logScale={logScale}
+              />
             </SWRConfig>
           )
         }
