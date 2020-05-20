@@ -101,9 +101,11 @@ const useStyles = makeStyles(() =>
   })
 )
 const colors = {
-  palette: ['#fffcf9', '#fff5eb', '#fee6ce', '#fdd0a2', '#fdae6b', '#fd8d3c', '#f16913', '#d94801', '#a63603', '#7f2704', '#641A2C'],
+  palette0: ['#fffcf9', '#fff5eb', '#fee6ce', '#fdd0a2', '#fdae6b', '#fd8d3c', '#f16913', '#d94801', '#a63603', '#7f2704', '#641A2C'],
+  palette: ['#fffcf9', '#fff5f0', '#fee0d2', '#fcbba1', '#fc9272', '#fb6a4a', '#ef3b2c', '#cb181d', '#a50f15', '#67000d', '#333333'],
 }
-const thresholds = [3, 5, 10, 20, 40, 60, 80, 100, 250, 1000].map((x) => x * 5)
+// const thresholds = [3, 5, 10, 20, 40, 60, 80, 100, 250, 1000]
+const thresholds = [5, 10, 20, 50, 100, 200, 500, 1000, 2500, 10000]
 
 const Choropleth: React.FC<Props> = ({ map, data, go, mode, codes, dateRange, logScale, colorMap }) => {
   const classes = useStyles()
