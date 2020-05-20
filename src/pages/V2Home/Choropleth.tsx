@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useEffect, useMemo, memo } from 'react'
+import React, { useEffect, useMemo, useState, memo } from 'react'
 import { createStyles, makeStyles } from '@material-ui/styles'
 import * as d3 from 'd3'
 import * as topojson from 'topojson'
@@ -23,6 +23,30 @@ interface Props {
   dateRange: DateRangeT
   logScale: boolean
 }
+interface TooltipRowT {
+  name: string
+  pop: string
+  yr: string
+  ipm: number
+  fpm: number
+  i: number
+  f: number
+}
+
+interface TooltipT {
+  debug?: {
+    [key: string]: string
+  }
+  rows: TooltipRowT[]
+}
+
+declare global {
+  interface Window {
+    choropleth: any
+  }
+}
+
+window.choropleth = window.choropleth || { topojson, d3 }
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -31,6 +55,7 @@ const useStyles = makeStyles(() =>
       maxHeight: 'calc(100vh - 300px)',
       minHeight: '400px',
       minWidth: '400px',
+      position: 'relative',
     },
     svgRoot: {
       border: '1px solid #eee',
@@ -47,7 +72,7 @@ const useStyles = makeStyles(() =>
       overflow: 'scroll',
     },
     districtPath: {
-      strokeWidth: 1,
+      strokeWidth: 0.2,
       stroke: '#eee',
       opacity: 0.1,
     },
@@ -66,16 +91,21 @@ const useStyles = makeStyles(() =>
     gutter: {
       fill: 'white',
     },
+    hoveredDistrict: {
+      cursor: 'pointer',
+      opacity: 1,
+      strokeWidth: 1,
+      stroke: '#666',
+    },
+    tooltip: {
+      position: 'absolute',
+      background: 'white',
+      zIndex: '15',
+      overflow: 'hidden',
+      pointerEvents: 'none',
+    },
   })
 )
-declare global {
-  interface Window {
-    choropleth: any
-  }
-}
-
-window.choropleth = window.choropleth || { topojson, d3 }
-
 const colors = {
   palette: ['#fffcf9', '#fff5eb', '#fee6ce', '#fdd0a2', '#fdae6b', '#fd8d3c', '#f16913', '#d94801', '#a63603', '#7f2704', '#641A2C'],
 }
@@ -87,6 +117,7 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, dateRange, logScale,
   const color = useMemo(() => d3.scaleThreshold().domain(thresholds).range(colors.palette), [])
   const colorHex = color
   const colorConst = (count: number): string => '#eeeeee'
+  const [tooltip, setTooltip] = useState<TooltipT>(null)
 
   useEffect(() => {
     console.log('render choropleth', { map, data })
@@ -96,6 +127,10 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, dateRange, logScale,
     const svg = d3.select(el).select('svg')
     console.log('d3 update', svg)
 
+    const onClick = function (d) {
+      const code = d.properties.z.replace(/\/$/, '')
+      go({ codes: mode === 'compare' ? [code, ...zones.map((z) => z.code)] : [code] })
+    }
     const gLegend = svg.select('.colorLegend')
     gLegend
       .call(colorLegend, {
@@ -129,7 +164,9 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, dateRange, logScale,
     const t = d3.transition().duration(1000)
     const districtTopo = topojson.feature(mapData, mapData.objects.districts) || { features: [] }
     const stateTopo = topojson.feature(mapData, mapData.objects.states) || { features: [] }
-    const selectedZoneCodes = data ? [...data.zones.flatMap((z) => z.unitCodes), ...data.zones.map((z) => z.code)] : ['in']
+    const selectedZoneCodes = (data ? [...data.zones.flatMap((z) => z.unitCodes), ...data.zones.map((z) => z.code)] : ['in']).map(
+      (code) => `${code}/`
+    )
     const selectedStateTopo = {
       ...stateTopo,
       features: stateTopo.features.filter(
@@ -149,6 +186,29 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, dateRange, logScale,
 
     const selectedDistrictCodes = selectedDistrictTopo.features.map((d) => d.properties.z)
     const selectedStateCodes = selectedStateTopo.features.map((d) => d.properties.z)
+
+    const divTooltip = d3.select(el).select('.tooltip')
+    const showTooltip = function (d) {
+      const props = [d.properties]
+      moveTooltip(d)
+      d3.select(this).classed(classes.hoveredDistrict, true).raise()
+      setTooltip({
+        rows: props,
+      })
+    }
+    const moveTooltip = (d) => {
+      const m = d3.mouse(el)
+      divTooltip
+        .style('left', `${m[0]}px`)
+        .style('top', `${m[1]}px`)
+        .style('transform', m[0] > view.width / 2 ? `translate(-100%)` : null)
+    }
+
+    const hideTooltip = function (d) {
+      d3.select(this).classed(classes.hoveredDistrict, false).lower()
+      setTooltip(null)
+    }
+
     const projection = d3.geoMercator()
     const path = d3.geoPath(projection)
     projection.fitExtent(
@@ -174,10 +234,14 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, dateRange, logScale,
             .append('path')
             .attr('d', path)
             .style('fill', (d, i) => color(0))
-            .call((enter) => enter.transition(t).style('fill', (d, i) => color(d.properties.ipm)))
+            .call((enter) => enter.style('fill', (d, i) => color(d.properties.ipm)))
             .classed(classes.districtPath, true)
             .classed(classes.activePath, (d) => selectedZoneCodes.includes(d.properties.z))
-            .classed(classes.selectedDistrictPath, (d) => selectedDistrictCodes.includes(d.properties.z)),
+            .classed(classes.selectedDistrictPath, (d) => selectedDistrictCodes.includes(d.properties.z))
+            .on('mouseover', showTooltip)
+            .on('mousemove', moveTooltip)
+            .on('mouseout', hideTooltip)
+            .on('click', onClick),
         (update) =>
           update
             .classed(classes.districtPath, true)
@@ -196,6 +260,7 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, dateRange, logScale,
           enter
             .append('path')
             .attr('d', path)
+            .raise()
             .classed(classes.statePath, true)
             .classed(classes.activePath, (d) => selectedZoneCodes.includes(d.properties.z)),
         (update) => update.classed(classes.statePath, true).classed(classes.activePath, (d) => selectedZoneCodes.includes(d.properties.z)),
@@ -208,11 +273,14 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, dateRange, logScale,
     classes.activePath,
     classes.districtPath,
     classes.gutter,
+    classes.hoveredDistrict,
     classes.selectedDistrictPath,
     classes.statePath,
     color,
     data,
+    go,
     map,
+    mode,
     view.height,
     view.innerHeight,
     view.innerWidth,
@@ -236,9 +304,31 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, dateRange, logScale,
       </Row>
 
       <div ref={view.ref} className={classes.mapRoot}>
+        <div className={`${classes.tooltip} tooltip`} style={{ display: tooltip ? 'block' : 'none' }}>
+          <table>
+            <tbody>
+              {tooltip &&
+                tooltip.rows.map((row) => (
+                  <React.Fragment key={row.name}>
+                    <tr>
+                      <td colSpan={4}>
+                        {row.name} Pop: {row.pop} ({row.yr})
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>{row.i}</td>
+                      <td>Infections</td>
+                      <td>{row.ipm}</td>
+                      <td>infections per million</td>
+                    </tr>
+                  </React.Fragment>
+                ))}
+            </tbody>
+          </table>
+        </div>
         <svg className={classes.svgRoot} preserveAspectRatio='xMidYMid meet' width={view.width} height={view.height}>
           <g className='districts' />
-          <g className='states' />
+          <g className='states' style={{ pointerEvents: 'none' }} />
           <g className='mask' />
           <g className='colorLegend' />
         </svg>
