@@ -1,14 +1,23 @@
-import React, { useState } from 'react'
+import {
+  Divider,
+  IconButton,
+  InputBase,
+  LinearProgress,
+  List,
+  ListItem,
+  ListItemSecondaryAction,
+  ListItemText,
+  Paper,
+  Theme,
+} from '@material-ui/core'
+import { Close, Search } from '@material-ui/icons'
+import { createStyles, makeStyles } from '@material-ui/styles'
 import { graphql } from 'babel-plugin-relay/macro'
-
-import { makeStyles, createStyles } from '@material-ui/styles'
-import { IoIosSearch, IoIosClose } from 'react-icons/io'
-import clsx from 'clsx'
-import ErrorBox from '../ErrorBox'
+import React, { useState } from 'react'
 import { QueryRenderer } from 'react-relay'
 import environment from '../../relayEnvironment'
 import { SearchbarQuery } from '../../__generated__/SearchbarQuery.graphql'
-import { LinearProgress, Theme } from '@material-ui/core'
+import ErrorBox from '../ErrorBox'
 
 interface Props {
   onSearch: (code: string, name: string) => void
@@ -16,6 +25,29 @@ interface Props {
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
+    root: {
+      position: 'relative',
+      backgroundColor: '#fff',
+    },
+    searchRoot: {
+      padding: '2px 4px',
+      display: 'flex',
+      alignItems: 'center',
+    },
+    searchWithResultRoot: {
+      padding: '2px 4px',
+      display: 'flex',
+      alignItems: 'center',
+      borderBottomLeftRadius: 0,
+      borderBottomRightRadius: 0,
+    },
+    input: {
+      marginLeft: theme.spacing(1),
+      flex: 1,
+    },
+    iconButton: {
+      padding: 10,
+    },
     inputRoot: {
       position: 'relative',
       display: 'flex',
@@ -23,54 +55,22 @@ const useStyles = makeStyles((theme: Theme) =>
       backgroundColor: '#fafafa',
       borderRadius: '24px',
       boxShadow: 'rgba(0, 0, 0, 0.1) 0px 2px 12px',
-    },
-    input: {
-      boxSizing: 'border-box',
-      textIndent: '36px',
-      width: '100%',
-      height: '100%',
-      outline: 'none',
-      border: 'none',
-      padding: '12px',
-      fontSize: '16px',
-      borderRadius: '24px',
       fontFamily: theme.typography.fontFamily,
     },
     searchIcon: {
-      width: '24px',
-      height: '24px',
+      padding: 10,
+      color: '#0000008a',
+    },
+    result: {
       position: 'absolute',
-      marginLeft: '16px',
+      backgroundColor: '#fff',
+      borderTopLeftRadius: 0,
+      borderTopRightRadius: 0,
+      width: '100%',
+      zIndex: 4,
     },
-    closeIcon: {
-      cursor: 'pointer',
-      position: 'absolute',
-      right: '0',
-      width: '24px',
-      height: '24px',
-      marginRight: '16px',
-    },
-    button: {
-      height: '48px',
-    },
-    menu: {
-      marginTop: '8px',
-      marginLeft: '8px',
-      marginRight: '8px',
-    },
-    menuItem: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      padding: '8px',
-      borderBottom: '1px solid #e4e4e4',
-      transitionDuration: '0.3s',
-      '&:hover': {
-        backgroundColor: '#e4e4e4',
-      },
-    },
-    menuItemHighlighted: {
-      backgroundColor: '#eee',
+    zone: {
+      fontWeight: 600,
     },
     parentZone: {
       color: '#646464',
@@ -89,80 +89,99 @@ const Searchbar: React.FC<Props> = ({ onSearch }) => {
   const classes = useStyles()
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setOpen(true)
     setValue(e.target.value)
+    setOpen(true)
+    if (e.target.value.length === 0) setOpen(false)
   }
 
   const searchQuery: string | null = value && value.length >= 2 ? value : null
 
   return (
-    <>
-      <div className={classes.inputRoot}>
-        <input value={value} placeholder='How is your state/city doing?' className={classes.input} onChange={onChange} />
-        <IoIosSearch className={classes.searchIcon} />
+    <Paper elevation={open ? 1 : 2} className={classes.root}>
+      <div className={open ? classes.searchWithResultRoot : classes.searchRoot}>
+        <Search className={classes.searchIcon} />
+        <InputBase
+          value={value}
+          className={classes.input}
+          placeholder='How is your state/city doing?'
+          inputProps={{ 'aria-label': 'search google maps' }}
+          onChange={onChange}
+        />
         {open && (
-          <IoIosClose
-            className={classes.closeIcon}
+          <IconButton
+            className={classes.iconButton}
             onClick={() => {
-              setOpen(false)
               setValue('')
+              setOpen(false)
             }}
-          />
+          >
+            <Close />
+          </IconButton>
         )}
       </div>
-
-      <QueryRenderer<SearchbarQuery>
-        environment={environment}
-        query={
-          searchQuery
-            ? graphql`
-                query SearchbarQuery($searchQuery: String) {
-                  zonesList(searchQuery: $searchQuery) {
-                    slug
-                    name
-                    code
-                    parentZone {
+      {open && <Divider />}
+      <Paper elevation={2} className={classes.result}>
+        <QueryRenderer<SearchbarQuery>
+          environment={environment}
+          query={
+            searchQuery
+              ? graphql`
+                  query SearchbarQuery($searchQuery: String) {
+                    zonesList(searchQuery: $searchQuery) {
+                      slug
                       name
+                      code
+                      parentZone {
+                        name
+                      }
                     }
                   }
-                }
-              `
-            : undefined
-        }
-        variables={{ searchQuery }}
-        render={({ error, props }) => {
-          if (error) {
-            return <ErrorBox error={error} />
-          } else if (props) {
-            const items = props.zonesList || []
-            return (
-              <div className={classes.menu}>
-                {open &&
-                  items.map((item) => {
-                    return (
-                      item && (
-                        <div
-                          key={item.slug}
-                          className={clsx(classes.menuItem)}
-                          onClick={() => {
-                            onSearch(item.code, item.name)
-                            setValue('')
-                            setOpen(false)
-                          }}
-                        >
-                          <p>{item.name}</p>
-                          <p className={classes.parentZone}>{item.parentZone && item.parentZone.name}</p>
-                        </div>
-                      )
-                    )
-                  })}
-              </div>
-            )
+                `
+              : undefined
           }
-          return <LinearProgress />
-        }}
-      />
-    </>
+          variables={{ searchQuery }}
+          render={({ error, props }) => {
+            if (error) {
+              return <ErrorBox error={error} />
+            } else if (props) {
+              const items = props.zonesList || []
+              if (open)
+                return (
+                  <List>
+                    {items.map((item) => {
+                      return (
+                        item && (
+                          <ListItem
+                            button
+                            key={item.slug}
+                            onClick={() => {
+                              onSearch(item.code, item.name)
+                              setValue('')
+                              setOpen(false)
+                            }}
+                          >
+                            <ListItemText
+                              classes={{
+                                primary: classes.zone,
+                              }}
+                              primary={item.name}
+                            />
+                            <ListItemSecondaryAction className={classes.parentZone}>
+                              {item.parentZone && item.parentZone.name}
+                            </ListItemSecondaryAction>
+                          </ListItem>
+                        )
+                      )
+                    })}
+                  </List>
+                )
+              else return <></>
+            }
+            return <LinearProgress />
+          }}
+        />
+      </Paper>
+    </Paper>
   )
 }
 

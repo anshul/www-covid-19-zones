@@ -1,10 +1,10 @@
+import { CloseRounded } from '@material-ui/icons'
+import { createStyles, makeStyles } from '@material-ui/styles'
 import React from 'react'
-import { makeStyles, createStyles } from '@material-ui/styles'
-import { Row, Col } from 'react-flexbox-grid'
-import { IoIosClose } from 'react-icons/io'
-import { slateGrey } from '../../utils/ColorFactory'
-import { UrlT } from '../../types'
+import { Col, Row } from 'react-flexbox-grid'
 import Searchbar from '../../components/Searchbar'
+import { UrlT } from '../../types'
+import { slateGrey } from '../../utils/ColorFactory'
 
 interface CompareBarZone {
   name: string
@@ -26,7 +26,7 @@ const useStyles = makeStyles(() =>
       padding: '4px 12px',
       marginRight: '4px',
     },
-    compareCross: { cursor: 'pointer', marginLeft: '8px', backgroundColor: slateGrey[200], borderRadius: '50%' },
+    compareCross: { cursor: 'pointer', marginLeft: '8px' },
   })
 )
 
@@ -45,13 +45,13 @@ const CompareBar: React.FC<Props> = ({ zones, go }) => {
           <Searchbar onSearch={onSearch} />
         </Col>
       </Row>
-      <Row style={{ minHeight: '40px' }}>
+      <Row style={{ minHeight: '40px', padding: '8px 0' }}>
         <Col>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {zones.map((zone) => (
               <div key={zone.code} className={classes.compareButton}>
-                {zone.name}
-                <IoIosClose className={classes.compareCross} onClick={() => onClose(zone)} />
+                <p>{zone.name}</p>
+                <CloseRounded fontSize='small' className={classes.compareCross} onClick={() => onClose(zone)} />
               </div>
             ))}
           </div>

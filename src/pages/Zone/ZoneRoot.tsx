@@ -1,18 +1,17 @@
-import React, { useState, useMemo } from 'react'
-import { graphql } from 'babel-plugin-relay/macro'
-
-import { Row, Col, Grid } from 'react-flexbox-grid'
-import { createFragmentContainer } from 'react-relay'
-import { ZoneRoot_zoneStats } from '../../__generated__/ZoneRoot_zoneStats.graphql'
-import CustomLineChart from '../../components/CustomLineChart'
-import { makeStyles, createStyles } from '@material-ui/styles'
-import Searchbar from '../../components/Searchbar'
-import ChartOptionsRow from '../../components/ChartOptionsRow'
-import { slateGrey } from '../../utils/ColorFactory'
 import { Breadcrumbs, Button } from '@material-ui/core'
+import { Add } from '@material-ui/icons'
+import { createStyles, makeStyles } from '@material-ui/styles'
+import { graphql } from 'babel-plugin-relay/macro'
+import React, { useMemo, useState } from 'react'
+import { Col, Grid, Row } from 'react-flexbox-grid'
+import { createFragmentContainer } from 'react-relay'
 import { Link } from 'react-router-dom'
-import { IoIosAdd } from 'react-icons/io'
+import ChartOptionsRow from '../../components/ChartOptionsRow'
+import CustomLineChart from '../../components/CustomLineChart'
+import Searchbar from '../../components/Searchbar'
+import { slateGrey } from '../../utils/ColorFactory'
 import { DateRangeT, filterData } from '../../utils/filterData'
+import { ZoneRoot_zoneStats } from '../../__generated__/ZoneRoot_zoneStats.graphql'
 
 interface Props {
   zoneStats: ZoneRoot_zoneStats | null
@@ -99,7 +98,7 @@ const ZoneRoot: React.FC<Props> = ({ zoneStats, onSearch, gotoCompare }) => {
             disableElevation
             variant='contained'
             color='secondary'
-            startIcon={<IoIosAdd />}
+            startIcon={<Add />}
             onClick={() => gotoCompare(zoneStats.zone.code)}
           >
             Compare
