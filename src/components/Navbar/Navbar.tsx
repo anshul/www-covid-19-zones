@@ -1,10 +1,9 @@
-import React, { useState, SyntheticEvent } from 'react'
-import { makeStyles, createStyles } from '@material-ui/styles'
-import { Link } from 'react-router-dom'
-import { AppBar, Toolbar, Typography, IconButton, Theme, Menu, MenuItem, Fade } from '@material-ui/core'
-import { IoIosMenu } from 'react-icons/io'
+import { AppBar, Fade, IconButton, Menu, MenuItem, Theme, Toolbar, Typography } from '@material-ui/core'
+import { MenuOpen } from '@material-ui/icons'
+import { createStyles, makeStyles } from '@material-ui/styles'
+import React, { SyntheticEvent, useState } from 'react'
 import { Grid } from 'react-flexbox-grid'
-import { RouteComponentProps } from 'react-router-dom'
+import { Link, RouteComponentProps } from 'react-router-dom'
 
 interface Props {
   path: string
@@ -77,7 +76,7 @@ const Navbar: React.FC<RouteComponentProps<{}>> = ({ match, history }) => {
             {Object.keys(menuItems).length > 1 && (
               <>
                 <IconButton edge='start' aria-controls='fade-menu' aria-haspopup={true} onClick={toggleMenu}>
-                  <IoIosMenu />
+                  <MenuOpen />
                 </IconButton>
 
                 <Menu anchorEl={anchorEl} style={{ marginTop: '30px' }} open={open} onClose={toggleMenu} TransitionComponent={Fade}>

@@ -1,12 +1,12 @@
-import React from 'react'
-import { makeStyles, createStyles } from '@material-ui/styles'
-import { Row, Col } from 'react-flexbox-grid'
 import { Breadcrumbs, Button } from '@material-ui/core'
-import { IoIosAdd } from 'react-icons/io'
+import { Add } from '@material-ui/icons'
+import { createStyles, makeStyles } from '@material-ui/styles'
+import React from 'react'
+import { Col, Row } from 'react-flexbox-grid'
 import { Link } from 'react-router-dom'
-import { slateGrey } from '../../utils/ColorFactory'
-import { UrlT } from '../../types'
 import Searchbar from '../../components/Searchbar'
+import { UrlT } from '../../types'
+import { slateGrey } from '../../utils/ColorFactory'
 
 interface ZoneBarZone {
   name: string
@@ -49,7 +49,7 @@ const ZoneBar: React.FC<Props> = ({ zone, go }) => {
           <Searchbar onSearch={onSearch} />
         </Col>
       </Row>
-      <Row style={{ minHeight: '40px' }}>
+      <Row style={{ minHeight: '40px', padding: '8px 0' }}>
         <Col>
           <Breadcrumbs style={{ marginLeft: '10px' }}>
             {zone && zone.parent && (
@@ -67,7 +67,7 @@ const ZoneBar: React.FC<Props> = ({ zone, go }) => {
             disableElevation
             variant='contained'
             color='secondary'
-            startIcon={<IoIosAdd />}
+            startIcon={<Add />}
             onClick={onCompare}
           >
             Compare
