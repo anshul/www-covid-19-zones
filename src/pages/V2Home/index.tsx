@@ -11,6 +11,7 @@ import V2HomeRoot from './V2HomeRoot'
 import { parse, stringify } from 'qs'
 import { V2HomeQuery } from '../../__generated__/V2HomeQuery.graphql'
 import { DateRangeT, UrlT } from '../../types'
+import './fade.css'
 
 const V2Home: React.FC<RouteComponentProps<{ mode: string; codes: string }>> = ({ location, match, history }) => {
   const q = parse(location.search, { ignoreQueryPrefix: true })
@@ -21,7 +22,7 @@ const V2Home: React.FC<RouteComponentProps<{ mode: string; codes: string }>> = (
 
   const go = (target: UrlT) => {
     const newTarget = { mode, codes, dateRange: q.dateRange, logScale: q.logScale, ...target }
-    newTarget.codes = newTarget.codes.filter((x) => x).sort()
+    newTarget.codes = newTarget.codes.filter((x) => x)
 
     const newQ = stringify({ t: newTarget.dateRange, log: `${newTarget.logScale || ''}`.length > 1 ? 'yes' : undefined })
     const query = newQ.length > 1 ? `?${newQ}` : ''

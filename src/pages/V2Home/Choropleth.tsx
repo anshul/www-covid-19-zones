@@ -9,8 +9,7 @@ import useResponsiveView from '../../hooks/useResponsiveView'
 import colorLegend from './colorLegend'
 import ZoneCard from './ZoneCard'
 import { Row, Col } from 'react-flexbox-grid'
-
-import './Choropleth.css'
+import NumberPill from './NumberPill'
 
 interface Props {
   map: MapDataT | null
@@ -18,6 +17,7 @@ interface Props {
     [code: string]: string
   }
   data: V2HomeRoot_data | null
+  codes: string[]
   go: (target: UrlT) => void
   mode: string
   dateRange: DateRangeT
@@ -40,14 +40,6 @@ interface TooltipT {
   rows: TooltipRowT[]
 }
 
-declare global {
-  interface Window {
-    choropleth: any
-  }
-}
-
-window.choropleth = window.choropleth || { topojson, d3 }
-
 const useStyles = makeStyles(() =>
   createStyles({
     mapRoot: {
@@ -57,14 +49,17 @@ const useStyles = makeStyles(() =>
       minWidth: '400px',
       position: 'relative',
     },
+    separator: {
+      borderTop: '1px solid black',
+      borderLeft: '1px solid black',
+      padding: '5px',
+    },
+    term: {
+      fontSize: '80%',
+      fontWeight: '600',
+    },
     svgRoot: {
       border: '1px solid #eee',
-    },
-    colorLegend: {
-      fontSize: '55%',
-    },
-    legendShape: {
-      border: '2px solid #999',
     },
     pre: {
       whiteSpace: 'pre-wrap',
@@ -74,7 +69,7 @@ const useStyles = makeStyles(() =>
     districtPath: {
       strokeWidth: 0.2,
       stroke: '#eee',
-      opacity: 0.1,
+      opacity: 0.15,
     },
     statePath: {
       strokeWidth: 0.3,
@@ -82,7 +77,7 @@ const useStyles = makeStyles(() =>
       fill: 'transparent',
     },
     activePath: {
-      strokeWidth: 1,
+      strokeWidth: 0.7,
       stroke: '#666',
     },
     selectedDistrictPath: {
@@ -94,26 +89,30 @@ const useStyles = makeStyles(() =>
     hoveredDistrict: {
       cursor: 'pointer',
       opacity: 1,
-      strokeWidth: 1,
+      strokeWidth: 0.7,
       stroke: '#666',
     },
     tooltip: {
       position: 'absolute',
-      background: 'white',
       zIndex: '15',
       overflow: 'hidden',
       pointerEvents: 'none',
+      border: '1px solid #c4c4c4',
+      backgroundColor: 'white',
+      padding: '.25em .5em .5em',
+      borderRadius: '.25em',
+      fontSize: '80%',
     },
   })
 )
 const colors = {
   palette: ['#fffcf9', '#fff5eb', '#fee6ce', '#fdd0a2', '#fdae6b', '#fd8d3c', '#f16913', '#d94801', '#a63603', '#7f2704', '#641A2C'],
 }
-const thresholds = [3, 5, 10, 20, 40, 60, 80, 100, 250, 1000]
+const thresholds = [3, 5, 10, 20, 40, 60, 80, 100, 250, 1000].map((x) => x * 5)
 
-const Choropleth: React.FC<Props> = ({ map, data, go, mode, dateRange, logScale, colorMap }) => {
+const Choropleth: React.FC<Props> = ({ map, data, go, mode, codes, dateRange, logScale, colorMap }) => {
   const classes = useStyles()
-  const view = useResponsiveView({ marginTop: 70, marginLeft: 25, marginBottom: 25, marginRight: 25 })
+  const view = useResponsiveView({ marginTop: 70, marginLeft: 5, marginBottom: 0, marginRight: 5 })
   const color = useMemo(() => d3.scaleThreshold().domain(thresholds).range(colors.palette), [])
   const colorHex = color
   const colorConst = (count: number): string => '#eeeeee'
@@ -125,11 +124,11 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, dateRange, logScale,
     if (!maybeDiv) return
     const el: HTMLElement = maybeDiv as HTMLElement
     const svg = d3.select(el).select('svg')
-    console.log('d3 update', svg)
+    console.log('d3 update', svg, { codes })
 
     const onClick = function (d) {
       const code = d.properties.z.replace(/\/$/, '')
-      go({ codes: mode === 'compare' ? [code, ...zones.map((z) => z.code)] : [code] })
+      go({ codes: mode === 'compare' ? [...codes, code] : [code] })
     }
     const gLegend = svg.select('.colorLegend')
     gLegend
@@ -185,15 +184,15 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, dateRange, logScale,
     }
 
     const selectedDistrictCodes = selectedDistrictTopo.features.map((d) => d.properties.z)
-    const selectedStateCodes = selectedStateTopo.features.map((d) => d.properties.z)
+    // const selectedStateCodes = selectedStateTopo.features.map((d) => d.properties.z)
 
     const divTooltip = d3.select(el).select('.tooltip')
     const showTooltip = function (d) {
-      const props = [d.properties]
+      const features = [d, stateTopo.features.find((s) => s.properties.z === d.properties.pz)].filter((x) => x)
       moveTooltip(d)
       d3.select(this).classed(classes.hoveredDistrict, true).raise()
       setTooltip({
-        rows: props,
+        rows: features.map((f) => f.properties),
       })
     }
     const moveTooltip = (d) => {
@@ -219,12 +218,22 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, dateRange, logScale,
       districtTopo
     )
     const box = d3.geoPath(projection).bounds(selectedStateTopo)
-    const zoom = Math.min(view.innerWidth / (box[1][0] - box[0][0]), view.innerHeight / (box[1][1] - box[0][1]))
+    const zoom = 0.95 * Math.min(view.innerWidth / (box[1][0] - box[0][0]), view.innerHeight / (box[1][1] - box[0][1]), 8)
+    console.log(111111, zoom)
     const dx = ((box[0][0] + box[1][0]) / 2) * zoom - view.innerWidth / 2
     const dy = ((box[0][1] + box[1][1]) / 2) * zoom - view.innerHeight / 2
     const gDistricts = svg.select('.districts')
     gDistricts.transition(t).attr('transform', `translate(${view.marginLeft - dx}, ${view.marginTop - dy})scale(${zoom})`)
 
+    const districtUpdater = (update) =>
+      update
+        .classed(classes.districtPath, true)
+        .classed(classes.activePath, (d) => selectedZoneCodes.includes(d.properties.z))
+        .classed(classes.selectedDistrictPath, (d) => selectedDistrictCodes.includes(d.properties.z))
+        .on('mouseover', showTooltip)
+        .on('mousemove', moveTooltip)
+        .on('mouseout', hideTooltip)
+        .on('click', onClick)
     gDistricts
       .selectAll('path')
       .data(districtTopo.features, (d) => d.properties.u)
@@ -235,18 +244,8 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, dateRange, logScale,
             .attr('d', path)
             .style('fill', (d, i) => color(0))
             .call((enter) => enter.style('fill', (d, i) => color(d.properties.ipm)))
-            .classed(classes.districtPath, true)
-            .classed(classes.activePath, (d) => selectedZoneCodes.includes(d.properties.z))
-            .classed(classes.selectedDistrictPath, (d) => selectedDistrictCodes.includes(d.properties.z))
-            .on('mouseover', showTooltip)
-            .on('mousemove', moveTooltip)
-            .on('mouseout', hideTooltip)
-            .on('click', onClick),
-        (update) =>
-          update
-            .classed(classes.districtPath, true)
-            .classed(classes.activePath, (d) => selectedZoneCodes.includes(d.properties.z))
-            .classed(classes.selectedDistrictPath, (d) => selectedDistrictCodes.includes(d.properties.z)),
+            .call(districtUpdater),
+        (update) => update.call(districtUpdater),
         (exit) => exit.call((exit) => exit.transition(t).attr('opacity', 0).remove())
       )
 
@@ -276,6 +275,7 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, dateRange, logScale,
     classes.hoveredDistrict,
     classes.selectedDistrictPath,
     classes.statePath,
+    codes,
     color,
     data,
     go,
@@ -305,21 +305,34 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, dateRange, logScale,
 
       <div ref={view.ref} className={classes.mapRoot}>
         <div className={`${classes.tooltip} tooltip`} style={{ display: tooltip ? 'block' : 'none' }}>
-          <table>
+          <table style={{ tableLayout: 'fixed', width: '240px' }}>
             <tbody>
               {tooltip &&
                 tooltip.rows.map((row) => (
                   <React.Fragment key={row.name}>
                     <tr>
                       <td colSpan={4}>
-                        {row.name} Pop: {row.pop} ({row.yr})
+                        <span style={{ fontWeight: 800, fontSize: '105%' }}>{row.name} </span>
+                        {row.pop && row.pop.length > 1 && (
+                          <p style={{ fontWeight: 500, fontSize: '10px', lineHeight: '8px' }}>
+                            Pop: {row.pop} ({row.yr})
+                          </p>
+                        )}
                       </td>
                     </tr>
                     <tr>
-                      <td>{row.i}</td>
-                      <td>Infections</td>
-                      <td>{row.ipm}</td>
-                      <td>infections per million</td>
+                      <td className={classes.separator} colSpan={2} />
+                      <td className={classes.separator} colSpan={2} />
+                    </tr>
+                    <tr>
+                      <td>
+                        <NumberPill count={row.i} color={colorConst} />
+                      </td>
+                      <td className={classes.term}>covid-19 infections</td>
+                      <td>
+                        <NumberPill count={row.ipm} color={colorHex} />
+                      </td>
+                      <td className={classes.term}>infections per million</td>
                     </tr>
                   </React.Fragment>
                 ))}

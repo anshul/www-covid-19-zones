@@ -30,7 +30,9 @@ const emptyZone = {
 const V2HomeRoot: React.FC<Props> = ({ data, codes, mode, go, dateRange, logScale }) => {
   const onSearch = (code: string) => go({ codes: mode === 'compare' ? [code] : [code] })
   const response: MapDataT = useSWR(`/api/maps?codes=in`)
-  const colorMap = data ? Object.fromEntries(new Map(data.zones.map((zone, i) => [zone.code, lineColors[i][500]]))) : {}
+  const colorMap = data
+    ? Object.fromEntries(new Map(data.zones.map((zone, i) => [zone.code, lineColors[i] ? lineColors[i][500] : '#aaaaaa'])))
+    : {}
   const [cachedData, setCachedData] = useState(data)
   const firstZone = cachedData && cachedData.zones.length >= 1 ? cachedData.zones[0] : null
   useEffect(() => {
@@ -53,6 +55,7 @@ const V2HomeRoot: React.FC<Props> = ({ data, codes, mode, go, dateRange, logScal
           <Choropleth
             colorMap={colorMap}
             map={response.data as MapDataT}
+            codes={codes}
             mode={mode}
             data={cachedData}
             go={go}

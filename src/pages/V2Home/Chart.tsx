@@ -2,7 +2,7 @@
 
 import { createStyles, makeStyles } from '@material-ui/styles'
 import * as d3 from 'd3'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import Button from '../../components/Button'
 import useResponsiveView from '../../hooks/useResponsiveView'
 import { DateRangeT, UrlT } from '../../types'
@@ -35,11 +35,6 @@ const useStyles = makeStyles(() =>
     },
   })
 )
-declare global {
-  interface Window {
-    c: any
-  }
-}
 interface Props {
   data: V2HomeRoot_data | null
   go: (target: UrlT) => void
@@ -47,8 +42,6 @@ interface Props {
   dateRange: DateRangeT
   logScale: boolean
 }
-
-window.c = window.c || { d3 }
 
 const chartSettings = {
   marginLeft: 50,

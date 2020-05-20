@@ -45,12 +45,12 @@ const ZoneRoot: React.FC<Props> = ({ zoneStats, onSearch, gotoCompare }) => {
   const [logScale, setLogScale] = useState(false)
   const filteredData = useMemo(() => {
     if (!zoneStats) return []
-    return filterData(dateRange, zoneStats.newCases.data)
+    return filterData(dateRange, zoneStats.newCases.data as object[])
   }, [zoneStats, dateRange])
 
   const cumFilteredData = useMemo(() => {
     if (!zoneStats) return []
-    return filterData(dateRange, zoneStats.cumCases.data)
+    return filterData(dateRange, zoneStats.cumCases.data as object[])
   }, [zoneStats, dateRange])
 
   if (!zoneStats) {
