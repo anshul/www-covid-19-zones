@@ -11,7 +11,7 @@ import { CompareQuery } from '../../__generated__/CompareQuery.graphql'
 
 const Compare: React.FC<RouteComponentProps<{ codes: string }>> = ({ location, history }) => {
   const q = parse(location.search, { ignoreQueryPrefix: true })
-  const codes = q.codes.split(',')
+  const codes = (q.codes as string).split(',')
 
   const onCompare = (codes: string[]) => {
     codes.length > 0 ? history.push(`/compare?codes=${codes}`) : history.push(`/`)

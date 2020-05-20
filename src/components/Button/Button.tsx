@@ -1,8 +1,8 @@
-import React from 'react'
-import { makeStyles, createStyles } from '@material-ui/styles'
 import { Button as MuiButton, ButtonProps, CircularProgress } from '@material-ui/core'
-import { FiAlertCircle } from 'react-icons/fi'
+import { AddAlertOutlined } from '@material-ui/icons'
+import { createStyles, makeStyles } from '@material-ui/styles'
 import clsx from 'clsx'
+import React from 'react'
 
 interface Props {
   error?: boolean
@@ -35,7 +35,7 @@ const Button: React.FC<ButtonProps & Props> = ({ className, error, loading, cust
   return (
     <MuiButton
       variant='text'
-      startIcon={loading ? <CircularProgress size={18} /> : error ? <FiAlertCircle /> : props.startIcon}
+      startIcon={loading ? <CircularProgress size={18} /> : error ? <AddAlertOutlined /> : props.startIcon}
       className={clsx(classes.root, classes.button, className)}
       {...props}
     />

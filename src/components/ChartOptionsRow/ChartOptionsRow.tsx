@@ -3,7 +3,7 @@ import React from 'react'
 import { Row, Col } from 'react-flexbox-grid'
 import { Button, ButtonGroup } from '@material-ui/core'
 
-type DateRangeT = 'all_time' | 'last_30_days' | 'last_7_days'
+type DateRangeT = 'all' | '1m' | '1w'
 interface Props {
   dateRange: DateRangeT
   setDateRange: (dateRange: DateRangeT) => void
@@ -13,9 +13,9 @@ interface Props {
 
 const ChartOptionRow: React.FC<Props> = ({ dateRange, setDateRange, logScale, setLogScale }) => {
   const dateRanges: { label: string; value: DateRangeT }[] = [
-    { label: 'All', value: 'all_time' },
-    { label: '1 Month', value: 'last_30_days' },
-    { label: '7 Days', value: 'last_7_days' },
+    { label: 'All', value: 'all' },
+    { label: '1 Month', value: '1m' },
+    { label: '7 Days', value: '1w' },
   ]
 
   return (

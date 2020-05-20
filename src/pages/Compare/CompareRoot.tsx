@@ -1,25 +1,25 @@
-import React, { useState, useMemo } from 'react'
+import { Close } from '@material-ui/icons'
 import { graphql } from 'babel-plugin-relay/macro'
+import React, { useMemo, useState } from 'react'
+import { Col, Grid, Row } from 'react-flexbox-grid'
 import { createFragmentContainer } from 'react-relay'
-import { CompareRoot_data } from '../../__generated__/CompareRoot_data.graphql'
-import { Grid, Row, Col } from 'react-flexbox-grid'
-import Searchbar from '../../components/Searchbar'
 import ChartOptionsRow from '../../components/ChartOptionsRow'
-import { slateGrey } from '../../utils/ColorFactory'
-import { IoIosClose } from 'react-icons/io'
 import CustomLineChart from '../../components/CustomLineChart'
+import Searchbar from '../../components/Searchbar'
+import { slateGrey } from '../../utils/ColorFactory'
 import { filterData } from '../../utils/filterData'
+import { CompareRoot_data } from '../../__generated__/CompareRoot_data.graphql'
 
 interface Props {
   data: CompareRoot_data | null
   onCompare: (codes: string[]) => void
 }
-type DateRangeT = 'all_time' | 'last_30_days' | 'last_7_days'
+type DateRangeT = 'all' | '1m' | '1w'
 
 const CompareRoot: React.FC<Props> = ({ data, onCompare }) => {
   const codes = data ? data.zones.map((zone) => [zone.code, zone.name] || []) || [] : []
   const [logScale, setLogScale] = useState(false)
-  const [dateRange, setDateRange] = useState<DateRangeT>('all_time')
+  const [dateRange, setDateRange] = useState<DateRangeT>('all')
   const filteredData = useMemo(() => {
     if (!data) return []
     return filterData(dateRange, data.newCases.data)
@@ -56,7 +56,7 @@ const CompareRoot: React.FC<Props> = ({ data, onCompare }) => {
           <Searchbar onSearch={(code) => onCompare(codes.map((code) => code[0]).concat([code]))} />
         </Col>
       </Row>
-      <Row style={{ minHeight: '40px' }}>
+      <Row style={{ minHeight: '40px', padding: '8px 0' }}>
         <Col xs={12}>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {codes.map((code) => (
@@ -72,7 +72,7 @@ const CompareRoot: React.FC<Props> = ({ data, onCompare }) => {
                 }}
               >
                 {code[1]}
-                <IoIosClose
+                <Close
                   style={{ cursor: 'pointer', marginLeft: '8px', backgroundColor: slateGrey[200], borderRadius: '50%' }}
                   onClick={() => {
                     const currentCodeIdx = codes.indexOf(code)

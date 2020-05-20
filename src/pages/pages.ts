@@ -2,6 +2,7 @@ import { RouteComponentProps } from 'react-router-dom'
 // import Home from './Home'
 import Zone from './Zone'
 import Compare from './Compare'
+import V2Home from './V2Home'
 
 type Component = React.ComponentType<RouteComponentProps<any>> | React.ComponentType<any> //eslint-disable-line
 
@@ -21,5 +22,10 @@ export const pages: Page[] = [
     path: '/compare/:codes*',
     view: Compare,
     displayName: 'Compare',
+  },
+  {
+    path: '/v2/:mode/:codes*',
+    view: V2Home,
+    displayName: 'Home',
   },
 ]

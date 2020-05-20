@@ -88,13 +88,50 @@ type PageInfo {
 type Query {
   compare(codes: [String!]!): CompareStats
   home: HomeData!
+  v2Stats(codes: [String!]!): V2Stats!
 
-  """Zone data"""
+  """Zone daily_chart"""
   zone(slug: String!): Zone!
   zoneStats(code: String!): ZoneStats
 
   """List of all zones"""
   zonesList(searchQuery: String): [Zone!]!
+}
+
+type TsPoint {
+  dt: String!
+  newInf: Float!
+  newInfSma5: Float!
+  totInf: Float!
+}
+
+type V2Stats {
+  zones: [V2Zone!]!
+}
+
+type V2Zone {
+  attributionMd: String
+  chart: [TsPoint!]!
+  children: [V2Zone!]
+  code: String!
+  cumulativeFatalities: Int!
+  cumulativeInfections: Int!
+  cumulativeRecoveries: Int!
+  cumulativeTests: Int!
+  currentActives: Int!
+  fArea: String!
+  fAsOf: String!
+  fPopulation: String!
+  fPopulationYear: String!
+  name: String!
+  parent: V2Zone
+  perMillionActives: Float!
+  perMillionFatalities: Float!
+  perMillionInfections: Float!
+  perMillionRecoveries: Float!
+  perMillionTests: Float!
+  related: [V2Zone!]!
+  unitCodes: [String!]!
 }
 
 type Zone {
