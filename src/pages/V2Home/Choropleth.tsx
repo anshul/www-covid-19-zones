@@ -61,11 +61,6 @@ const useStyles = makeStyles(() =>
     svgRoot: {
       border: '1px solid #eee',
     },
-    pre: {
-      whiteSpace: 'pre-wrap',
-      maxWidth: '300px',
-      overflow: 'scroll',
-    },
     districtPath: {
       strokeWidth: 0.2,
       stroke: '#eee',
@@ -124,7 +119,13 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, codes, dateRange, lo
     if (!maybeDiv) return
     const el: HTMLElement = maybeDiv as HTMLElement
     const svg = d3.select(el).select('svg')
-    console.log('d3 update', svg, { codes })
+    console.log('d3 update', {
+      w: view.width,
+      h: view.height,
+      iw: view.innerWidth,
+      ih: view.innerHeight,
+      m: [view.marginTop, view.marginRight, view.marginBottom, view.marginLeft],
+    })
 
     const onClick = function (d) {
       const code = d.properties.z.replace(/\/$/, '')
@@ -219,10 +220,10 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, codes, dateRange, lo
     )
     const box = d3.geoPath(projection).bounds(selectedStateTopo)
     const zoom = 0.95 * Math.min(view.innerWidth / (box[1][0] - box[0][0]), view.innerHeight / (box[1][1] - box[0][1]), 8)
-    console.log(111111, zoom)
     const dx = ((box[0][0] + box[1][0]) / 2) * zoom - view.innerWidth / 2
     const dy = ((box[0][1] + box[1][1]) / 2) * zoom - view.innerHeight / 2
     const gDistricts = svg.select('.districts')
+    console.log(222, { zoom, dx, dy })
     gDistricts.transition(t).attr('transform', `translate(${view.marginLeft - dx}, ${view.marginTop - dy})scale(${zoom})`)
 
     const districtUpdater = (update) =>
@@ -245,7 +246,7 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, codes, dateRange, lo
             .style('fill', (d, i) => color(0))
             .call((enter) => enter.style('fill', (d, i) => color(d.properties.ipm)))
             .call(districtUpdater),
-        (update) => update.call(districtUpdater),
+        (update) => update.attr('d', path).call(districtUpdater),
         (exit) => exit.call((exit) => exit.transition(t).attr('opacity', 0).remove())
       )
 
@@ -262,7 +263,11 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, codes, dateRange, lo
             .raise()
             .classed(classes.statePath, true)
             .classed(classes.activePath, (d) => selectedZoneCodes.includes(d.properties.z)),
-        (update) => update.classed(classes.statePath, true).classed(classes.activePath, (d) => selectedZoneCodes.includes(d.properties.z)),
+        (update) =>
+          update
+            .attr('d', path)
+            .classed(classes.statePath, true)
+            .classed(classes.activePath, (d) => selectedZoneCodes.includes(d.properties.z)),
         (exit) => exit.call((exit) => exit.transition(t).attr('opacity', 0).remove())
       )
     return () => {
@@ -345,10 +350,6 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, codes, dateRange, lo
           <g className='mask' />
           <g className='colorLegend' />
         </svg>
-        <pre className={classes.pre}>
-          {view.width} x {view.height}
-          {JSON.stringify(data, null, null)}
-        </pre>
       </div>
     </>
   )
