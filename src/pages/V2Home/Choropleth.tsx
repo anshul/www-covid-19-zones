@@ -46,6 +46,26 @@ const useStyles = makeStyles(() =>
       maxWidth: '300px',
       overflow: 'scroll',
     },
+    districtPath: {
+      strokeWidth: 1,
+      stroke: '#eee',
+      opacity: 0.1,
+    },
+    statePath: {
+      strokeWidth: 0.3,
+      stroke: '#333',
+      fill: 'transparent',
+    },
+    activePath: {
+      strokeWidth: 1,
+      stroke: '#666',
+    },
+    selectedDistrictPath: {
+      opacity: 1,
+    },
+    gutter: {
+      fill: 'white',
+    },
   })
 )
 declare global {
@@ -63,14 +83,15 @@ const thresholds = [3, 5, 10, 20, 40, 60, 80, 100, 250, 1000]
 
 const Choropleth: React.FC<Props> = ({ map, data, go, mode, dateRange, logScale, colorMap }) => {
   const classes = useStyles()
-  const view = useResponsiveView({ marginTop: 10 })
+  const view = useResponsiveView({ marginTop: 70, marginLeft: 25, marginBottom: 25, marginRight: 25 })
   const color = useMemo(() => d3.scaleThreshold().domain(thresholds).range(colors.palette), [])
-  const colorHex = (count: number): string => color(count)
+  const colorHex = color
+  const colorConst = (count: number): string => '#eeeeee'
 
   useEffect(() => {
     console.log('render choropleth', { map, data })
     const maybeDiv: unknown = view.ref.current
-    if (!map || !maybeDiv) return
+    if (!maybeDiv) return
     const el: HTMLElement = maybeDiv as HTMLElement
     const svg = d3.select(el).select('svg')
     console.log('d3 update', svg)
@@ -84,10 +105,124 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, dateRange, logScale,
       })
       .attr('transform', `translate(${view.innerWidth - 340},20)`)
 
+    const gMask = svg.select('.mask')
+    gMask
+      .selectAll('rect')
+      .data(
+        [
+          [0, 0, view.width, view.marginTop],
+          [view.width - view.marginRight, 0, view.marginRight, view.height],
+          [0, view.height - view.marginBottom, view.width, view.marginBottom],
+          [0, 0, view.marginLeft, view.height],
+        ],
+        (d, i) => i
+      )
+      .join('rect')
+      .attr('x', (d) => d[0])
+      .attr('y', (d) => d[1])
+      .attr('width', (d) => d[2])
+      .attr('height', (d) => d[3])
+      .classed(classes.gutter, true)
+
+    if (!map) return
+    const mapData = map['map']
+    const t = d3.transition().duration(1000)
+    const districtTopo = topojson.feature(mapData, mapData.objects.districts) || { features: [] }
+    const stateTopo = topojson.feature(mapData, mapData.objects.states) || { features: [] }
+    const selectedZoneCodes = data ? [...data.zones.flatMap((z) => z.unitCodes), ...data.zones.map((z) => z.code)] : ['in']
+    const selectedStateTopo = {
+      ...stateTopo,
+      features: stateTopo.features.filter(
+        (d) =>
+          d.properties.zone.length >= 2 &&
+          selectedZoneCodes.some((code) => (code.length >= 2 && d.properties.zone.startsWith(code)) || code.startsWith(d.properties.zone))
+      ),
+    }
+    const selectedDistrictTopo = {
+      ...districtTopo,
+      features: districtTopo.features.filter(
+        (d) =>
+          d.properties.zone.length >= 2 &&
+          selectedZoneCodes.some((code) => (code.length >= 2 && d.properties.zone.startsWith(code)) || code.startsWith(d.properties.zone))
+      ),
+    }
+
+    const selectedDistrictCodes = selectedDistrictTopo.features.map((d) => d.properties.zone)
+    const selectedStateCodes = selectedStateTopo.features.map((d) => d.properties.zone)
+    const projection = d3.geoMercator()
+    const path = d3.geoPath(projection)
+    projection.fitExtent(
+      [
+        [0, 0],
+        [view.width, view.height],
+      ],
+      districtTopo
+    )
+    const box = d3.geoPath(projection).bounds(selectedStateTopo)
+    const zoom = Math.min(view.innerWidth / (box[1][0] - box[0][0]), view.innerHeight / (box[1][1] - box[0][1]))
+    const dx = ((box[0][0] + box[1][0]) / 2) * zoom - view.innerWidth / 2
+    const dy = ((box[0][1] + box[1][1]) / 2) * zoom - view.innerHeight / 2
+    const gDistricts = svg.select('.districts')
+    gDistricts.transition(t).attr('transform', `translate(${view.marginLeft - dx}, ${view.marginTop - dy})scale(${zoom})`)
+
+    gDistricts
+      .selectAll('path')
+      .data(districtTopo.features, (d) => d.properties.zone)
+      .join(
+        (enter) =>
+          enter
+            .append('path')
+            .attr('d', path)
+            .style('fill', (d, i) => color(0))
+            .call((enter) => enter.transition(t).style('fill', (d, i) => color(d.properties.ipm)))
+            .classed(classes.districtPath, true)
+            .classed(classes.activePath, (d) => selectedZoneCodes.includes(d.properties.zone))
+            .classed(classes.selectedDistrictPath, (d) => selectedDistrictCodes.includes(d.properties.zone)),
+        (update) =>
+          update
+            .classed(classes.districtPath, true)
+            .classed(classes.activePath, (d) => selectedZoneCodes.includes(d.properties.zone))
+            .classed(classes.selectedDistrictPath, (d) => selectedDistrictCodes.includes(d.properties.zone)),
+        (exit) => exit.call((exit) => exit.transition(t).attr('opacity', 0).remove())
+      )
+
+    const gStates = svg.select('.states')
+    gStates.transition(t).attr('transform', `translate(${view.marginLeft - dx}, ${view.marginTop - dy})scale(${zoom})`)
+    gStates
+      .selectAll('path')
+      .data(stateTopo.features, (d) => d.properties.zone)
+      .join(
+        (enter) =>
+          enter
+            .append('path')
+            .attr('d', path)
+            .classed(classes.statePath, true)
+            .classed(classes.activePath, (d) => selectedZoneCodes.includes(d.properties.zone)),
+        (update) => update.classed(classes.statePath, true).classed(classes.activePath, (d) => selectedZoneCodes.includes(d.properties.zone)),
+        (exit) => exit.call((exit) => exit.transition(t).attr('opacity', 0).remove())
+      )
     return () => {
       console.log('d3 cleanup')
     }
-  }, [color, data, map, view.innerWidth, view.ref])
+  }, [
+    classes.activePath,
+    classes.districtPath,
+    classes.gutter,
+    classes.selectedDistrictPath,
+    classes.statePath,
+    color,
+    data,
+    map,
+    view.height,
+    view.innerHeight,
+    view.innerWidth,
+    view.marginBottom,
+    view.marginLeft,
+    view.marginRight,
+    view.marginTop,
+    view.ref,
+    view.width,
+  ])
 
   return (
     <>
@@ -95,16 +230,17 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, dateRange, logScale,
         {data &&
           data.zones.map((zone) => (
             <Col className='fade' xs={6} sm={4} md={3} lg={2} key={zone.code}>
-              <ZoneCard lineColor={colorMap[zone.code]} ipmColor={colorHex} zone={zone} />
+              <ZoneCard lineColor={colorMap[zone.code]} ipmColor={colorHex} iColor={colorConst} zone={zone} />
             </Col>
           ))}
       </Row>
 
       <div ref={view.ref} className={classes.mapRoot}>
         <svg className={classes.svgRoot} preserveAspectRatio='xMidYMid meet' width={view.width} height={view.height}>
-          <g className='colorLegend' />
-          <g className='states' />
           <g className='districts' />
+          <g className='states' />
+          <g className='mask' />
+          <g className='colorLegend' />
         </svg>
         <pre className={classes.pre}>
           {view.width} x {view.height}

@@ -10,6 +10,7 @@ interface Props {
   lineColor: string
   zone: ZoneCard_zone
   ipmColor: (count: number) => string
+  iColor: (count: number) => string
 }
 
 const useStyles = makeStyles(() =>
@@ -24,6 +25,7 @@ const useStyles = makeStyles(() =>
     },
     number: {
       fontSize: '11px',
+      minWidth: '35px',
       padding: '0 0 0 8px',
     },
     term: {
@@ -32,15 +34,15 @@ const useStyles = makeStyles(() =>
       fontSize: '0.7em',
     },
     numberPill: {
+      textAlign: 'center',
       fontSize: '11px',
-      minWidth: '35px',
       padding: '.15em .25em',
-      borderRadius: '.25em',
+      borderRadius: '.35em',
     },
   })
 )
 
-const ZoneCard: React.FC<Props> = ({ zone, lineColor, ipmColor }) => {
+const ZoneCard: React.FC<Props> = ({ zone, lineColor, ipmColor, iColor }) => {
   const classes = useStyles()
   return (
     <div key={zone.code}>
@@ -52,7 +54,18 @@ const ZoneCard: React.FC<Props> = ({ zone, lineColor, ipmColor }) => {
       </Typography>
       <Row bottom='xs'>
         <span className={classes.term}>Infections</span>
-        <span className={classes.number}>{zone.cumulativeInfections}</span>
+        <span className={classes.number}>
+          <Typography
+            style={{
+              backgroundColor: iColor(zone.cumulativeInfections),
+              color: pickTextColor(iColor(zone.cumulativeInfections)),
+              border: `1px solid ${iColor(zone.cumulativeInfections)}`,
+            }}
+            className={classes.numberPill}
+          >
+            {zone.cumulativeInfections}
+          </Typography>
+        </span>
       </Row>
       <Row bottom='xs'>
         <span className={classes.term}>per million</span>
@@ -61,8 +74,8 @@ const ZoneCard: React.FC<Props> = ({ zone, lineColor, ipmColor }) => {
             style={{
               backgroundColor: ipmColor(zone.perMillionInfections),
               color: pickTextColor(ipmColor(zone.perMillionInfections)),
+              border: `1px solid ${ipmColor(zone.perMillionInfections)}`,
             }}
-            component='span'
             className={classes.numberPill}
           >
             {zone.perMillionInfections}
