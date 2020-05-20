@@ -32,7 +32,7 @@ const useStyles = makeStyles(() =>
 
 const CompareBar: React.FC<Props> = ({ zones, go }) => {
   const classes = useStyles()
-  const onSearch = (code: string) => go({ codes: [code, ...zones.map((z) => z.code)] })
+  const onSearch = (code: string) => go({ codes: [...zones.map((z) => z.code), code] })
   const onClose = (zone: CompareBarZone) => {
     if (zones.length <= 1) return go({ mode: 'zones' })
     go({ codes: zones.map((z) => z.code).filter((c) => c !== zone.code) })

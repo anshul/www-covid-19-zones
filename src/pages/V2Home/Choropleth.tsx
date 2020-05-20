@@ -101,11 +101,12 @@ const useStyles = makeStyles(() =>
   })
 )
 const colors = {
-  palette0: ['#fffcf9', '#fff5eb', '#fee6ce', '#fdd0a2', '#fdae6b', '#fd8d3c', '#f16913', '#d94801', '#a63603', '#7f2704', '#641A2C'],
-  palette: ['#fffcf9', '#fff5f0', '#fee0d2', '#fcbba1', '#fc9272', '#fb6a4a', '#ef3b2c', '#cb181d', '#a50f15', '#67000d', '#333333'],
+  palette: ['#fffcf9', '#fff5eb', '#fee6ce', '#fdd0a2', '#fdae6b', '#fd8d3c', '#f16913', '#d94801', '#a63603', '#7f2704', '#641A2C'],
+  palette0: ['#fffcf9', '#fff5f0', '#fee0d2', '#fcbba1', '#fc9272', '#fb6a4a', '#ef3b2c', '#cb181d', '#a50f15', '#67000d', '#333333'],
+  palette2: ['#fffcf9', '#fcfbfd', '#efedf5', '#dadaeb', '#bcbddc', '#9e9ac8', '#807dba', '#6a51a3', '#54278f', '#3f007d', '#333333'],
 }
-// const thresholds = [3, 5, 10, 20, 40, 60, 80, 100, 250, 1000]
-const thresholds = [5, 10, 20, 50, 100, 200, 500, 1000, 2500, 10000]
+const thresholds = [3, 5, 10, 20, 40, 60, 80, 100, 250, 1000]
+// const thresholds = [0.2, 1, 2, 10, 20, 40, 60, 80, 100, 1000].map((x) => x * 5)
 
 const Choropleth: React.FC<Props> = ({ map, data, go, mode, codes, dateRange, logScale, colorMap }) => {
   const classes = useStyles()
@@ -155,10 +156,10 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, codes, dateRange, lo
         (d, i) => i
       )
       .join('rect')
-      .attr('x', (d) => d[0])
-      .attr('y', (d) => d[1])
-      .attr('width', (d) => d[2])
-      .attr('height', (d) => d[3])
+      .attr('x', (d) => d[0] - 1)
+      .attr('y', (d) => d[1] - 1)
+      .attr('width', (d) => d[2] + 2)
+      .attr('height', (d) => d[3] + 2)
       .classed(classes.gutter, true)
 
     if (!map) return
