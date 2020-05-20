@@ -7,6 +7,7 @@ import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
 import useSWR from 'swr'
 import { lineColors } from '../../utils/ColorFactory'
 import Choropleth from './Choropleth'
+import DailyChart from './DailyChart'
 import CompareBar from './CompareBar'
 import ErrorPanel from './ErrorPanel'
 import ZoneBar from './ZoneBar'
@@ -62,6 +63,9 @@ const V2HomeRoot: React.FC<Props> = ({ data, codes, mode, go, dateRange, logScal
             dateRange={dateRange}
             logScale={logScale}
           />
+        </Col>
+        <Col xs={12} md={12}>
+          <DailyChart colorMap={colorMap} codes={codes} mode={mode} data={cachedData} go={go} dateRange={dateRange} logScale={logScale} />
         </Col>
       </Row>
     </Grid>
