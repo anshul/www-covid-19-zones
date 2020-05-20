@@ -25,7 +25,7 @@ interface Props {
   title?: string
   lineKeys: ReadonlyArray<string>
   xAxisKey: string
-  data: any
+  data: readonly object[] // eslint-disable-line
   legend?: { [lineKey: string]: string }
   logScale?: boolean
 }
@@ -90,7 +90,7 @@ const CustomLineChart: React.FC<Props> = ({ width, legend, palette, height, titl
   return (
     <Grid className={classes.root}>
       <ResponsiveContainer width={width ?? '100%'} height={height ?? '100%'}>
-        <LineChart data={data as any[]} style={{ paddingTop: '16px' }}>
+        <LineChart data={data} style={{ paddingTop: '16px' }}>
           <CartesianGrid strokeOpacity={0.5} horizontal={false} />
           <XAxis
             padding={{ left: 16, right: 16 }}

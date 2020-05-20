@@ -1,6 +1,6 @@
 export type DateRangeT = 'all' | '1m' | '1w'
 
-export const filterData = (dateRange: DateRangeT, data: ReadonlyArray<unknown>) => {
+export const filterData = (dateRange: DateRangeT, data: ReadonlyArray<object>) => {
   switch (dateRange) {
     case 'all':
       return data

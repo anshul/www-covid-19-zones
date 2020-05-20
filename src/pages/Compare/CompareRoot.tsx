@@ -22,11 +22,11 @@ const CompareRoot: React.FC<Props> = ({ data, onCompare }) => {
   const [dateRange, setDateRange] = useState<DateRangeT>('all')
   const filteredData = useMemo(() => {
     if (!data) return []
-    return filterData(dateRange, data.newCases.data)
+    return filterData(dateRange, data.newCases.data as object[])
   }, [data, dateRange])
   const cumFilteredData = useMemo(() => {
     if (!data) return []
-    return filterData(dateRange, data.cumCases.data)
+    return filterData(dateRange, data.cumCases.data as object[])
   }, [data, dateRange])
 
   if (!data) {
