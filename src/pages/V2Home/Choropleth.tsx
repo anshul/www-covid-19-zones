@@ -134,21 +134,21 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, dateRange, logScale,
       ...stateTopo,
       features: stateTopo.features.filter(
         (d) =>
-          d.properties.zone.length >= 2 &&
-          selectedZoneCodes.some((code) => (code.length >= 2 && d.properties.zone.startsWith(code)) || code.startsWith(d.properties.zone))
+          d.properties.z.length >= 2 &&
+          selectedZoneCodes.some((code) => (code.length >= 2 && d.properties.z.startsWith(code)) || code.startsWith(d.properties.z))
       ),
     }
     const selectedDistrictTopo = {
       ...districtTopo,
       features: districtTopo.features.filter(
         (d) =>
-          d.properties.zone.length >= 2 &&
-          selectedZoneCodes.some((code) => (code.length >= 2 && d.properties.zone.startsWith(code)) || code.startsWith(d.properties.zone))
+          d.properties.z.length >= 2 &&
+          selectedZoneCodes.some((code) => (code.length >= 2 && d.properties.z.startsWith(code)) || code.startsWith(d.properties.z))
       ),
     }
 
-    const selectedDistrictCodes = selectedDistrictTopo.features.map((d) => d.properties.zone)
-    const selectedStateCodes = selectedStateTopo.features.map((d) => d.properties.zone)
+    const selectedDistrictCodes = selectedDistrictTopo.features.map((d) => d.properties.z)
+    const selectedStateCodes = selectedStateTopo.features.map((d) => d.properties.z)
     const projection = d3.geoMercator()
     const path = d3.geoPath(projection)
     projection.fitExtent(
@@ -167,7 +167,7 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, dateRange, logScale,
 
     gDistricts
       .selectAll('path')
-      .data(districtTopo.features, (d) => d.properties.zone)
+      .data(districtTopo.features, (d) => d.properties.u)
       .join(
         (enter) =>
           enter
@@ -176,13 +176,13 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, dateRange, logScale,
             .style('fill', (d, i) => color(0))
             .call((enter) => enter.transition(t).style('fill', (d, i) => color(d.properties.ipm)))
             .classed(classes.districtPath, true)
-            .classed(classes.activePath, (d) => selectedZoneCodes.includes(d.properties.zone))
-            .classed(classes.selectedDistrictPath, (d) => selectedDistrictCodes.includes(d.properties.zone)),
+            .classed(classes.activePath, (d) => selectedZoneCodes.includes(d.properties.z))
+            .classed(classes.selectedDistrictPath, (d) => selectedDistrictCodes.includes(d.properties.z)),
         (update) =>
           update
             .classed(classes.districtPath, true)
-            .classed(classes.activePath, (d) => selectedZoneCodes.includes(d.properties.zone))
-            .classed(classes.selectedDistrictPath, (d) => selectedDistrictCodes.includes(d.properties.zone)),
+            .classed(classes.activePath, (d) => selectedZoneCodes.includes(d.properties.z))
+            .classed(classes.selectedDistrictPath, (d) => selectedDistrictCodes.includes(d.properties.z)),
         (exit) => exit.call((exit) => exit.transition(t).attr('opacity', 0).remove())
       )
 
@@ -190,15 +190,15 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, dateRange, logScale,
     gStates.transition(t).attr('transform', `translate(${view.marginLeft - dx}, ${view.marginTop - dy})scale(${zoom})`)
     gStates
       .selectAll('path')
-      .data(stateTopo.features, (d) => d.properties.zone)
+      .data(stateTopo.features, (d) => d.properties.z)
       .join(
         (enter) =>
           enter
             .append('path')
             .attr('d', path)
             .classed(classes.statePath, true)
-            .classed(classes.activePath, (d) => selectedZoneCodes.includes(d.properties.zone)),
-        (update) => update.classed(classes.statePath, true).classed(classes.activePath, (d) => selectedZoneCodes.includes(d.properties.zone)),
+            .classed(classes.activePath, (d) => selectedZoneCodes.includes(d.properties.z)),
+        (update) => update.classed(classes.statePath, true).classed(classes.activePath, (d) => selectedZoneCodes.includes(d.properties.z)),
         (exit) => exit.call((exit) => exit.transition(t).attr('opacity', 0).remove())
       )
     return () => {
