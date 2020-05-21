@@ -91,36 +91,39 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, dateRange, logScal
         (exit) => exit.call((exit) => exit.transition(t).attr('opacity', 0).remove())
       )
 
-    const legend = svg.select('.legend')
-    legend.attr('transform', `translate(${view.marginLeft},${view.marginTop})`)
+    // const legend = svg.select('.legend')
+    // legend.attr('transform', `translate(${view.marginLeft},${view.marginTop})`)
 
-    const legendX = 20
-    const legendRectWidth = 40
-    const legendRectHeight = 20
-    legend
-      .selectAll('g')
-      .data(data.zones, (d) => d.code)
-      .join((enter) =>
-        enter
-          .append('g')
-          .call((enter) =>
-            enter
-              .append('rect')
-              .attr('width', legendRectWidth)
-              .attr('height', legendRectHeight)
-              .attr('x', legendX)
-              .attr('y', (_, i) => i * legendRectHeight + i * 10)
-              .style('fill', (d) => colorMap[d.code])
-          )
-          .call((enter) =>
-            enter
-              .append('text')
-              .attr('x', legendX + legendRectWidth + 10)
-              .attr('y', (_, i) => i * legendRectHeight + i * 10)
-              .attr('alignment-baseline', 'hanging')
-              .text((d) => d.name)
-          )
-      )
+    // const legendX = 20
+    // const legendRectWidth = 40
+    // const legendRectHeight = 20
+    // const legendUpdater = (selection) =>
+    //   selection
+    //     .call((selection) =>
+    //       selection
+    //         .append('rect')
+    //         .attr('width', legendRectWidth)
+    //         .attr('height', legendRectHeight)
+    //         .attr('x', legendX)
+    //         .attr('y', (_, i) => i * legendRectHeight + i * 10)
+    //         .style('fill', (d) => colorMap[d.code])
+    //     )
+    //     .call((selection) =>
+    //       selection
+    //         .append('text')
+    //         .attr('x', legendX + legendRectWidth + 10)
+    //         .attr('y', (_, i) => i * legendRectHeight + i * 10)
+    //         .attr('alignment-baseline', 'hanging')
+    //         .text((d) => d.name)
+    //     )
+    // legend
+    //   .selectAll('g')
+    //   .data(data.zones, (d) => d.code)
+    //   .join(
+    //     (enter) => enter.append('g').call(legendUpdater),
+    //     (update) => update.call(legendUpdater),
+    //     (exit) => exit.remove()
+    //   )
 
     return () => {
       console.log('d3 cleanup')
