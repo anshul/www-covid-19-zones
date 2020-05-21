@@ -83,7 +83,7 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, dateRange, logScal
         .style('stroke', (d) => colorMap[d.code])
         .style('stroke-width', 2)
     gChart
-      .selectAll('.line')
+      .selectAll('path')
       .data(data.zones, (d) => d.code)
       .join(
         (enter) => enter.append('path').call(updater),
