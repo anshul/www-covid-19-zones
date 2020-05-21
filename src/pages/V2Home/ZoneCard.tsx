@@ -1,6 +1,6 @@
 import { graphql } from 'babel-plugin-relay/macro'
 import React from 'react'
-import { createStyles, makeStyles } from '@material-ui/styles'
+import { createStyles, makeStyles } from '@material-ui/core'
 import { Typography } from '@material-ui/core'
 import { createFragmentContainer } from 'react-relay'
 import { ZoneCard_zone } from '../../__generated__/ZoneCard_zone.graphql'

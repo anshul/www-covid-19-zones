@@ -1,5 +1,5 @@
 import React from 'react'
-import { makeStyles, createStyles } from '@material-ui/styles'
+import { makeStyles, createStyles } from '@material-ui/core'
 import { flamingo, fireBush, slateBlue, mountainMeadow } from '../../utils/ColorFactory'
 import clsx from 'clsx'
 

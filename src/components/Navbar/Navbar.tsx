@@ -1,6 +1,6 @@
 import { AppBar, Fade, IconButton, Menu, MenuItem, Theme, Toolbar, Typography } from '@material-ui/core'
 import { MenuOpen } from '@material-ui/icons'
-import { createStyles, makeStyles } from '@material-ui/styles'
+import { createStyles, makeStyles } from '@material-ui/core'
 import React, { SyntheticEvent, useState } from 'react'
 import { Grid } from 'react-flexbox-grid'
 import { Link, RouteComponentProps } from 'react-router-dom'

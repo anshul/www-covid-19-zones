@@ -1,6 +1,6 @@
 import { Button as MuiButton, ButtonProps, CircularProgress } from '@material-ui/core'
 import { AddAlertOutlined } from '@material-ui/icons'
-import { createStyles, makeStyles } from '@material-ui/styles'
+import { createStyles, makeStyles } from '@material-ui/core'
 import clsx from 'clsx'
 import React from 'react'
 

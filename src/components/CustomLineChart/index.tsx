@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Theme } from '@material-ui/core'
+import { Theme, makeStyles, createStyles } from '@material-ui/core'
 import {
   LineChart,
   CartesianGrid,
@@ -14,7 +14,6 @@ import {
   LegendProps,
   YAxisProps,
 } from 'recharts'
-import { makeStyles, createStyles } from '@material-ui/styles'
 import { lineColors, pairedColors, fireBush } from '../../utils/ColorFactory'
 import { Grid, Col, Row } from 'react-flexbox-grid'
 
