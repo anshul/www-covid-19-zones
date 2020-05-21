@@ -1,5 +1,6 @@
 import { graphql } from 'babel-plugin-relay/macro'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
+import * as d3 from 'd3'
 import { Col, Grid, Row } from 'react-flexbox-grid'
 import { createFragmentContainer } from 'react-relay'
 import { DateRangeT, UrlT, MapDataT } from '../../types'
@@ -11,6 +12,7 @@ import DailyChart from './DailyChart'
 import CompareBar from './CompareBar'
 import ErrorPanel from './ErrorPanel'
 import ZoneBar from './ZoneBar'
+import ZoneCard from './ZoneCard'
 
 interface Props {
   data: V2HomeRoot_data | null
@@ -28,8 +30,18 @@ const emptyZone = {
   name: '',
 }
 
+const colors = {
+  palette: ['#fffcf9', '#fff5eb', '#fee6ce', '#fdd0a2', '#fdae6b', '#fd8d3c', '#f16913', '#d94801', '#a63603', '#7f2704', '#641A2C'],
+  palette0: ['#fffcf9', '#fff5f0', '#fee0d2', '#fcbba1', '#fc9272', '#fb6a4a', '#ef3b2c', '#cb181d', '#a50f15', '#67000d', '#333333'],
+  palette2: ['#fffcf9', '#fcfbfd', '#efedf5', '#dadaeb', '#bcbddc', '#9e9ac8', '#807dba', '#6a51a3', '#54278f', '#3f007d', '#333333'],
+}
+const thresholds = [3, 5, 10, 20, 40, 60, 80, 100, 250, 1000]
+
 const V2HomeRoot: React.FC<Props> = ({ data, codes, mode, go, dateRange, logScale }) => {
   const onSearch = (code: string) => go({ codes: mode === 'compare' ? [code] : [code] })
+  const colorScale = useMemo(() => d3.scaleThreshold<number, string>().domain(thresholds).range(colors.palette), [])
+  const colorConst = (count: number): string => '#eeeeee'
+
   const response: MapDataT = useSWR(`/api/maps?codes=in`)
   const colorMap = data
     ? Object.fromEntries(new Map(data.zones.map((zone, i) => [zone.code, lineColors[i] ? lineColors[i][500] : '#aaaaaa'])))
@@ -53,12 +65,23 @@ const V2HomeRoot: React.FC<Props> = ({ data, codes, mode, go, dateRange, logScal
       )}
       <Row style={{ minHeight: '40px' }}>
         <Col xs={12} md={12}>
+          <Row start='xs'>
+            {cachedData &&
+              cachedData.zones.map((zone) => (
+                <Col className='fade' xs={6} sm={4} md={3} lg={2} key={zone.code}>
+                  <ZoneCard lineColor={colorMap[zone.code]} ipmColor={colorScale} iColor={colorConst} zone={zone} />
+                </Col>
+              ))}
+          </Row>
+
           <Choropleth
             colorMap={colorMap}
             map={response.data as MapDataT}
             codes={codes}
             mode={mode}
             data={cachedData}
+            colorScale={colorScale}
+            colorConst={colorConst}
             go={go}
             dateRange={dateRange}
             logScale={logScale}

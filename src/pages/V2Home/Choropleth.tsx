@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useEffect, useMemo, useState, memo } from 'react'
+import React, { useEffect, useState, memo } from 'react'
 import { createStyles, makeStyles } from '@material-ui/core'
 import * as d3 from 'd3'
 import * as topojson from 'topojson'
@@ -7,15 +7,16 @@ import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
 import { MapDataT } from '../../types'
 import useResponsiveView from '../../hooks/useResponsiveView'
 import colorLegend from './colorLegend'
-import ZoneCard from './ZoneCard'
-import { Row, Col } from 'react-flexbox-grid'
 import NumberPill from './NumberPill'
+import { ScaleThreshold } from 'd3'
 
 interface Props {
   map: MapDataT | null
   colorMap: {
     [code: string]: string
   }
+  colorScale: ScaleThreshold<number, string>
+  colorConst: (count: number) => string
   data: V2HomeRoot_data | null
   codes: string[]
   go: (target: UrlT) => void
@@ -100,20 +101,10 @@ const useStyles = makeStyles(() =>
     },
   })
 )
-const colors = {
-  palette: ['#fffcf9', '#fff5eb', '#fee6ce', '#fdd0a2', '#fdae6b', '#fd8d3c', '#f16913', '#d94801', '#a63603', '#7f2704', '#641A2C'],
-  palette0: ['#fffcf9', '#fff5f0', '#fee0d2', '#fcbba1', '#fc9272', '#fb6a4a', '#ef3b2c', '#cb181d', '#a50f15', '#67000d', '#333333'],
-  palette2: ['#fffcf9', '#fcfbfd', '#efedf5', '#dadaeb', '#bcbddc', '#9e9ac8', '#807dba', '#6a51a3', '#54278f', '#3f007d', '#333333'],
-}
-const thresholds = [3, 5, 10, 20, 40, 60, 80, 100, 250, 1000]
-// const thresholds = [0.2, 1, 2, 10, 20, 40, 60, 80, 100, 1000].map((x) => x * 5)
 
-const Choropleth: React.FC<Props> = ({ map, data, go, mode, codes, dateRange, logScale, colorMap }) => {
+const Choropleth: React.FC<Props> = ({ map, data, go, mode, codes, dateRange, logScale, colorMap, colorScale, colorConst }) => {
   const classes = useStyles()
   const view = useResponsiveView({ marginTop: 70, marginLeft: 5, marginBottom: 0, marginRight: 5 })
-  const color = useMemo(() => d3.scaleThreshold().domain(thresholds).range(colors.palette), [])
-  const colorHex = color
-  const colorConst = (count: number): string => '#eeeeee'
   const [tooltip, setTooltip] = useState<TooltipT>(null)
 
   useEffect(() => {
@@ -137,7 +128,7 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, codes, dateRange, lo
     const gLegend = svg.select('.colorLegend')
     gLegend
       .call(colorLegend, {
-        color: color,
+        color: colorScale,
         title: 'Infections per million population',
         width: 320,
       })
@@ -246,8 +237,8 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, codes, dateRange, lo
           enter
             .append('path')
             .attr('d', path)
-            .style('fill', (d, i) => color(0))
-            .call((enter) => enter.style('fill', (d, i) => color(d.properties.ipm)))
+            .style('fill', (d, i) => colorScale(0))
+            .call((enter) => enter.style('fill', (d, i) => colorScale(d.properties.ipm)))
             .call(districtUpdater),
         (update) => update.attr('d', path).call(districtUpdater),
         (exit) => exit.call((exit) => exit.transition(t).attr('opacity', 0).remove())
@@ -284,7 +275,7 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, codes, dateRange, lo
     classes.selectedDistrictPath,
     classes.statePath,
     codes,
-    color,
+    colorScale,
     data,
     go,
     map,
@@ -302,15 +293,6 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, codes, dateRange, lo
 
   return (
     <>
-      <Row start='xs'>
-        {data &&
-          data.zones.map((zone) => (
-            <Col className='fade' xs={6} sm={4} md={3} lg={2} key={zone.code}>
-              <ZoneCard lineColor={colorMap[zone.code]} ipmColor={colorHex} iColor={colorConst} zone={zone} />
-            </Col>
-          ))}
-      </Row>
-
       <div ref={view.ref} className={classes.mapRoot}>
         <div className={`${classes.tooltip} tooltip`} style={{ display: tooltip ? 'block' : 'none' }}>
           <table style={{ tableLayout: 'fixed', width: '240px' }}>
@@ -338,7 +320,7 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, codes, dateRange, lo
                       </td>
                       <td className={classes.term}>covid-19 infections</td>
                       <td>
-                        <NumberPill count={row.ipm} color={colorHex} />
+                        <NumberPill count={row.ipm} color={colorScale} />
                       </td>
                       <td className={classes.term}>infections per million</td>
                     </tr>
