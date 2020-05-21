@@ -11,7 +11,7 @@ import {
   Theme,
 } from '@material-ui/core'
 import { Close, Search } from '@material-ui/icons'
-import { createStyles, makeStyles } from '@material-ui/styles'
+import { createStyles, makeStyles } from '@material-ui/core'
 import { graphql } from 'babel-plugin-relay/macro'
 import React, { useState } from 'react'
 import { QueryRenderer } from 'react-relay'

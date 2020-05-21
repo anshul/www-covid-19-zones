@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState, memo } from 'react'
-import { createStyles, makeStyles } from '@material-ui/styles'
+import { createStyles, makeStyles } from '@material-ui/core'
 import * as d3 from 'd3'
 import * as topojson from 'topojson'
 import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'

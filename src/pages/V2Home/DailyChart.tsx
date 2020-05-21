@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, memo } from 'react'
-import { createStyles, makeStyles } from '@material-ui/styles'
+import { createStyles, makeStyles } from '@material-ui/core'
 import * as d3 from 'd3'
 import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
 import useResponsiveView from '../../hooks/useResponsiveView'

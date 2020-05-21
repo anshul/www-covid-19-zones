@@ -1,5 +1,5 @@
 import React from 'react'
-import { createStyles, makeStyles } from '@material-ui/styles'
+import { createStyles, makeStyles } from '@material-ui/core'
 import { Typography } from '@material-ui/core'
 import { pickTextColor } from '../../utils/ColorFactory'
 interface Props {

@@ -30,21 +30,15 @@ function App() {
       })}
     >
       <Router>
-        <Route
-          render={({ location }) => (
-            <>
-              <Route path='*' exact component={Navbar} />
-              <Switch location={location}>
-                <Route exact path='/' render={() => <Redirect to='/zones/in' />} />
-                <Route exact path='/v2' render={() => <Redirect to='/v2/zones/in' />} />
-                {pages.map((page) => {
-                  return <Route exact key={page.displayName} style={{ marginTop: '8px' }} path={page.path} component={page.view} />
-                })}
-                <Route path='*' exact={true} component={GenericNotFound} />
-              </Switch>
-            </>
-          )}
-        />
+        <Route path='*' exact component={Navbar} />
+        <Switch>
+          <Route exact path='/' render={() => <Redirect to='/zones/in' />} />
+          <Route exact path='/v2' render={() => <Redirect to='/v2/zones/in' />} />
+          {pages.map((page) => {
+            return <Route exact key={page.displayName} style={{ marginTop: '8px' }} path={page.path} component={page.view} />
+          })}
+          <Route path='*' exact={true} component={GenericNotFound} />
+        </Switch>
       </Router>
     </ThemeProvider>
   )

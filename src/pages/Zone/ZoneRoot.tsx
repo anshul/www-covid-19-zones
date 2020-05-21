@@ -1,6 +1,6 @@
 import { Breadcrumbs, Button } from '@material-ui/core'
 import { Add } from '@material-ui/icons'
-import { createStyles, makeStyles } from '@material-ui/styles'
+import { createStyles, makeStyles } from '@material-ui/core'
 import { graphql } from 'babel-plugin-relay/macro'
 import React, { useMemo, useState } from 'react'
 import { Col, Grid, Row } from 'react-flexbox-grid'

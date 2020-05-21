@@ -1,6 +1,6 @@
 import { Breadcrumbs, Button } from '@material-ui/core'
 import { Add } from '@material-ui/icons'
-import { createStyles, makeStyles } from '@material-ui/styles'
+import { createStyles, makeStyles } from '@material-ui/core'
 import React from 'react'
 import { Col, Row } from 'react-flexbox-grid'
 import { Link } from 'react-router-dom'

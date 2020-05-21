@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { createStyles, makeStyles } from '@material-ui/styles'
+import { createStyles, makeStyles } from '@material-ui/core'
 import * as d3 from 'd3'
 import React, { useCallback, useEffect, useState } from 'react'
 import Button from '../../components/Button'
