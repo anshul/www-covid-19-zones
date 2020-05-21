@@ -91,6 +91,37 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, dateRange, logScal
         (exit) => exit.call((exit) => exit.transition(t).attr('opacity', 0).remove())
       )
 
+    const legend = svg.select('.legend')
+    legend.attr('transform', `translate(${view.marginLeft},${view.marginTop})`)
+
+    const legendX = 20
+    const legendRectWidth = 40
+    const legendRectHeight = 20
+    legend
+      .selectAll('g')
+      .data(data.zones, (d) => d.code)
+      .join((enter) =>
+        enter
+          .append('g')
+          .call((enter) =>
+            enter
+              .append('rect')
+              .attr('width', legendRectWidth)
+              .attr('height', legendRectHeight)
+              .attr('x', legendX)
+              .attr('y', (_, i) => i * legendRectHeight + i * 10)
+              .style('fill', (d) => colorMap[d.code])
+          )
+          .call((enter) =>
+            enter
+              .append('text')
+              .attr('x', legendX + legendRectWidth + 10)
+              .attr('y', (_, i) => i * legendRectHeight + i * 10)
+              .attr('alignment-baseline', 'hanging')
+              .text((d) => d.name)
+          )
+      )
+
     return () => {
       console.log('d3 cleanup')
     }
@@ -115,6 +146,7 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, dateRange, logScal
           <g className='chart' />
           <g className='xAxis' />
           <g className='yAxis' />
+          <g className='legend' />
         </svg>
       </div>
     </>
