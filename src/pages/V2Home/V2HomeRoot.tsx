@@ -82,8 +82,8 @@ const V2HomeRoot: React.FC<Props> = ({ data, codes, mode, go, dateRange, logScal
 
       <Row></Row>
       <Row style={{ minHeight: '40px' }}>
-        {parentZones.map((pz) => (
-          <Col key={pz.code} xs={Math.max(colWidth, 6)} md={Math.max(colWidth, 4)} lg={colWidth} style={{ height: mapHeight }}>
+        {parentZones.map((pz, idx) => (
+          <Col key={`map-${idx}`} xs={Math.max(colWidth, 6)} md={Math.max(colWidth, 4)} lg={colWidth} style={{ height: mapHeight }}>
             <Choropleth
               title={pz.name}
               titleCode={pz.code}
