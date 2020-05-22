@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme: Theme) =>
       fontWeight: 800,
       display: 'flex',
       justifyContent: 'space-between',
-      alignItems: 'center',
+      alignItems: 'top',
     },
     subtitle: {
       fontSize: '11px',

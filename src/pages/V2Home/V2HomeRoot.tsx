@@ -94,7 +94,7 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
       <Row start='xs'>
         {cachedData &&
           cachedData.zones.map((zone) => (
-            <Col className='fade' xs={6} sm={4} md={3} lg={2} key={zone.code}>
+            <Col className='fade' xs={6} sm={4} md={3} lg={2} key={zone.code} style={{ marginTop: '24px' }}>
               <ZoneCard
                 lineColor={zoneColor(zone.code)}
                 ipmColor={ipmColor}
