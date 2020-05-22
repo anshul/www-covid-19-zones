@@ -1,3 +1,4 @@
+/* eslint-disable */
 // @ts-nocheck
 const isMobile = () => {
   const ua = navigator.userAgent || navigator.vendor || window.opera
