@@ -78,6 +78,11 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
       : { ...(z.parent || z), key: `${(z.parent || z).code}-${z.category}`, name: `${(z.parent || z).name} (${z.pCategory})` }
   const parentZones = cachedData ? Object.values(Object.fromEntries(cachedData.zones.map(groupZone).map((z) => [z.key, z]))) : []
   const colWidth = cachedData ? Math.max(3, Math.floor(12 / parentZones.length)) : 12
+  const removeZone = (code: string) => {
+    if (cachedData && cachedData.zones.length <= 1) return go({ mode: 'zones' })
+
+    go({ codes: cachedData?.zones.map((z) => z.code).filter((c) => c !== code) })
+  }
 
   return (
     <Grid>
@@ -90,7 +95,14 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
         {cachedData &&
           cachedData.zones.map((zone) => (
             <Col className='fade' xs={6} sm={4} md={3} lg={2} key={zone.code}>
-              <ZoneCard lineColor={zoneColor(zone.code)} ipmColor={ipmColor} iColor={iColor} zone={zone} />
+              <ZoneCard
+                lineColor={zoneColor(zone.code)}
+                ipmColor={ipmColor}
+                iColor={iColor}
+                zone={zone}
+                canRemove={mode === 'compare'}
+                onRemove={() => removeZone(zone.code)}
+              />
             </Col>
           ))}
       </Row>
