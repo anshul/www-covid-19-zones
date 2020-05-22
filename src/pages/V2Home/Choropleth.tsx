@@ -1,9 +1,8 @@
 // @ts-nocheck
-import { createStyles, makeStyles } from '@material-ui/core'
-import * as d3 from 'd3'
-import { ScaleThreshold } from 'd3'
 import React, { memo, useEffect, useState } from 'react'
+import * as d3 from 'd3'
 import * as topojson from 'topojson'
+import { createStyles, makeStyles } from '@material-ui/core'
 import useResponsiveView from '../../hooks/useResponsiveView'
 import { MapDataT } from '../../types'
 import NumberPill from './NumberPill'
@@ -17,17 +16,15 @@ interface Props {
   readonly titleCode: string
   readonly title: string
   map: MapDataT | null
-  colorMap: {
-    [code: string]: string
-  }
-  colorScale: ScaleThreshold<number, string>
-  colorConst: (count: number) => string
+  zoneColor: d3.ScaleOrdinal<string, string>
+  ipmColor: d3.ScaleThreshold<number, string>
+  iColor: d3.ScaleThreshold<number, string>
   zones: readonly ZoneT[] | null
   codes: string[]
   go: (target: UrlT) => void
   mode: string
   dateRange: DateRangeT
-  logScale: boolean
+  isLogarithmic: boolean
   isTouchDevice: boolean
 }
 interface TooltipRowT {
@@ -128,10 +125,10 @@ const Choropleth: React.FC<Props> = ({
   mode,
   codes,
   dateRange,
-  logScale,
-  colorMap,
-  colorScale,
-  colorConst,
+  isLogarithmic,
+  zoneColor,
+  ipmColor,
+  iColor,
   isTouchDevice,
 }) => {
   const classes = useStyles()
@@ -281,8 +278,8 @@ const Choropleth: React.FC<Props> = ({
           enter
             .append('path')
             .attr('d', path)
-            .style('fill', (d, i) => colorScale(0))
-            .call((enter) => enter.style('fill', (d, i) => colorScale(d.properties.ipm)))
+            .style('fill', (d, i) => ipmColor(0))
+            .call((enter) => enter.style('fill', (d, i) => ipmColor(d.properties.ipm)))
             .call(districtUpdater),
         (update) => update.attr('d', path).call(districtUpdater),
         (exit) => exit.call((exit) => (isTouchDevice ? exit.remove() : exit.transition().duration(1000).attr('opacity', 0).remove()))
@@ -317,7 +314,7 @@ const Choropleth: React.FC<Props> = ({
     classes.statePath,
     classes.title,
     codes,
-    colorScale,
+    ipmColor,
     go,
     isTouchDevice,
     map,
@@ -361,11 +358,11 @@ const Choropleth: React.FC<Props> = ({
                     </tr>
                     <tr>
                       <td>
-                        <NumberPill count={row.i} color={colorConst} />
+                        <NumberPill count={row.i} color={iColor} />
                       </td>
                       <td className={classes.term}>covid-19 infections</td>
                       <td>
-                        <NumberPill count={row.ipm} color={colorScale} />
+                        <NumberPill count={row.ipm} color={ipmColor} />
                       </td>
                       <td className={classes.term}>infections per million</td>
                     </tr>

@@ -18,14 +18,14 @@ const V2Home: React.FC<RouteComponentProps<{ mode: string; codes: string }>> = (
   const q = parse(location.search, { ignoreQueryPrefix: true })
   const codes = match.params.codes.split(',')
   const dateRange: string = ['all', '1w', '1m'].find((x) => x === q.t) || 'all'
-  const logScale: boolean = `${q.log || ''}`.length > 1 && q.log !== 'no'
+  const isLogarithmic: boolean = `${q.log || ''}`.length > 1 && q.log !== 'no'
   const mode: string = match.params.mode || 'zones'
 
   const go = (target: UrlT) => {
-    const newTarget = { mode, codes, dateRange: q.dateRange, logScale: q.logScale, ...target }
+    const newTarget = { mode, codes, dateRange: q.dateRange, isLogarithmic: q.isLogarithmic, ...target }
     newTarget.codes = newTarget.codes.filter((x) => x)
 
-    const newQ = stringify({ t: newTarget.dateRange, log: `${newTarget.logScale || ''}`.length > 1 ? 'yes' : undefined })
+    const newQ = stringify({ t: newTarget.dateRange, log: `${newTarget.isLogarithmic || ''}`.length > 1 ? 'yes' : undefined })
     const query = newQ.length > 1 ? `?${newQ}` : ''
 
     if (newTarget.codes.length === 0) {
@@ -35,7 +35,7 @@ const V2Home: React.FC<RouteComponentProps<{ mode: string; codes: string }>> = (
     history.push(`/v2/${newTarget.mode}/${newTarget.codes.join(',')}${query}`)
   }
 
-  console.log('Rendering V2Home', { codes, mode, dateRange, logScale })
+  console.log('Rendering V2Home', { codes, mode, dateRange, isLogarithmic })
 
   return (
     <QueryRenderer<V2HomeQuery>
@@ -66,7 +66,7 @@ const V2Home: React.FC<RouteComponentProps<{ mode: string; codes: string }>> = (
                 mode={mode}
                 go={go}
                 dateRange={dateRange as DateRangeT}
-                logScale={logScale}
+                isLogarithmic={isLogarithmic}
               />
             </SWRConfig>
           )

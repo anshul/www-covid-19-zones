@@ -22,7 +22,7 @@ interface Props {
   go: (target: UrlT) => void
   mode: string
   dateRange: DateRangeT
-  logScale: boolean
+  isLogarithmic: boolean
 }
 
 const MODES = ['compare', 'zones']
@@ -35,19 +35,34 @@ const emptyZone = {
 const colors = {
   palette: ['#fff7ec', '#ffffcc', '#ffeda0', '#fed976', '#feb24c', '#fd8d3c', '#fc4e2a', '#e31a1c', '#bd0026', '#800026', '#662506', '#333333'],
 }
-// const thresholds = [3, 5, 10, 20, 40, 60, 80, 100, 250, 1000]
-const thresholds = [3, 10, 20, 50, 75, 100, 250, 500, 1000, 2000, 10000]
+// const ipmThresholds = [3, 5, 10, 20, 40, 60, 80, 100, 250, 1000]
+const ipmThresholds = [3, 10, 20, 50, 75, 100, 250, 500, 1000, 2000, 10000]
+const iThresholds = [0]
 
-const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dateRange, logScale }) => {
+const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dateRange, isLogarithmic }) => {
+  const aspectRatio = window.innerWidth / window.innerHeight
   const onSearch = (code: string) => go({ codes: mode === 'compare' ? [code] : [code] })
-  const colorScale = useMemo(() => d3.scaleThreshold<number, string>().domain(thresholds).range(colors.palette), [])
-  const colorConst = (count: number): string => '#eeeeee'
-
   const response: MapDataT = useSWR(`/api/maps?codes=in`)
-  const colorMap = data
-    ? Object.fromEntries(new Map(data.zones.map((zone, i) => [zone.code, lineColors[i] ? lineColors[i][500] : '#aaaaaa'])))
-    : {}
   const [cachedData, setCachedData] = useState(data)
+  const ipmColor = useMemo(() => d3.scaleThreshold<number, string>().domain(ipmThresholds).range(colors.palette), [])
+  const iColor = useMemo(() => d3.scaleThreshold<number, string>().domain(iThresholds).range(['#ffffff', '#eeeeee']), [])
+  const zoneColor = useMemo(
+    () =>
+      d3
+        .scaleOrdinal<string, string>()
+        .domain(cachedData ? cachedData.zones.map((z) => z.code) : [])
+        .range(lineColors.map((l) => l[500])),
+    [cachedData]
+  )
+  const mapHeight = useMemo(() => {
+    if (cachedData && cachedData.zones.length === 1) {
+      if (aspectRatio < 1) {
+        return '400px'
+      }
+      return window.innerHeight - 400 > 300 ? `${window.innerHeight - 400}px` : '400px'
+    }
+    return cachedData && cachedData.zones.length > 1 ? '400px' : '200px'
+  }, [aspectRatio, cachedData])
   const firstZone = cachedData && cachedData.zones.length >= 1 ? cachedData.zones[0] : null
   useEffect(() => {
     if (data) setCachedData(data)
@@ -56,13 +71,6 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
     if (!MODES.find((m) => m === mode)) return <ErrorPanel onSearch={onSearch} message='Page not found!' />
     if (!firstZone) return <ErrorPanel onSearch={onSearch} message='Invalid zone!' />
   }
-  const aspectRatio = window.innerWidth / window.innerHeight
-  let mapHeight = cachedData && cachedData.zones.length > 1 ? '400px' : '200px'
-  if (cachedData && cachedData.zones.length === 1) {
-    if (aspectRatio < 1) mapHeight = '400px'
-    mapHeight = window.innerHeight - 400 > 300 ? `${window.innerHeight - 400}px` : '400px'
-  }
-
   const groupZone = (z: V2HomeRoot_data['zones'][0]) =>
     z.category === 'country' || z.category === 'state'
       ? { ...z, key: z.code }
@@ -81,12 +89,12 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
         {cachedData &&
           cachedData.zones.map((zone) => (
             <Col className='fade' xs={6} sm={4} md={3} lg={2} key={zone.code}>
-              <ZoneCard lineColor={colorMap[zone.code]} ipmColor={colorScale} iColor={colorConst} zone={zone} />
+              <ZoneCard lineColor={zoneColor(zone.code)} ipmColor={ipmColor} iColor={iColor} zone={zone} />
             </Col>
           ))}
       </Row>
       <Col xs={12} md={12}>
-        <ChoroLegend color={colorScale} />
+        <ChoroLegend color={ipmColor} />
       </Col>
 
       <Row></Row>
@@ -97,21 +105,29 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
               title={group.name}
               titleCode={group.code}
               isTouchDevice={isTouchDevice}
-              colorMap={colorMap}
               map={response.data as MapDataT}
               codes={codes}
               mode={mode}
               zones={cachedData ? cachedData.zones.filter((z) => groupZone(z).key === group.key) : null}
-              colorScale={colorScale}
-              colorConst={colorConst}
+              zoneColor={zoneColor}
+              ipmColor={ipmColor}
+              iColor={iColor}
               go={go}
               dateRange={dateRange}
-              logScale={logScale}
+              isLogarithmic={isLogarithmic}
             />
           </Col>
         ))}
         <Col xs={12} md={12}>
-          <DailyChart colorMap={colorMap} codes={codes} mode={mode} data={cachedData} go={go} dateRange={dateRange} logScale={logScale} />
+          <DailyChart
+            zoneColor={zoneColor}
+            codes={codes}
+            mode={mode}
+            data={cachedData}
+            go={go}
+            dateRange={dateRange}
+            isLogarithmic={isLogarithmic}
+          />
         </Col>
       </Row>
     </Grid>
