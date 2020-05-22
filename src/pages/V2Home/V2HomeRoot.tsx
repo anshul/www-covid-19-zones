@@ -55,10 +55,15 @@ const V2HomeRoot: React.FC<Props> = ({ data, codes, mode, go, dateRange, logScal
     if (!MODES.find((m) => m === mode)) return <ErrorPanel onSearch={onSearch} message='Page not found!' />
     if (!firstZone) return <ErrorPanel onSearch={onSearch} message='Invalid zone!' />
   }
-  const mapHeight = cachedData ? (cachedData.zones.length > 1 ? '400px' : 'calc(100vh - 300px)') : '200px'
-  const parentZones = cachedData
-    ? Object.values(Object.fromEntries(cachedData.zones.map((z) => (z.parent ? z.parent : z)).map((z) => [z.code, z])))
-    : []
+  const aspectRatio = window.innerWidth / window.innerHeight
+  let mapHeight = cachedData && cachedData.zones.length > 1 ? '400px' : '200px'
+  if (cachedData && cachedData.zones.length === 1) mapHeight = aspectRatio > 1 ? `${Math.round(window.innerHeight - 300)}px` : '400px'
+
+  const groupZone = (z: V2HomeRoot_data['zones'][0]) =>
+    z.category === 'country' || z.category === 'state'
+      ? { ...z, key: z.code }
+      : { ...(z.parent || z), key: `${(z.parent || z).code}-${z.category}`, name: `${(z.parent || z).name} (${z.pCategory})` }
+  const parentZones = cachedData ? Object.values(Object.fromEntries(cachedData.zones.map(groupZone).map((z) => [z.key, z]))) : []
   const colWidth = cachedData ? Math.max(3, Math.floor(12 / parentZones.length)) : 12
 
   return (
@@ -82,16 +87,16 @@ const V2HomeRoot: React.FC<Props> = ({ data, codes, mode, go, dateRange, logScal
 
       <Row></Row>
       <Row style={{ minHeight: '40px' }}>
-        {parentZones.map((pz, idx) => (
-          <Col key={`map-${idx}`} xs={Math.max(colWidth, 6)} md={Math.max(colWidth, 4)} lg={colWidth} style={{ height: mapHeight }}>
+        {parentZones.map((group, index) => (
+          <Col key={`map-${index}`} xs={Math.max(colWidth, 6)} md={Math.max(colWidth, 4)} lg={colWidth} style={{ height: mapHeight }}>
             <Choropleth
-              title={pz.name}
-              titleCode={pz.code}
+              title={group.name}
+              titleCode={group.code}
               colorMap={colorMap}
               map={response.data as MapDataT}
               codes={codes}
               mode={mode}
-              zones={cachedData ? cachedData.zones.filter((z) => (z.parent ? z.parent.code === pz.code : z.code === pz.code)) : null}
+              zones={cachedData ? cachedData.zones.filter((z) => groupZone(z).key === group.key) : null}
               colorScale={colorScale}
               colorConst={colorConst}
               go={go}
@@ -113,6 +118,8 @@ export default createFragmentContainer(V2HomeRoot, {
     fragment V2HomeRoot_data on V2Stats {
       zones {
         code
+        category
+        pCategory
         name
         ...ZoneCard_zone
         unitCodes

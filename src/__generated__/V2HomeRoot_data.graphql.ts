@@ -6,6 +6,8 @@ import { FragmentRefs } from "relay-runtime";
 export type V2HomeRoot_data = {
     readonly zones: ReadonlyArray<{
         readonly code: string;
+        readonly category: string;
+        readonly pCategory: string;
         readonly name: string;
         readonly unitCodes: ReadonlyArray<string>;
         readonly chart: ReadonlyArray<{
@@ -62,6 +64,20 @@ return {
       "plural": true,
       "selections": [
         (v0/*: any*/),
+        {
+          "kind": "ScalarField",
+          "alias": null,
+          "name": "category",
+          "args": null,
+          "storageKey": null
+        },
+        {
+          "kind": "ScalarField",
+          "alias": null,
+          "name": "pCategory",
+          "args": null,
+          "storageKey": null
+        },
         (v1/*: any*/),
         {
           "kind": "ScalarField",
@@ -132,5 +148,5 @@ return {
   ]
 };
 })();
-(node as any).hash = 'b14a2ea54f3a9d6996f1252c21b65013';
+(node as any).hash = '5c1ce4375ab8b3c5dae481e2c0e6c1ed';
 export default node;

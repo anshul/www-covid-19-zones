@@ -111,6 +111,7 @@ type V2Stats {
 
 type V2Zone {
   attributionMd: String
+  category: String!
   chart: [TsPoint!]!
   children: [V2Zone!]
   code: String!
@@ -124,6 +125,7 @@ type V2Zone {
   fPopulation: String!
   fPopulationYear: String!
   name: String!
+  pCategory: String!
   parent: V2Zone
   perMillionActives: Float!
   perMillionFatalities: Float!

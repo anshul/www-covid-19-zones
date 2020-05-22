@@ -105,7 +105,9 @@ const useStyles = makeStyles(() =>
       fontSize: '80%',
     },
     title: {
-      fontSize: '125%',
+      fontSize: '12.2px',
+      fontWeight: '300',
+      fillOpacity: 0.7,
     },
   })
 )
@@ -231,15 +233,17 @@ const Choropleth: React.FC<Props> = ({
       districtTopo
     )
     const box = d3.geoPath(projection).bounds(selectedStateTopo)
-    const zoom = 1 // 0.98 * Math.min(view.innerWidth / (box[1][0] - box[0][0]), view.innerHeight / (box[1][1] - box[0][1]), 8)
+    const zoom = 0.98 * Math.min(view.innerWidth / (box[1][0] - box[0][0]), view.innerHeight / (box[1][1] - box[0][1]), 6)
     const dx = ((box[0][0] + box[1][0]) / 2) * zoom - view.innerWidth / 2
     const dy = ((box[0][1] + box[1][1]) / 2) * zoom - view.innerHeight / 2
     const gDistricts = svg.select('.districts')
     const transitionZoom = (selection) =>
-      selection
-        .transition()
-        .duration(1000)
-        .attr('transform', `translate(${view.marginLeft - dx}, ${view.marginTop - dy})scale(${zoom})`)
+      mode === 'compare'
+        ? selection.attr('transform', `translate(${view.marginLeft - dx}, ${view.marginTop - dy})scale(${zoom})`)
+        : selection
+            .transition()
+            .duration(1000)
+            .attr('transform', `translate(${view.marginLeft - dx}, ${view.marginTop - dy})scale(${zoom})`)
 
     const districtUpdater = (update) =>
       update
@@ -251,7 +255,7 @@ const Choropleth: React.FC<Props> = ({
         .on('mouseout', hideTooltip)
         .on('click', onClick)
     const filterCode = titleCode + '/'
-    const filterFeatures = (d) => true || d.properties.z === filterCode || d.properties.pz === filterCode || titleCode === 'in'
+    const filterFeatures = (d) => d.properties.z === filterCode || d.properties.pz === filterCode || titleCode === 'in'
     gDistricts
       .call(transitionZoom)
       .selectAll('path')
@@ -265,7 +269,7 @@ const Choropleth: React.FC<Props> = ({
             .call((enter) => enter.style('fill', (d, i) => colorScale(d.properties.ipm)))
             .call(districtUpdater),
         (update) => update.attr('d', path).call(districtUpdater),
-        (exit) => exit.call((exit) => exit.transition().duration(5000).attr('opacity', 0).remove())
+        (exit) => exit.call((exit) => exit.transition().duration(1000).attr('opacity', 0).remove())
       )
 
     const gStates = svg.select('.states')
@@ -286,7 +290,7 @@ const Choropleth: React.FC<Props> = ({
             .attr('d', path)
             .classed(classes.statePath, true)
             .classed(classes.activePath, (d) => selectedZoneCodes.includes(d.properties.z)),
-        (exit) => exit.call((exit) => exit.transition().duration(8000).attr('opacity', 0).remove())
+        (exit) => exit.call((exit) => exit.transition().duration(1000).attr('opacity', 0).remove())
       )
     return () => {
       console.log('d3 cleanup')
