@@ -99,7 +99,7 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
               key={`map-${idx}`}
               xs={Math.max(colWidth, 6)}
               md={Math.max(colWidth, 4)}
-              lg={colWidth}
+              lg={Math.max(colWidth, 4)}
               style={{ height: mapHeight, position: 'relative' }}
             >
               <Choropleth

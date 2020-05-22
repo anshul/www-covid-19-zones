@@ -51,10 +51,12 @@ const TrendChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor }) => {
 
     if (!data) return
 
-    const filteredZones = data.zones.map((z) => ({ ...z, chart: z.chart.filter((day) => day.totInf > threshold) }))
+    const filteredZones = data.zones
+      .map((z) => ({ ...z, chart: z.chart.filter((d) => d && d.totInf > threshold) }))
+      .filter((z) => z.chart && z.chart.length >= 1)
     const y = d3
       .scaleLog()
-      .domain([threshold, d3.max(filteredZones.flatMap((z) => z.chart.map((day) => day.totInf)))])
+      .domain([threshold, d3.max(filteredZones.flatMap((z) => z.chart.map((d) => d.totInf)))])
       .range([view.height - view.marginBottom, view.marginTop])
       .nice()
     const x = d3
