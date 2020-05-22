@@ -14,6 +14,7 @@ import DailyChart from './DailyChart'
 import ErrorPanel from './ErrorPanel'
 import ZoneBar from './ZoneBar'
 import ZoneCard from './ZoneCard'
+import TrendChart from './TrendChart'
 
 interface Props {
   isTouchDevice: boolean
@@ -109,6 +110,9 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
         ))}
         <Col xs={12} md={12}>
           <DailyChart colorMap={colorMap} codes={codes} mode={mode} data={cachedData} go={go} dateRange={dateRange} logScale={logScale} />
+        </Col>
+        <Col xs={12} md={12}>
+          <TrendChart colorMap={colorMap} codes={codes} mode={mode} data={cachedData} go={go} dateRange={dateRange} logScale={logScale} />
         </Col>
       </Row>
     </Grid>
