@@ -36,7 +36,7 @@ const NumberPill: React.FC<Props> = ({ color = () => '#eeeeee', count, allowNega
         }}
         className={classes.numberPill}
       >
-        {count && (count >= 0 || allowNegative) ? count : ''}
+        {count && (count >= 0 || allowNegative) ? count : '·'}
       </Typography>
     </span>
   )
