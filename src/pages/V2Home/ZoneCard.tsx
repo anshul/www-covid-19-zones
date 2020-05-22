@@ -39,7 +39,7 @@ const ZoneCard: React.FC<Props> = ({ zone, lineColor, ipmColor, iColor }) => {
         {zone.name}
       </Typography>
       <Typography className={classes.subtitle}>
-        Population {zone.fPopulation} ({zone.fPopulationYear})
+        Population {zone.fEstPopulation} ({zone.fEstPopulationYear})
       </Typography>
       <Row bottom='xs'>
         <span className={classes.term}>Infections</span>
@@ -58,8 +58,8 @@ export default createFragmentContainer(ZoneCard, {
     fragment ZoneCard_zone on V2Zone {
       code
       name
-      fPopulation
-      fPopulationYear
+      fEstPopulation
+      fEstPopulationYear
       perMillionInfections
       cumulativeInfections
     }

@@ -16,6 +16,7 @@ import ZoneBar from './ZoneBar'
 import ZoneCard from './ZoneCard'
 
 interface Props {
+  isTouchDevice: boolean
   data: V2HomeRoot_data | null
   codes: string[]
   go: (target: UrlT) => void
@@ -37,7 +38,7 @@ const colors = {
 // const thresholds = [3, 5, 10, 20, 40, 60, 80, 100, 250, 1000]
 const thresholds = [3, 10, 20, 50, 75, 100, 250, 500, 1000, 2000, 10000]
 
-const V2HomeRoot: React.FC<Props> = ({ data, codes, mode, go, dateRange, logScale }) => {
+const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dateRange, logScale }) => {
   const onSearch = (code: string) => go({ codes: mode === 'compare' ? [code] : [code] })
   const colorScale = useMemo(() => d3.scaleThreshold<number, string>().domain(thresholds).range(colors.palette), [])
   const colorConst = (count: number): string => '#eeeeee'
@@ -92,6 +93,7 @@ const V2HomeRoot: React.FC<Props> = ({ data, codes, mode, go, dateRange, logScal
             <Choropleth
               title={group.name}
               titleCode={group.code}
+              isTouchDevice={isTouchDevice}
               colorMap={colorMap}
               map={response.data as MapDataT}
               codes={codes}

@@ -43,7 +43,7 @@ const useResponsiveView = <T extends HTMLElement>(margins?: InputView): View<T> 
       if (!Array.isArray(entries)) return
       if (!entries.length) return
       const entry = entries[0]
-      if (view.width !== entry.contentRect.width || view.height !== entry.contentRect.height) {
+      if (view.width !== Math.floor(entry.contentRect.width) || view.height !== Math.floor(entry.contentRect.height)) {
         const width = Math.floor(entry.contentRect.width)
         const height = Math.floor(entry.contentRect.height)
         const innerWidth = Math.max(width - view.marginLeft - view.marginRight, 0)

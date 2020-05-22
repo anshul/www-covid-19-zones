@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-/* @relayHash 7bea6ba93f871ec8638394507dac0068 */
+/* @relayHash 4d082f76094e05bdf811c58769e1d3ec */
 
 import { ConcreteRequest } from "relay-runtime";
 import { FragmentRefs } from "relay-runtime";
@@ -52,8 +52,8 @@ fragment V2HomeRoot_data on V2Stats {
 fragment ZoneCard_zone on V2Zone {
   code
   name
-  fPopulation
-  fPopulationYear
+  fEstPopulation
+  fEstPopulationYear
   perMillionInfections
   cumulativeInfections
 }
@@ -158,14 +158,14 @@ return {
               {
                 "kind": "ScalarField",
                 "alias": null,
-                "name": "fPopulation",
+                "name": "fEstPopulation",
                 "args": null,
                 "storageKey": null
               },
               {
                 "kind": "ScalarField",
                 "alias": null,
-                "name": "fPopulationYear",
+                "name": "fEstPopulationYear",
                 "args": null,
                 "storageKey": null
               },
@@ -252,7 +252,7 @@ return {
     "operationKind": "query",
     "name": "V2HomeQuery",
     "id": null,
-    "text": "query V2HomeQuery(\n  $codes: [String!]!\n) {\n  v2Stats(codes: $codes) {\n    ...V2HomeRoot_data\n  }\n}\n\nfragment V2HomeRoot_data on V2Stats {\n  zones {\n    code\n    category\n    pCategory\n    name\n    ...ZoneCard_zone\n    unitCodes\n    chart {\n      dt\n      newInf\n      newInfSma5\n      totInf\n    }\n    parent {\n      code\n      name\n    }\n  }\n}\n\nfragment ZoneCard_zone on V2Zone {\n  code\n  name\n  fPopulation\n  fPopulationYear\n  perMillionInfections\n  cumulativeInfections\n}\n",
+    "text": "query V2HomeQuery(\n  $codes: [String!]!\n) {\n  v2Stats(codes: $codes) {\n    ...V2HomeRoot_data\n  }\n}\n\nfragment V2HomeRoot_data on V2Stats {\n  zones {\n    code\n    category\n    pCategory\n    name\n    ...ZoneCard_zone\n    unitCodes\n    chart {\n      dt\n      newInf\n      newInfSma5\n      totInf\n    }\n    parent {\n      code\n      name\n    }\n  }\n}\n\nfragment ZoneCard_zone on V2Zone {\n  code\n  name\n  fEstPopulation\n  fEstPopulationYear\n  perMillionInfections\n  cumulativeInfections\n}\n",
     "metadata": {}
   }
 };

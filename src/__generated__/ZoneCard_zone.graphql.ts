@@ -6,8 +6,8 @@ import { FragmentRefs } from "relay-runtime";
 export type ZoneCard_zone = {
     readonly code: string;
     readonly name: string;
-    readonly fPopulation: string;
-    readonly fPopulationYear: string;
+    readonly fEstPopulation: string;
+    readonly fEstPopulationYear: string;
     readonly perMillionInfections: number;
     readonly cumulativeInfections: number;
     readonly " $refType": "ZoneCard_zone";
@@ -44,14 +44,14 @@ const node: ReaderFragment = {
     {
       "kind": "ScalarField",
       "alias": null,
-      "name": "fPopulation",
+      "name": "fEstPopulation",
       "args": null,
       "storageKey": null
     },
     {
       "kind": "ScalarField",
       "alias": null,
-      "name": "fPopulationYear",
+      "name": "fEstPopulationYear",
       "args": null,
       "storageKey": null
     },
@@ -71,5 +71,5 @@ const node: ReaderFragment = {
     }
   ]
 };
-(node as any).hash = '1d53983ae9400abb9a56e07588840873';
+(node as any).hash = 'cdc6d8ba1cd3ebf78e334f428cc38854';
 export default node;

@@ -28,6 +28,7 @@ interface Props {
   mode: string
   dateRange: DateRangeT
   logScale: boolean
+  isTouchDevice: boolean
 }
 interface TooltipRowT {
   name: string
@@ -125,13 +126,15 @@ const Choropleth: React.FC<Props> = ({
   colorMap,
   colorScale,
   colorConst,
+  isTouchDevice,
 }) => {
   const classes = useStyles()
   const view = useResponsiveView({ marginTop: 5, marginLeft: 5, marginBottom: 5, marginRight: 5 })
   const [tooltip, setTooltip] = useState<TooltipT>(null)
 
   useEffect(() => {
-    console.log('render choropleth', { map, zones })
+    const currentlyOnCountry = titleCode === 'in'
+    console.log('render choropleth', { currentlyOnCountry, map, zones })
     const maybeDiv: unknown = view.ref.current
     if (!maybeDiv) return
     const el: HTMLElement = maybeDiv as HTMLElement
@@ -146,9 +149,8 @@ const Choropleth: React.FC<Props> = ({
 
     const onClick = function (d) {
       const code = d.properties.z.replace(/\/$/, '')
-      const parentCode = d.properties.pz.replace(/\/$/, '')
-      const currentlyOnCountry = zones.length === 1 && zones[0].category === "country"
-      go({ codes: mode === 'compare' ? [...codes, code] : currentlyOnCountry ? [parentCode] : [code] })
+      // const parentCode = d.properties.pz.replace(/\/$/, '')
+      go({ codes: mode === 'compare' ? [...codes, code] : [code] })
     }
     const gTitle = svg.select('.title')
     gTitle
@@ -235,9 +237,9 @@ const Choropleth: React.FC<Props> = ({
       districtTopo
     )
     const box = d3.geoPath(projection).bounds(selectedStateTopo)
-    const zoom = 0.98 * Math.min(view.innerWidth / (box[1][0] - box[0][0]), view.innerHeight / (box[1][1] - box[0][1]), 6)
-    const dx = ((box[0][0] + box[1][0]) / 2) * zoom - view.innerWidth / 2
-    const dy = ((box[0][1] + box[1][1]) / 2) * zoom - view.innerHeight / 2
+    const zoom = 0.98 * Math.min(view.innerWidth / (box[1][0] - box[0][0]), view.innerHeight / (box[1][1] - box[0][1]), 6) || 1
+    const dx = ((box[0][0] + box[1][0]) / 2) * zoom - view.innerWidth / 2 || 0
+    const dy = ((box[0][1] + box[1][1]) / 2) * zoom - view.innerHeight / 2 || 0
     const gDistricts = svg.select('.districts')
     const transitionZoom = (selection) =>
       mode === 'compare'
@@ -246,19 +248,23 @@ const Choropleth: React.FC<Props> = ({
             .transition()
             .duration(1000)
             .attr('transform', `translate(${view.marginLeft - dx}, ${view.marginTop - dy})scale(${zoom})`)
+    const events = (selection, hasEvents) => {
+      if (!hasEvents) return selection
+      return isTouchDevice
+        ? selection.on('click', onClick)
+        : selection.on('mouseover', showTooltip).on('mousemove', moveTooltip).on('mouseout', hideTooltip).on('click', onClick)
+    }
 
     const districtUpdater = (update) =>
       update
         .classed(classes.districtPath, true)
         .classed(classes.activePath, (d) => selectedZoneCodes.includes(d.properties.z))
         .classed(classes.selectedDistrictPath, (d) => selectedDistrictCodes.includes(d.properties.z))
-        .on('mouseover', showTooltip)
-        .on('mousemove', moveTooltip)
-        .on('mouseout', hideTooltip)
-        .on('click', onClick)
+        .call(events, !currentlyOnCountry)
     const filterCode = titleCode + '/'
     const filterFeatures = (d) => d.properties.z === filterCode || d.properties.pz === filterCode || titleCode === 'in'
     gDistricts
+      .style('pointer-events', currentlyOnCountry ? 'none' : 'all')
       .call(transitionZoom)
       .selectAll('path')
       .data(districtTopo.features.filter(filterFeatures), (d) => d.properties.u)
@@ -271,28 +277,24 @@ const Choropleth: React.FC<Props> = ({
             .call((enter) => enter.style('fill', (d, i) => colorScale(d.properties.ipm)))
             .call(districtUpdater),
         (update) => update.attr('d', path).call(districtUpdater),
-        (exit) => exit.call((exit) => exit.transition().duration(1000).attr('opacity', 0).remove())
+        (exit) => exit.call((exit) => (isTouchDevice ? exit.remove() : exit.transition().duration(1000).attr('opacity', 0).remove()))
       )
+    const stateUpdater = (selection) =>
+      selection
+        .classed(classes.statePath, true)
+        .classed(classes.activePath, (d) => selectedZoneCodes.includes(d.properties.z))
+        .call(events, currentlyOnCountry)
 
     const gStates = svg.select('.states')
     gStates
+      .style('pointer-events', currentlyOnCountry ? 'all' : 'none')
       .call(transitionZoom)
       .selectAll('path')
       .data(stateTopo.features.filter(filterFeatures), (d) => d.properties.z)
       .join(
-        (enter) =>
-          enter
-            .append('path')
-            .attr('d', path)
-            .raise()
-            .classed(classes.statePath, true)
-            .classed(classes.activePath, (d) => selectedZoneCodes.includes(d.properties.z)),
-        (update) =>
-          update
-            .attr('d', path)
-            .classed(classes.statePath, true)
-            .classed(classes.activePath, (d) => selectedZoneCodes.includes(d.properties.z)),
-        (exit) => exit.call((exit) => exit.transition().duration(1000).attr('opacity', 0).remove())
+        (enter) => enter.append('path').attr('d', path).raise().call(stateUpdater),
+        (update) => update.attr('d', path).call(stateUpdater),
+        (exit) => exit.call((exit) => (isTouchDevice ? exit.remove() : exit.transition().duration(1000).attr('opacity', 0).remove()))
       )
     return () => {
       console.log('d3 cleanup')
@@ -308,6 +310,7 @@ const Choropleth: React.FC<Props> = ({
     codes,
     colorScale,
     go,
+    isTouchDevice,
     map,
     mode,
     title,
@@ -364,7 +367,7 @@ const Choropleth: React.FC<Props> = ({
         </div>
         <svg className={classes.svgRoot} preserveAspectRatio='xMidYMid meet' width={view.width} height={view.height}>
           <g className='districts' />
-          <g className='states' style={{ pointerEvents: 'none' }} />
+          <g className='states' />
           <g className='mask' />
           <g className='title' />
         </svg>

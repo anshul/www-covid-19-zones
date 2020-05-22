@@ -122,8 +122,8 @@ type V2Zone {
   currentActives: Int!
   fArea: String!
   fAsOf: String!
-  fPopulation: String!
-  fPopulationYear: String!
+  fEstPopulation: String!
+  fEstPopulationYear: String!
   name: String!
   pCategory: String!
   parent: V2Zone

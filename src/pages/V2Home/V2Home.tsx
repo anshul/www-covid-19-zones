@@ -11,6 +11,7 @@ import V2HomeRoot from './V2HomeRoot'
 import { parse, stringify } from 'qs'
 import { V2HomeQuery } from '../../__generated__/V2HomeQuery.graphql'
 import { DateRangeT, UrlT } from '../../types'
+import isTouchDevice from './isTouchDevice'
 import './fade.css'
 
 const V2Home: React.FC<RouteComponentProps<{ mode: string; codes: string }>> = ({ location, match, history }) => {
@@ -59,6 +60,7 @@ const V2Home: React.FC<RouteComponentProps<{ mode: string; codes: string }>> = (
               }}
             >
               <V2HomeRoot
+                isTouchDevice={isTouchDevice()}
                 data={props ? props.v2Stats : null}
                 codes={codes}
                 mode={mode}
