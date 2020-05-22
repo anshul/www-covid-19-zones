@@ -6,6 +6,10 @@
   <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#000000" />
+  <meta property="og:title" content="Covid-19 Zones">
+  <meta property="og:description" content="Covid-19 visualisation.">
+  <meta property="og:image" content="https://covid19zones.com/thumb.png">
+  <meta property="og:url" content="https://covid19zones.com">
   <meta name="description"
     content="A simple visualisation tool for individuals, communities and policymakers to see local disease trends." />
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
@@ -43,7 +47,10 @@
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-166957115-1"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
     gtag('js', new Date());
 
     gtag('config', 'UA-166957115-1');
