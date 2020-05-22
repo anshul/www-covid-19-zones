@@ -58,7 +58,7 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
   const mapHeight = useMemo(() => {
     if (cachedData && cachedData.zones.length === 1) {
       if (aspectRatio < 1) {
-        return '400px'
+        return '500px'
       }
       return window.innerHeight - 400 > 300 ? `${window.innerHeight - 400}px` : '400px'
     }
@@ -72,68 +72,65 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
     if (!MODES.find((m) => m === mode)) return <ErrorPanel onSearch={onSearch} message='Page not found!' />
     if (!firstZone) return <ErrorPanel onSearch={onSearch} message='Invalid zone!' />
   }
-  const groupZone = (z: V2HomeRoot_data['zones'][0]) =>
-    z.category === 'country' || z.category === 'state'
-      ? { ...z, key: z.code }
-      : { ...(z.parent || z), key: `${(z.parent || z).code}-${z.category}`, name: `${(z.parent || z).name} (${z.pCategory})` }
-  const parentZones = cachedData ? Object.values(Object.fromEntries(cachedData.zones.map(groupZone).map((z) => [z.key, z]))) : []
-  const colWidth = cachedData ? Math.max(3, Math.floor(12 / parentZones.length)) : 12
   const removeZone = (code: string) => {
     if (cachedData && cachedData.zones.length <= 1) return go({ mode: 'zones' })
 
     go({ codes: cachedData?.zones.map((z) => z.code).filter((c) => c !== code) })
   }
+  const colWidth = cachedData ? Math.max(3, Math.floor(12 / cachedData.zones.length)) : 12
 
   return (
     <Grid>
-      {mode === 'compare' ? (
-        <CompareBar zones={cachedData ? cachedData.zones : []} go={go} />
-      ) : (
-        <ZoneBar zone={firstZone || emptyZone} go={go} />
-      )}
+      <div style={{ position: 'relative', minHeight: '170px' }}>
+        {mode === 'compare' ? (
+          <CompareBar zones={cachedData ? cachedData.zones : []} go={go} />
+        ) : (
+          <ZoneBar zone={firstZone || emptyZone} go={go} />
+        )}
+        <div style={{ position: 'absolute', right: '0px', top: '95px' }}>
+          <ChoroLegend color={ipmColor} />
+        </div>
+      </div>
+
       <Row start='xs'>
         {cachedData &&
-          cachedData.zones.map((zone) => (
-            <Col className='fade' xs={6} sm={4} md={3} lg={2} key={zone.code} style={{ marginTop: '24px' }}>
-              <ZoneCard
-                lineColor={zoneColor(zone.code)}
+          cachedData.zones.map((zone, idx) => (
+            <Col
+              key={`map-${idx}`}
+              xs={Math.max(colWidth, 6)}
+              md={Math.max(colWidth, 4)}
+              lg={Math.max(colWidth, 4)}
+              style={{ height: mapHeight, position: 'relative' }}
+            >
+              <Choropleth
+                title={zone.name}
+                titleCode={zone.category === 'state' || zone.category === 'country' ? zone.code : (zone.parent || zone).code}
+                isTouchDevice={isTouchDevice}
+                map={response.data as MapDataT}
+                codes={codes}
+                mode={mode}
+                zones={[zone]}
+                zoneColor={zoneColor}
                 ipmColor={ipmColor}
                 iColor={iColor}
-                zone={zone}
-                canRemove={mode === 'compare'}
-                onRemove={() => removeZone(zone.code)}
+                go={go}
+                dateRange={dateRange}
+                isLogarithmic={isLogarithmic}
               />
+              <div style={{ position: 'absolute', top: '5px', left: '15px' }}>
+                <ZoneCard
+                  lineColor={zoneColor(zone.code)}
+                  ipmColor={ipmColor}
+                  iColor={iColor}
+                  zone={zone}
+                  canRemove={mode === 'compare'}
+                  onRemove={() => removeZone(zone.code)}
+                />
+              </div>
             </Col>
           ))}
       </Row>
 
-      <Row>
-        <Col xs={12} md={12}>
-          <ChoroLegend color={ipmColor} />
-        </Col>
-      </Row>
-
-      <Row style={{ minHeight: '40px' }}>
-        {parentZones.map((group, index) => (
-          <Col key={`map-${index}`} xs={Math.max(colWidth, 6)} md={Math.max(colWidth, 4)} lg={colWidth} style={{ height: mapHeight }}>
-            <Choropleth
-              title={group.name}
-              titleCode={group.code}
-              isTouchDevice={isTouchDevice}
-              map={response.data as MapDataT}
-              codes={codes}
-              mode={mode}
-              zones={cachedData ? cachedData.zones.filter((z) => groupZone(z).key === group.key) : null}
-              zoneColor={zoneColor}
-              ipmColor={ipmColor}
-              iColor={iColor}
-              go={go}
-              dateRange={dateRange}
-              isLogarithmic={isLogarithmic}
-            />
-          </Col>
-        ))}
-      </Row>
       <Row>
         <Col xs={12} md={12}>
           <TrendChart zoneColor={zoneColor} codes={codes} mode={mode} data={cachedData} go={go} />
