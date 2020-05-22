@@ -1,9 +1,8 @@
 // @ts-nocheck
-import { createStyles, makeStyles } from '@material-ui/core'
-import * as d3 from 'd3'
-import { ScaleThreshold } from 'd3'
 import React, { memo, useEffect, useState } from 'react'
+import * as d3 from 'd3'
 import * as topojson from 'topojson'
+import { createStyles, makeStyles } from '@material-ui/core'
 import useResponsiveView from '../../hooks/useResponsiveView'
 import { MapDataT } from '../../types'
 import NumberPill from './NumberPill'
@@ -17,17 +16,15 @@ interface Props {
   readonly titleCode: string
   readonly title: string
   map: MapDataT | null
-  colorMap: {
-    [code: string]: string
-  }
-  colorScale: ScaleThreshold<number, string>
-  colorConst: (count: number) => string
+  zoneColor: d3.ScaleOrdinal<string, string>
+  ipmColor: d3.ScaleThreshold<number, string>
+  iColor: d3.ScaleThreshold<number, string>
   zones: readonly ZoneT[] | null
   codes: string[]
   go: (target: UrlT) => void
   mode: string
   dateRange: DateRangeT
-  logScale: boolean
+  isLogarithmic: boolean
   isTouchDevice: boolean
 }
 interface TooltipRowT {
@@ -52,8 +49,8 @@ const useStyles = makeStyles(() =>
     mapRoot: {
       height: '100%',
       maxHeight: 'calc(100vh - 300px)',
-      minHeight: '200px',
-      minWidth: '200px',
+      minHeight: '160px',
+      minWidth: '160px',
       position: 'relative',
     },
     separator: {
@@ -87,6 +84,12 @@ const useStyles = makeStyles(() =>
     },
     gutter: {
       fill: 'white',
+    },
+    hoveredState: {
+      cursor: 'pointer',
+      opacity: 1,
+      strokeWidth: 2,
+      stroke: '#666',
     },
     hoveredDistrict: {
       cursor: 'pointer',
@@ -122,10 +125,10 @@ const Choropleth: React.FC<Props> = ({
   mode,
   codes,
   dateRange,
-  logScale,
-  colorMap,
-  colorScale,
-  colorConst,
+  isLogarithmic,
+  zoneColor,
+  ipmColor,
+  iColor,
   isTouchDevice,
 }) => {
   const classes = useStyles()
@@ -176,8 +179,8 @@ const Choropleth: React.FC<Props> = ({
       .join('rect')
       .attr('x', (d) => d[0] - 1)
       .attr('y', (d) => d[1] - 1)
-      .attr('width', (d) => d[2] + 2)
-      .attr('height', (d) => d[3] + 2)
+      .attr('width', (d) => Math.max(d[2] + 2, 0))
+      .attr('height', (d) => Math.max(d[3] + 2, 0))
       .classed(classes.gutter, true)
 
     if (!map) return
@@ -209,7 +212,7 @@ const Choropleth: React.FC<Props> = ({
     const showTooltip = function (d) {
       const features = [d, stateTopo.features.find((s) => s.properties.z === d.properties.pz)].filter((x) => x)
       moveTooltip(d)
-      d3.select(this).classed(classes.hoveredDistrict, true).raise()
+      currentlyOnCountry ? d3.select(this).classed(classes.hoveredState, true) : d3.select(this).classed(classes.hoveredDistrict, true).raise()
       setTooltip({
         rows: features.map((f) => f.properties),
       })
@@ -223,7 +226,9 @@ const Choropleth: React.FC<Props> = ({
     }
 
     const hideTooltip = function (d) {
-      d3.select(this).classed(classes.hoveredDistrict, false).lower()
+      currentlyOnCountry
+        ? d3.select(this).classed(classes.hoveredState, false)
+        : d3.select(this).classed(classes.hoveredDistrict, false).lower()
       setTooltip(null)
     }
 
@@ -273,8 +278,8 @@ const Choropleth: React.FC<Props> = ({
           enter
             .append('path')
             .attr('d', path)
-            .style('fill', (d, i) => colorScale(0))
-            .call((enter) => enter.style('fill', (d, i) => colorScale(d.properties.ipm)))
+            .style('fill', (d, i) => ipmColor(0))
+            .call((enter) => enter.style('fill', (d, i) => ipmColor(d.properties.ipm)))
             .call(districtUpdater),
         (update) => update.attr('d', path).call(districtUpdater),
         (exit) => exit.call((exit) => (isTouchDevice ? exit.remove() : exit.transition().duration(1000).attr('opacity', 0).remove()))
@@ -304,11 +309,12 @@ const Choropleth: React.FC<Props> = ({
     classes.districtPath,
     classes.gutter,
     classes.hoveredDistrict,
+    classes.hoveredState,
     classes.selectedDistrictPath,
     classes.statePath,
     classes.title,
     codes,
-    colorScale,
+    ipmColor,
     go,
     isTouchDevice,
     map,
@@ -352,11 +358,11 @@ const Choropleth: React.FC<Props> = ({
                     </tr>
                     <tr>
                       <td>
-                        <NumberPill count={row.i} color={colorConst} />
+                        <NumberPill count={row.i} color={iColor} />
                       </td>
                       <td className={classes.term}>covid-19 infections</td>
                       <td>
-                        <NumberPill count={row.ipm} color={colorScale} />
+                        <NumberPill count={row.ipm} color={ipmColor} />
                       </td>
                       <td className={classes.term}>infections per million</td>
                     </tr>
