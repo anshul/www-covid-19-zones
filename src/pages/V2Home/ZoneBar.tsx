@@ -49,7 +49,7 @@ const ZoneBar: React.FC<Props> = ({ zone, go }) => {
           <Searchbar onSearch={onSearch} />
         </Col>
       </Row>
-      <Row style={{ minHeight: '40px', padding: '8px 0' }}>
+      <Row style={{ minHeight: '40px', padding: '8px 0' }} middle='xs'>
         <Col>
           <Breadcrumbs style={{ marginLeft: '10px' }}>
             {zone && zone.parent && (
@@ -60,7 +60,7 @@ const ZoneBar: React.FC<Props> = ({ zone, go }) => {
             <p className={classes.zoneLinkText}>{zone.name}</p>
           </Breadcrumbs>
         </Col>
-        <Col xs>
+        <Col>
           <Button
             style={{ marginLeft: '25px' }}
             size='small'
