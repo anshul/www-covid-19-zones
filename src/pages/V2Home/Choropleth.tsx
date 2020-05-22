@@ -1,14 +1,14 @@
 // @ts-nocheck
-import React, { useEffect, useState, memo } from 'react'
 import { createStyles, makeStyles } from '@material-ui/core'
 import * as d3 from 'd3'
+import { ScaleThreshold } from 'd3'
+import React, { memo, useEffect, useState } from 'react'
 import * as topojson from 'topojson'
-import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
-import { MapDataT } from '../../types'
 import useResponsiveView from '../../hooks/useResponsiveView'
+import { MapDataT } from '../../types'
+import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
 import colorLegend from './colorLegend'
 import NumberPill from './NumberPill'
-import { ScaleThreshold } from 'd3'
 
 interface Props {
   map: MapDataT | null
