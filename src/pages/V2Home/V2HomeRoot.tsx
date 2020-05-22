@@ -93,11 +93,13 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
             </Col>
           ))}
       </Row>
-      <Col xs={12} md={12}>
-        <ChoroLegend color={ipmColor} />
-      </Col>
 
-      <Row></Row>
+      <Row>
+        <Col xs={12} md={12}>
+          <ChoroLegend color={ipmColor} />
+        </Col>
+      </Row>
+
       <Row style={{ minHeight: '40px' }}>
         {parentZones.map((group, index) => (
           <Col key={`map-${index}`} xs={Math.max(colWidth, 6)} md={Math.max(colWidth, 4)} lg={colWidth} style={{ height: mapHeight }}>
@@ -118,6 +120,8 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
             />
           </Col>
         ))}
+      </Row>
+      <Row>
         <Col xs={12} md={12}>
           <DailyChart
             zoneColor={zoneColor}
