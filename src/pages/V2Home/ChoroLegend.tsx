@@ -15,10 +15,8 @@ interface Props {
 const useStyles = makeStyles(() =>
   createStyles({
     mapRoot: {
-      maxHeight: '60px',
+      maxHeight: '70px',
       minWidth: '400px',
-      overflow: 'visible',
-      zIndex: 100,
     },
     svgRoot: {
       minHeight: '200px',

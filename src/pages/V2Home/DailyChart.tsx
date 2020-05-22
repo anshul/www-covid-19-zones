@@ -1,27 +1,25 @@
 // @ts-nocheck
-import { createStyles, makeStyles } from '@material-ui/core'
-import * as d3 from 'd3'
 import React, { memo, useEffect } from 'react'
+import * as d3 from 'd3'
+import { createStyles, makeStyles } from '@material-ui/core'
 import useResponsiveView from '../../hooks/useResponsiveView'
 import { DateRangeT, UrlT } from '../../types'
 import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
 
 interface Props {
-  colorMap: {
-    [code: string]: string
-  }
   data: V2HomeRoot_data | null
+  zoneColor: d3.ScaleOrdinal<string, string>
   codes: string[]
   go: (target: UrlT) => void
   mode: string
   dateRange: DateRangeT
-  logScale: boolean
+  isLogarithmic: boolean
 }
 
 const useStyles = makeStyles(() =>
   createStyles({
     chartRoot: {
-      height: '400px',
+      height: '300px',
       minWidth: '400px',
       position: 'relative',
     },
@@ -34,7 +32,7 @@ const useStyles = makeStyles(() =>
   })
 )
 
-const DailyChart: React.FC<Props> = ({ data, go, mode, codes, dateRange, logScale, colorMap }) => {
+const DailyChart: React.FC<Props> = ({ data, go, mode, codes, dateRange, isLogarithmic, zoneColor }) => {
   const classes = useStyles()
   const view = useResponsiveView({ marginTop: 5, marginLeft: 5, marginBottom: 30, marginRight: 50 })
 
@@ -96,7 +94,7 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, dateRange, logScal
         .classed('line', true)
         .attr('d', (d) => newInfLine(d.chart))
         .style('fill', 'none')
-        .style('stroke', (d) => colorMap[d.code])
+        .style('stroke', (d) => zoneColor[d.code])
         .style('stroke-width', 4)
 
     gChart
@@ -132,7 +130,7 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, dateRange, logScal
     //         .attr('height', legendRectHeight)
     //         .attr('x', legendX)
     //         .attr('y', (_, i) => i * legendRectHeight + i * 10)
-    //         .style('fill', (d) => colorMap[d.code])
+    //         .style('fill', (d) => zoneColor[d.code])
     //     )
     //     .call((selection) =>
     //       selection
@@ -155,7 +153,7 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, dateRange, logScal
       console.log('d3 cleanup')
     }
   }, [
-    colorMap,
+    zoneColor,
     data,
     view.height,
     view.innerHeight,
