@@ -5,6 +5,8 @@ import { createStyles, makeStyles } from '@material-ui/core'
 import useResponsiveView from '../../hooks/useResponsiveView'
 import { DateRangeT, UrlT } from '../../types'
 import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
+import { Col, Row } from 'react-flexbox-grid'
+import { Typography } from '@material-ui/core'
 
 interface Props {
   data: V2HomeRoot_data | null
@@ -19,6 +21,7 @@ interface Props {
 const useStyles = makeStyles(() =>
   createStyles({
     chartRoot: {
+      marginTop: '10px',
       height: '300px',
       minWidth: '400px',
       position: 'relative',
@@ -28,6 +31,11 @@ const useStyles = makeStyles(() =>
     },
     pre: {
       whiteSpace: 'pre-wrap',
+    },
+    legendSvg: {
+      background: 'transparent',
+      position: 'absolute',
+      top: '-10px',
     },
   })
 )

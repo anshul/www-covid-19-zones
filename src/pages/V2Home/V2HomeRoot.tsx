@@ -136,6 +136,11 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
       </Row>
       <Row>
         <Col xs={12} md={12}>
+          <TrendChart zoneColor={zoneColor} codes={codes} mode={mode} data={cachedData} go={go} />
+        </Col>
+      </Row>
+      <Row>
+        <Col xs={12} md={12}>
           <DailyChart
             zoneColor={zoneColor}
             codes={codes}
@@ -145,9 +150,6 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
             dateRange={dateRange}
             isLogarithmic={isLogarithmic}
           />
-        </Col>
-        <Col xs={12} md={12}>
-          <TrendChart zoneColor={zoneColor} codes={codes} mode={mode} data={cachedData} go={go} />
         </Col>
       </Row>
     </Grid>
