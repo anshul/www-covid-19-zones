@@ -17,7 +17,7 @@ const useStyles = makeStyles(() =>
     },
     numberPill: {
       textAlign: 'center',
-      fontSize: '11px',
+      fontSize: '16px',
       padding: '.15em .25em',
       borderRadius: '.35em',
     },

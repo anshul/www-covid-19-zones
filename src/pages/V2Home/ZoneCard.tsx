@@ -1,52 +1,75 @@
 import { graphql } from 'babel-plugin-relay/macro'
 import React from 'react'
-import { createStyles, makeStyles } from '@material-ui/core'
+import { createStyles, makeStyles, Theme } from '@material-ui/core'
 import { Typography } from '@material-ui/core'
 import { createFragmentContainer } from 'react-relay'
 import { ZoneCard_zone } from '../../__generated__/ZoneCard_zone.graphql'
 import { Row } from 'react-flexbox-grid'
 import NumberPill from './NumberPill'
+import { CloseRounded } from '@material-ui/icons'
 interface Props {
   lineColor: string
   zone: ZoneCard_zone
   ipmColor: (count: number) => string
   iColor: (count: number) => string
+  canRemove: boolean
+  onRemove?: () => void
 }
 
-const useStyles = makeStyles(() =>
+const useStyles = makeStyles((theme: Theme) =>
   createStyles({
+    root: {
+      border: '1px solid #eee',
+      height: '100%',
+      padding: theme.spacing(1),
+    },
     title: {
       fontSize: '22px',
       fontWeight: 800,
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'top',
     },
     subtitle: {
       fontSize: '11px',
       fontWeight: 600,
+      paddingBottom: theme.spacing(0.5),
     },
     term: {
       width: '60px',
       fontWeight: 400,
       fontSize: '0.7em',
     },
+    numberRow: {
+      display: 'flex',
+      alignItems: 'center',
+    },
+    removeButton: {
+      cursor: 'pointer',
+      '&:hover': {
+        color: 'grey',
+      },
+    },
   })
 )
 
-const ZoneCard: React.FC<Props> = ({ zone, lineColor, ipmColor, iColor }) => {
+const ZoneCard: React.FC<Props> = ({ zone, lineColor, ipmColor, iColor, canRemove, onRemove }) => {
   const classes = useStyles()
   return (
-    <div key={zone.code}>
+    <div key={zone.code} className={classes.root}>
       <Typography className={classes.title} variant='h1' style={{ color: lineColor }}>
         {zone.name}
+        {canRemove && <CloseRounded fontSize='small' color='disabled' className={classes.removeButton} onClick={onRemove} />}
       </Typography>
       <Typography className={classes.subtitle}>
-        Population {zone.fEstPopulation} ({zone.fEstPopulationYear})
+        Population <br /> {zone.fEstPopulation} ({zone.fEstPopulationYear})
       </Typography>
-      <Row bottom='xs'>
+      <Row bottom='xs' className={classes.numberRow}>
         <span className={classes.term}>Infections</span>
         <NumberPill count={zone.cumulativeInfections} color={iColor} />
       </Row>
-      <Row bottom='xs'>
-        <span className={classes.term}>per million</span>
+      <Row bottom='xs' className={classes.numberRow}>
+        <span className={classes.term}>Per million</span>
         <NumberPill count={zone.perMillionInfections} color={ipmColor} />
       </Row>
     </div>

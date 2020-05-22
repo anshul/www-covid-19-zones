@@ -21,6 +21,7 @@ import ErrorBox from '../ErrorBox'
 
 interface Props {
   onSearch: (code: string, name: string) => void
+  placeHolder?: string
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -82,7 +83,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-const Searchbar: React.FC<Props> = ({ onSearch }) => {
+const Searchbar: React.FC<Props> = ({ onSearch, placeHolder }) => {
   const [open, setOpen] = useState(false)
   const [value, setValue] = useState('')
 
@@ -103,7 +104,7 @@ const Searchbar: React.FC<Props> = ({ onSearch }) => {
         <InputBase
           value={value}
           className={classes.input}
-          placeholder='How is your state/city doing?'
+          placeholder={placeHolder ?? 'How is your state/city doing?'}
           inputProps={{ 'aria-label': 'search google maps' }}
           onChange={onChange}
         />
