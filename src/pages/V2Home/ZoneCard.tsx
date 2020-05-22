@@ -6,7 +6,7 @@ import { createFragmentContainer } from 'react-relay'
 import { ZoneCard_zone } from '../../__generated__/ZoneCard_zone.graphql'
 import { Row } from 'react-flexbox-grid'
 import NumberPill from './NumberPill'
-import { CloseRounded } from '@material-ui/icons'
+import { HighlightOffTwoTone } from '@material-ui/icons'
 interface Props {
   lineColor: string
   zone: ZoneCard_zone
@@ -19,7 +19,6 @@ interface Props {
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
-      border: '1px solid #eee',
       height: '100%',
       padding: theme.spacing(1),
     },
@@ -27,7 +26,7 @@ const useStyles = makeStyles((theme: Theme) =>
       fontSize: '22px',
       fontWeight: 800,
       display: 'flex',
-      justifyContent: 'space-between',
+      justifyContent: 'start',
       alignItems: 'top',
     },
     subtitle: {
@@ -45,9 +44,12 @@ const useStyles = makeStyles((theme: Theme) =>
       alignItems: 'center',
     },
     removeButton: {
+      marginTop: '-10px',
+      padding: '3px 6px',
+      color: '#c30',
       cursor: 'pointer',
       '&:hover': {
-        color: 'grey',
+        color: 'black',
       },
     },
   })
@@ -59,10 +61,10 @@ const ZoneCard: React.FC<Props> = ({ zone, lineColor, ipmColor, iColor, canRemov
     <div key={zone.code} className={classes.root}>
       <Typography className={classes.title} variant='h1' style={{ color: lineColor }}>
         {zone.name}
-        {canRemove && <CloseRounded fontSize='small' color='disabled' className={classes.removeButton} onClick={onRemove} />}
+        {canRemove && <HighlightOffTwoTone fontSize='small' color='action' className={classes.removeButton} onClick={onRemove} />}
       </Typography>
       <Typography className={classes.subtitle}>
-        Population <br /> {zone.fEstPopulation} ({zone.fEstPopulationYear})
+        Population {zone.fEstPopulation} ({zone.fEstPopulationYear})
       </Typography>
       <Row bottom='xs' className={classes.numberRow}>
         <span className={classes.term}>Infections</span>

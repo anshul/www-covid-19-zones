@@ -108,16 +108,10 @@ const useStyles = makeStyles(() =>
       borderRadius: '.25em',
       fontSize: '80%',
     },
-    title: {
-      fontSize: '12.2px',
-      fontWeight: '300',
-      fillOpacity: 0.7,
-    },
   })
 )
 
 const Choropleth: React.FC<Props> = ({
-  title,
   titleCode,
   map,
   zones,
@@ -155,15 +149,6 @@ const Choropleth: React.FC<Props> = ({
       // const parentCode = d.properties.pz.replace(/\/$/, '')
       go({ codes: mode === 'compare' ? [...codes, code] : [code] })
     }
-    const gTitle = svg.select('.title')
-    gTitle
-      .selectAll('text')
-      .data([title])
-      .join('text')
-      .text(title)
-      .classed(classes.title, true)
-      .attr('x', view.marginTop)
-      .attr('y', view.marginLeft + 20)
     const gMask = svg.select('.mask')
     gMask
       .selectAll('rect')
@@ -241,18 +226,24 @@ const Choropleth: React.FC<Props> = ({
       ],
       districtTopo
     )
-    const box = d3.geoPath(projection).bounds(selectedStateTopo)
-    const zoom = 0.98 * Math.min(view.innerWidth / (box[1][0] - box[0][0]), view.innerHeight / (box[1][1] - box[0][1]), 6) || 1
-    const dx = ((box[0][0] + box[1][0]) / 2) * zoom - view.innerWidth / 2 || 0
-    const dy = ((box[0][1] + box[1][1]) / 2) * zoom - view.innerHeight / 2 || 0
+    const [[x0, y0], [x1, y1]] = d3.geoPath(projection).bounds(selectedStateTopo)
+    const [w, h] = [x1 - x0, y1 - y0]
+    const zoom0 = Math.min(view.innerWidth / w, view.innerHeight / h) || 1
+
+    const [boxX, boxY] = [(x0 + x1) / 2, (y0 + y1) / 2]
+    const [spaceX, spaceY] = [(view.innerWidth - zoom0 * w) / 2, (view.innerHeight - zoom0 * h) / 2]
+    const [minSpaceX, minSpaceY] = [200, 180]
+    const extraX = spaceX >= spaceY && spaceX < minSpaceX ? minSpaceX - spaceX : 2
+    const extraY = spaceY > spaceX && spaceY < minSpaceY ? minSpaceY - spaceY : 2
+    console.log(555555555, extraX, extraY)
+    const [viewX, viewY] = [view.marginLeft + extraX / 2 + view.innerWidth / 2, view.marginTop + extraY / 2 + view.innerHeight / 2]
+    const zoom = Math.min((view.innerWidth - extraX) / w, (view.innerHeight - extraY) / h, 12) || 1
+    const [dx, dy] = [viewX - boxX * zoom || 0, viewY - boxY * zoom || 0]
     const gDistricts = svg.select('.districts')
     const transitionZoom = (selection) =>
       mode === 'compare'
-        ? selection.attr('transform', `translate(${view.marginLeft - dx}, ${view.marginTop - dy})scale(${zoom})`)
-        : selection
-            .transition()
-            .duration(1000)
-            .attr('transform', `translate(${view.marginLeft - dx}, ${view.marginTop - dy})scale(${zoom})`)
+        ? selection.attr('transform', `translate(${dx}, ${dy})scale(${zoom})`)
+        : selection.transition().duration(1000).attr('transform', `translate(${dx}, ${dy})scale(${zoom})`)
     const events = (selection, hasEvents) => {
       if (!hasEvents) return selection
       return isTouchDevice
@@ -284,6 +275,7 @@ const Choropleth: React.FC<Props> = ({
         (update) => update.attr('d', path).call(districtUpdater),
         (exit) => exit.call((exit) => (isTouchDevice ? exit.remove() : exit.transition().duration(1000).attr('opacity', 0).remove()))
       )
+
     const stateUpdater = (selection) =>
       selection
         .classed(classes.statePath, true)
@@ -312,14 +304,12 @@ const Choropleth: React.FC<Props> = ({
     classes.hoveredState,
     classes.selectedDistrictPath,
     classes.statePath,
-    classes.title,
     codes,
-    ipmColor,
     go,
+    ipmColor,
     isTouchDevice,
     map,
     mode,
-    title,
     titleCode,
     view.height,
     view.innerHeight,
@@ -375,7 +365,6 @@ const Choropleth: React.FC<Props> = ({
           <g className='districts' />
           <g className='states' />
           <g className='mask' />
-          <g className='title' />
         </svg>
       </div>
     </>
