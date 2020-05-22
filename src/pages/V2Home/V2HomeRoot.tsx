@@ -135,7 +135,7 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
           />
         </Col>
         <Col xs={12} md={12}>
-          <TrendChart colorMap={colorMap} codes={codes} mode={mode} data={cachedData} go={go} dateRange={dateRange} logScale={logScale} />
+          <TrendChart zoneColor={zoneColor} codes={codes} mode={mode} data={cachedData} go={go} />
         </Col>
       </Row>
     </Grid>

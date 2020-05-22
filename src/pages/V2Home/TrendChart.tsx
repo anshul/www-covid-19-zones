@@ -7,15 +7,11 @@ import { DateRangeT, UrlT } from '../../types'
 import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
 
 interface Props {
-  colorMap: {
-    [code: string]: string
-  }
+  zoneColor: d3.ScaleOrdinal<string, string>
   data: V2HomeRoot_data | null
   codes: string[]
   go: (target: UrlT) => void
   mode: string
-  dateRange: DateRangeT
-  logScale: boolean
 }
 
 const useStyles = makeStyles(() =>
@@ -34,7 +30,7 @@ const useStyles = makeStyles(() =>
   })
 )
 
-const TrendChart: React.FC<Props> = ({ data, go, mode, codes, dateRange, logScale, colorMap }) => {
+const TrendChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor }) => {
   const classes = useStyles()
   const view = useResponsiveView({ marginTop: 20, marginLeft: 40, marginBottom: 30, marginRight: 50 })
   const threshold = 10
@@ -74,7 +70,7 @@ const TrendChart: React.FC<Props> = ({ data, go, mode, codes, dateRange, logScal
     const trendlineUpdater = (selection) =>
       selection
         .attr('d', (d) => trendLine(d.chart))
-        .attr('stroke', 'black')
+        .attr('stroke', (d) => zoneColor(d.code))
         .attr('fill', 'none')
 
     svg
@@ -123,6 +119,7 @@ const TrendChart: React.FC<Props> = ({ data, go, mode, codes, dateRange, logScal
     view.marginTop,
     view.ref,
     view.width,
+    zoneColor,
   ])
 
   return (
