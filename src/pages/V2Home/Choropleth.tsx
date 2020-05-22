@@ -146,7 +146,9 @@ const Choropleth: React.FC<Props> = ({
 
     const onClick = function (d) {
       const code = d.properties.z.replace(/\/$/, '')
-      go({ codes: mode === 'compare' ? [...codes, code] : [code] })
+      const parentCode = d.properties.pz.replace(/\/$/, '')
+      const currentlyOnCountry = zones.length === 1 && zones[0].category === "country"
+      go({ codes: mode === 'compare' ? [...codes, code] : currentlyOnCountry ? [parentCode] : [code] })
     }
     const gTitle = svg.select('.title')
     gTitle
