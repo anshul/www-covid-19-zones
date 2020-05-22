@@ -8,6 +8,7 @@ import { DateRangeT, MapDataT, UrlT } from '../../types'
 import { lineColors } from '../../utils/ColorFactory'
 import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
 import Choropleth from './Choropleth'
+import ChoroLegend from './ChoroLegend'
 import CompareBar from './CompareBar'
 import DailyChart from './DailyChart'
 import ErrorPanel from './ErrorPanel'
@@ -31,11 +32,10 @@ const emptyZone = {
 }
 
 const colors = {
-  palette: ['#fffcf9', '#fff5eb', '#fee6ce', '#fdd0a2', '#fdae6b', '#fd8d3c', '#f16913', '#d94801', '#a63603', '#7f2704', '#641A2C'],
-  palette0: ['#fffcf9', '#fff5f0', '#fee0d2', '#fcbba1', '#fc9272', '#fb6a4a', '#ef3b2c', '#cb181d', '#a50f15', '#67000d', '#333333'],
-  palette2: ['#fffcf9', '#fcfbfd', '#efedf5', '#dadaeb', '#bcbddc', '#9e9ac8', '#807dba', '#6a51a3', '#54278f', '#3f007d', '#333333'],
+  palette: ['#fff7ec', '#ffffcc', '#ffeda0', '#fed976', '#feb24c', '#fd8d3c', '#fc4e2a', '#e31a1c', '#bd0026', '#800026', '#662506', '#333333'],
 }
-const thresholds = [3, 5, 10, 20, 40, 60, 80, 100, 250, 1000]
+// const thresholds = [3, 5, 10, 20, 40, 60, 80, 100, 250, 1000]
+const thresholds = [3, 10, 20, 50, 75, 100, 250, 500, 1000, 2000, 10000]
 
 const V2HomeRoot: React.FC<Props> = ({ data, codes, mode, go, dateRange, logScale }) => {
   const onSearch = (code: string) => go({ codes: mode === 'compare' ? [code] : [code] })
@@ -55,6 +55,11 @@ const V2HomeRoot: React.FC<Props> = ({ data, codes, mode, go, dateRange, logScal
     if (!MODES.find((m) => m === mode)) return <ErrorPanel onSearch={onSearch} message='Page not found!' />
     if (!firstZone) return <ErrorPanel onSearch={onSearch} message='Invalid zone!' />
   }
+  const mapHeight = cachedData ? (cachedData.zones.length > 1 ? '400px' : 'calc(100vh - 300px)') : '200px'
+  const parentZones = cachedData
+    ? Object.values(Object.fromEntries(cachedData.zones.map((z) => (z.parent ? z.parent : z)).map((z) => [z.code, z])))
+    : []
+  const colWidth = cachedData ? Math.max(3, Math.floor(12 / parentZones.length)) : 12
 
   return (
     <Grid>
@@ -63,30 +68,38 @@ const V2HomeRoot: React.FC<Props> = ({ data, codes, mode, go, dateRange, logScal
       ) : (
         <ZoneBar zone={firstZone || emptyZone} go={go} />
       )}
-      <Row style={{ minHeight: '40px' }}>
-        <Col xs={12} md={12}>
-          <Row start='xs'>
-            {cachedData &&
-              cachedData.zones.map((zone) => (
-                <Col className='fade' xs={6} sm={4} md={3} lg={2} key={zone.code}>
-                  <ZoneCard lineColor={colorMap[zone.code]} ipmColor={colorScale} iColor={colorConst} zone={zone} />
-                </Col>
-              ))}
-          </Row>
+      <Row start='xs'>
+        {cachedData &&
+          cachedData.zones.map((zone) => (
+            <Col className='fade' xs={6} sm={4} md={3} lg={2} key={zone.code}>
+              <ZoneCard lineColor={colorMap[zone.code]} ipmColor={colorScale} iColor={colorConst} zone={zone} />
+            </Col>
+          ))}
+      </Row>
+      <Col xs={12} md={12}>
+        <ChoroLegend color={colorScale} />
+      </Col>
 
-          <Choropleth
-            colorMap={colorMap}
-            map={response.data as MapDataT}
-            codes={codes}
-            mode={mode}
-            data={cachedData}
-            colorScale={colorScale}
-            colorConst={colorConst}
-            go={go}
-            dateRange={dateRange}
-            logScale={logScale}
-          />
-        </Col>
+      <Row></Row>
+      <Row style={{ minHeight: '40px' }}>
+        {parentZones.map((pz) => (
+          <Col key={pz.code} xs={Math.max(colWidth, 6)} md={Math.max(colWidth, 4)} lg={colWidth} style={{ height: mapHeight }}>
+            <Choropleth
+              title={pz.name}
+              titleCode={pz.code}
+              colorMap={colorMap}
+              map={response.data as MapDataT}
+              codes={codes}
+              mode={mode}
+              zones={cachedData ? cachedData.zones.filter((z) => (z.parent ? z.parent.code === pz.code : z.code === pz.code)) : null}
+              colorScale={colorScale}
+              colorConst={colorConst}
+              go={go}
+              dateRange={dateRange}
+              logScale={logScale}
+            />
+          </Col>
+        ))}
         <Col xs={12} md={12}>
           <DailyChart colorMap={colorMap} codes={codes} mode={mode} data={cachedData} go={go} dateRange={dateRange} logScale={logScale} />
         </Col>

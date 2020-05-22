@@ -6,18 +6,23 @@ import React, { memo, useEffect, useState } from 'react'
 import * as topojson from 'topojson'
 import useResponsiveView from '../../hooks/useResponsiveView'
 import { MapDataT } from '../../types'
-import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
-import colorLegend from './colorLegend'
 import NumberPill from './NumberPill'
 
+interface ZoneT {
+  readonly code: string
+  readonly unitCodes: readonly string[]
+}
+
 interface Props {
+  readonly titleCode: string
+  readonly title: string
   map: MapDataT | null
   colorMap: {
     [code: string]: string
   }
   colorScale: ScaleThreshold<number, string>
   colorConst: (count: number) => string
-  data: V2HomeRoot_data | null
+  zones: readonly ZoneT[] | null
   codes: string[]
   go: (target: UrlT) => void
   mode: string
@@ -44,10 +49,10 @@ interface TooltipT {
 const useStyles = makeStyles(() =>
   createStyles({
     mapRoot: {
-      height: 'calc(100vh - 300px)',
+      height: '100%',
       maxHeight: 'calc(100vh - 300px)',
-      minHeight: '400px',
-      minWidth: '400px',
+      minHeight: '200px',
+      minWidth: '200px',
       position: 'relative',
     },
     separator: {
@@ -99,16 +104,32 @@ const useStyles = makeStyles(() =>
       borderRadius: '.25em',
       fontSize: '80%',
     },
+    title: {
+      fontSize: '125%',
+    },
   })
 )
 
-const Choropleth: React.FC<Props> = ({ map, data, go, mode, codes, dateRange, logScale, colorMap, colorScale, colorConst }) => {
+const Choropleth: React.FC<Props> = ({
+  title,
+  titleCode,
+  map,
+  zones,
+  go,
+  mode,
+  codes,
+  dateRange,
+  logScale,
+  colorMap,
+  colorScale,
+  colorConst,
+}) => {
   const classes = useStyles()
-  const view = useResponsiveView({ marginTop: 70, marginLeft: 5, marginBottom: 0, marginRight: 5 })
+  const view = useResponsiveView({ marginTop: 5, marginLeft: 5, marginBottom: 5, marginRight: 5 })
   const [tooltip, setTooltip] = useState<TooltipT>(null)
 
   useEffect(() => {
-    console.log('render choropleth', { map, data })
+    console.log('render choropleth', { map, zones })
     const maybeDiv: unknown = view.ref.current
     if (!maybeDiv) return
     const el: HTMLElement = maybeDiv as HTMLElement
@@ -125,15 +146,15 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, codes, dateRange, lo
       const code = d.properties.z.replace(/\/$/, '')
       go({ codes: mode === 'compare' ? [...codes, code] : [code] })
     }
-    const gLegend = svg.select('.colorLegend')
-    gLegend
-      .call(colorLegend, {
-        color: colorScale,
-        title: 'Infections per million population',
-        width: 320,
-      })
-      .attr('transform', `translate(${view.innerWidth - 340},20)`)
-
+    const gTitle = svg.select('.title')
+    gTitle
+      .selectAll('text')
+      .data([title])
+      .join('text')
+      .text(title)
+      .classed(classes.title, true)
+      .attr('x', view.marginTop)
+      .attr('y', view.marginLeft + 20)
     const gMask = svg.select('.mask')
     gMask
       .selectAll('rect')
@@ -155,12 +176,9 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, codes, dateRange, lo
 
     if (!map) return
     const mapData = map['map']
-    const t = d3.transition().duration(1000)
     const districtTopo = topojson.feature(mapData, mapData.objects.districts) || { features: [] }
     const stateTopo = topojson.feature(mapData, mapData.objects.states) || { features: [] }
-    const selectedZoneCodes = (data ? [...data.zones.flatMap((z) => z.unitCodes), ...data.zones.map((z) => z.code)] : ['in']).map(
-      (code) => `${code}/`
-    )
+    const selectedZoneCodes = (zones ? [...zones.flatMap((z) => z.unitCodes), ...zones.map((z) => z.code)] : ['in']).map((code) => `${code}/`)
     const selectedStateTopo = {
       ...stateTopo,
       features: stateTopo.features.filter(
@@ -213,12 +231,15 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, codes, dateRange, lo
       districtTopo
     )
     const box = d3.geoPath(projection).bounds(selectedStateTopo)
-    const zoom = 0.95 * Math.min(view.innerWidth / (box[1][0] - box[0][0]), view.innerHeight / (box[1][1] - box[0][1]), 8)
+    const zoom = 1 // 0.98 * Math.min(view.innerWidth / (box[1][0] - box[0][0]), view.innerHeight / (box[1][1] - box[0][1]), 8)
     const dx = ((box[0][0] + box[1][0]) / 2) * zoom - view.innerWidth / 2
     const dy = ((box[0][1] + box[1][1]) / 2) * zoom - view.innerHeight / 2
     const gDistricts = svg.select('.districts')
-    console.log(222, { zoom, dx, dy })
-    gDistricts.transition(t).attr('transform', `translate(${view.marginLeft - dx}, ${view.marginTop - dy})scale(${zoom})`)
+    const transitionZoom = (selection) =>
+      selection
+        .transition()
+        .duration(1000)
+        .attr('transform', `translate(${view.marginLeft - dx}, ${view.marginTop - dy})scale(${zoom})`)
 
     const districtUpdater = (update) =>
       update
@@ -229,9 +250,12 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, codes, dateRange, lo
         .on('mousemove', moveTooltip)
         .on('mouseout', hideTooltip)
         .on('click', onClick)
+    const filterCode = titleCode + '/'
+    const filterFeatures = (d) => true || d.properties.z === filterCode || d.properties.pz === filterCode || titleCode === 'in'
     gDistricts
+      .call(transitionZoom)
       .selectAll('path')
-      .data(districtTopo.features, (d) => d.properties.u)
+      .data(districtTopo.features.filter(filterFeatures), (d) => d.properties.u)
       .join(
         (enter) =>
           enter
@@ -241,14 +265,14 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, codes, dateRange, lo
             .call((enter) => enter.style('fill', (d, i) => colorScale(d.properties.ipm)))
             .call(districtUpdater),
         (update) => update.attr('d', path).call(districtUpdater),
-        (exit) => exit.call((exit) => exit.transition(t).attr('opacity', 0).remove())
+        (exit) => exit.call((exit) => exit.transition().duration(5000).attr('opacity', 0).remove())
       )
 
     const gStates = svg.select('.states')
-    gStates.transition(t).attr('transform', `translate(${view.marginLeft - dx}, ${view.marginTop - dy})scale(${zoom})`)
     gStates
+      .call(transitionZoom)
       .selectAll('path')
-      .data(stateTopo.features, (d) => d.properties.z)
+      .data(stateTopo.features.filter(filterFeatures), (d) => d.properties.z)
       .join(
         (enter) =>
           enter
@@ -262,7 +286,7 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, codes, dateRange, lo
             .attr('d', path)
             .classed(classes.statePath, true)
             .classed(classes.activePath, (d) => selectedZoneCodes.includes(d.properties.z)),
-        (exit) => exit.call((exit) => exit.transition(t).attr('opacity', 0).remove())
+        (exit) => exit.call((exit) => exit.transition().duration(8000).attr('opacity', 0).remove())
       )
     return () => {
       console.log('d3 cleanup')
@@ -274,12 +298,14 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, codes, dateRange, lo
     classes.hoveredDistrict,
     classes.selectedDistrictPath,
     classes.statePath,
+    classes.title,
     codes,
     colorScale,
-    data,
     go,
     map,
     mode,
+    title,
+    titleCode,
     view.height,
     view.innerHeight,
     view.innerWidth,
@@ -289,6 +315,7 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, codes, dateRange, lo
     view.marginTop,
     view.ref,
     view.width,
+    zones,
   ])
 
   return (
@@ -333,7 +360,7 @@ const Choropleth: React.FC<Props> = ({ map, data, go, mode, codes, dateRange, lo
           <g className='districts' />
           <g className='states' style={{ pointerEvents: 'none' }} />
           <g className='mask' />
-          <g className='colorLegend' />
+          <g className='title' />
         </svg>
       </div>
     </>
