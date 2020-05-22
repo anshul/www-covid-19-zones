@@ -58,7 +58,10 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
   }
   const aspectRatio = window.innerWidth / window.innerHeight
   let mapHeight = cachedData && cachedData.zones.length > 1 ? '400px' : '200px'
-  if (cachedData && cachedData.zones.length === 1) mapHeight = aspectRatio > 1 ? `${Math.round(window.innerHeight - 300)}px` : '400px'
+  if (cachedData && cachedData.zones.length === 1) {
+    if (aspectRatio < 1) mapHeight = '400px'
+    mapHeight = window.innerHeight - 400 > 300 ? `${window.innerHeight - 400}px` : '400px'
+  }
 
   const groupZone = (z: V2HomeRoot_data['zones'][0]) =>
     z.category === 'country' || z.category === 'state'

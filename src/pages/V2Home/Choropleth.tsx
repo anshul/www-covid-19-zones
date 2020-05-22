@@ -52,8 +52,8 @@ const useStyles = makeStyles(() =>
     mapRoot: {
       height: '100%',
       maxHeight: 'calc(100vh - 300px)',
-      minHeight: '200px',
-      minWidth: '200px',
+      minHeight: '160px',
+      minWidth: '160px',
       position: 'relative',
     },
     separator: {
@@ -87,6 +87,12 @@ const useStyles = makeStyles(() =>
     },
     gutter: {
       fill: 'white',
+    },
+    hoveredState: {
+      cursor: 'pointer',
+      opacity: 1,
+      strokeWidth: 2,
+      stroke: '#666',
     },
     hoveredDistrict: {
       cursor: 'pointer',
@@ -176,8 +182,8 @@ const Choropleth: React.FC<Props> = ({
       .join('rect')
       .attr('x', (d) => d[0] - 1)
       .attr('y', (d) => d[1] - 1)
-      .attr('width', (d) => d[2] + 2)
-      .attr('height', (d) => d[3] + 2)
+      .attr('width', (d) => Math.max(d[2] + 2, 0))
+      .attr('height', (d) => Math.max(d[3] + 2, 0))
       .classed(classes.gutter, true)
 
     if (!map) return
@@ -209,7 +215,7 @@ const Choropleth: React.FC<Props> = ({
     const showTooltip = function (d) {
       const features = [d, stateTopo.features.find((s) => s.properties.z === d.properties.pz)].filter((x) => x)
       moveTooltip(d)
-      d3.select(this).classed(classes.hoveredDistrict, true).raise()
+      currentlyOnCountry ? d3.select(this).classed(classes.hoveredState, true) : d3.select(this).classed(classes.hoveredDistrict, true).raise()
       setTooltip({
         rows: features.map((f) => f.properties),
       })
@@ -223,7 +229,9 @@ const Choropleth: React.FC<Props> = ({
     }
 
     const hideTooltip = function (d) {
-      d3.select(this).classed(classes.hoveredDistrict, false).lower()
+      currentlyOnCountry
+        ? d3.select(this).classed(classes.hoveredState, false)
+        : d3.select(this).classed(classes.hoveredDistrict, false).lower()
       setTooltip(null)
     }
 
@@ -304,6 +312,7 @@ const Choropleth: React.FC<Props> = ({
     classes.districtPath,
     classes.gutter,
     classes.hoveredDistrict,
+    classes.hoveredState,
     classes.selectedDistrictPath,
     classes.statePath,
     classes.title,
