@@ -28,6 +28,12 @@ const useStyles = makeStyles(() =>
     pre: {
       whiteSpace: 'pre-wrap',
     },
+    fadedLine: {
+      opacity: 0.5,
+      '& > .line': {
+        stroke: 'grey',
+      },
+    },
   })
 )
 
@@ -68,12 +74,16 @@ const TrendChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor }) => {
       .scaleLinear()
       .domain([0, d3.max(filteredZones.map((z) => z.chart.length)) + 20])
       .range([view.marginLeft, view.width - view.marginRight])
+      .nice()
 
     svg
       .select('.xAxis')
       .attr('transform', `translate(0, ${view.height - view.marginBottom})`)
       .call(d3.axisBottom(x).ticks(view.innerWidth / 70))
-    svg.select('.yAxis').attr('transform', `translate(${view.marginLeft},0)`).call(d3.axisLeft(y))
+    svg
+      .select('.yAxis')
+      .attr('transform', `translate(${view.marginLeft},0)`)
+      .call(d3.axisLeft(y).tickFormat((d) => y.tickFormat(4, d3.format('.1s'))(d)))
 
     const trendLine = d3
       .line()
@@ -83,6 +93,7 @@ const TrendChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor }) => {
       d
         .attr('d', (d) => trendLine(d.chart))
         .attr('stroke', (d) => zoneColor(d.code))
+        .attr('stroke-width', 2)
         .attr('fill', 'none')
     const enterTrendLine = (d) => d.append('path').attr('class', 'line').call(updateTrendLine)
 
@@ -107,8 +118,11 @@ const TrendChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor }) => {
         (update) => update.call((d) => updateTrendLine(d.select('path.line'))).call((d) => updateLineLabel(d.select('text.line-label'))),
         (exit) => exit.remove()
       )
-
-    svg.on('mouseenter', entered).on('mousemove', moved)
+    if ('ontouchstart' in document) {
+      svg.style('-webkit-tap-highlight-color', 'transparent').on('touchstart', entered).on('touchmove', moved).on('touchend', left)
+    } else {
+      svg.on('mouseenter', entered).on('mousemove', moved).on('mouseleave', left)
+    }
 
     function entered() {
       dot.attr('display', null)
@@ -131,18 +145,35 @@ const TrendChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor }) => {
         entered()
       }
 
+      svg
+        .select('.lines')
+        .selectAll('g')
+        .filter((d) => d.code !== closestZone.code)
+        .attr('class', classes.fadedLine)
+
+      svg
+        .select('.lines')
+        .selectAll('g')
+        .filter((d) => d.code === closestZone.code)
+        .attr('class', '')
+
       const prev = xValue > 0 ? closestZone.chart[xValue - 1] : closestZone.chart[xValue]
       const next = xValue < closestZone.chart.length - 1 ? closestZone.chart[xValue + 1] : closestZone.chart[xValue]
 
       const period = (next.dayCount - prev.dayCount) / (Math.log2(next.totInf) - Math.log2(prev.totInf))
-      const periodFmt = d3.format('.0f')
+      const periodFmt = period < 10 ? d3.format('.1f') : d3.format('.0f')
+      const countFmt = d3.format(',.0f')
+      const slope = (y(next.totInf) - y(prev.totInf)) / (x(next.dayCount) - x(prev.dayCount))
+      const rot = (Math.atan(slope) * 180) / Math.PI
 
       dot.attr('transform', `translate(${x(xValue)}, ${y(zoneValue(closestZone))})`)
-      dot.select('text.count').text(zoneValue(closestZone))
+      dot.select('text.count').text(countFmt(zoneValue(closestZone)))
       dot.select('text.doubling-label').text(`doubling every ${periodFmt(period)} days`)
+      dot.select('path.slope').attr('transform', `rotate(${rot})`)
     }
 
     function left() {
+      svg.select('.lines').selectAll('g').classed(classes.fadedLine, false)
       dot.attr('display', 'none')
     }
 
@@ -150,6 +181,7 @@ const TrendChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor }) => {
       console.log('d3 cleanup')
     }
   }, [
+    classes.fadedLine,
     data,
     view.height,
     view.innerHeight,
@@ -173,8 +205,28 @@ const TrendChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor }) => {
           <g className='lineLabels' />
           <g className='dot'>
             <circle r='2.5' />
-            <text className='count' textAnchor='middle' y={-18}></text>
-            <text className='doubling-label' textAnchor='middle' y={-7}></text>
+            <text
+              className='count'
+              textAnchor='middle'
+              fontFamily='monospace'
+              y={-28}
+              stroke='#fff'
+              strokeWidth='2px'
+              fill='black'
+              paintOrder='stroke'
+            ></text>
+            <text
+              className='doubling-label'
+              textAnchor='middle'
+              fontFamily='sans-serif'
+              fontSize='11'
+              y={-17}
+              stroke='#fff'
+              strokeWidth='1px'
+              fill='black'
+              paintOrder='stroke'
+            ></text>
+            <path className='slope' d='M-70,0L70,0' stroke='grey' strokeWidth={0.5} />
           </g>
         </svg>
       </div>
