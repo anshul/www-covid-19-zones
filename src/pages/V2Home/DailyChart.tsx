@@ -77,6 +77,7 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
     const el: HTMLElement = maybeDiv as HTMLElement
     const svg = d3.select(el).select('svg')
     const dot = svg.select('g.dot')
+    const barsContainer = svg.select('.bars')
     const legendHeight = +d3.select(el).select('.legend').style('height').slice(0, -2)
     dot.attr('display', 'none')
     console.log('d3 update: daily chart', {
@@ -91,22 +92,27 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
     if (!data) return
 
     const filteredZones = data.zones.filter((z) => z.chart && z.chart.length >= 1)
+    const zone = filteredZones.find((z) => highlighted[z.code] === true) || filteredZones[0]
+    if (!zone) return
 
-    const parseTime = d3.timeParse('%Y-%m-%d')
-    const parseDt = (dt: string): Date => parseTime(dt) || new Date()
-    const minDate = d3.min(filteredZones.flatMap((zone) => zone.chart.map((point) => parseDt(point.dt)))) || new Date('2020', 3, 1)
-    const maxDate = d3.max(filteredZones.flatMap((zone) => zone.chart.map((point) => parseDt(point.dt)))) || new Date()
+    const parseDate = d3.timeParse('%Y-%m-%d')
+    const dateFmt = d3.timeFormat('%Y-%m-%d')
+    const minDate = d3.min(zone.chart.map((point) => parseDate(point.dt) || new Date())) || new Date('2020', 3, 1)
+    const maxDate = d3.max(zone.chart.map((point) => parseDate(point.dt) || new Date())) || new Date()
 
-    const minValue = d3.min(filteredZones.flatMap((zone) => zone.chart.map((point) => point.newInf))) || 0
-    const maxValue = d3.max(filteredZones.flatMap((zone) => zone.chart.map((point) => point.newInf))) || 100
+    const minValue = d3.min(zone.chart.map((point) => point.newInf)) || 0
+    const maxValue = d3.max(zone.chart.map((point) => point.newInf)) || 100
+
+    const barWidth = 4
+    const tipRadius = 3
 
     const y = d3
-      .scaleLog()
+      .scaleLinear()
       .domain([Math.max(minValue, 1), maxValue])
       .range([view.innerHeight, Math.max(view.marginTop, legendHeight)])
       .nice()
     const x = d3.scaleTime().domain([minDate, maxDate]).range([view.marginLeft, view.innerWidth]).nice()
-    const tickCount = Math.ceil(view.innerWidth / 70)
+    const tickCount = Math.ceil(view.innerWidth / 90)
 
     svg
       .select('.xAxisGrid')
@@ -118,6 +124,63 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
           .tickSize(-view.innerHeight + legendHeight)
           .tickFormat('')
       )
+
+    const updateStem = (selection) => selection.attr('height', (d) => view.innerHeight - y(d.newInf)).attr('fill', zoneColor(zone.code))
+    const enterStem = (selection) => selection.append('rect').attr('width', barWidth).call(updateStem)
+
+    const updateTip = (selection) => selection.attr('fill', zoneColor(zone.code))
+    const enterTip = (selection) =>
+      selection
+        .append('circle')
+        .attr('r', tipRadius)
+        .attr('cx', barWidth / 2)
+        .call(updateTip)
+
+    barsContainer
+      .selectAll('g')
+      .data(zone.chart, (d) => d.dt)
+      .join(
+        (enter) =>
+          enter
+            .append('g')
+            .attr('id', (d) => `day-${d.dt}`)
+            .attr('transform', (d) => `translate(${x(parseDate(d.dt)) - barWidth / 2}, ${y(d.newInf)})`)
+            .call(enterStem)
+            .call(enterTip),
+        (update) =>
+          update
+            .attr('transform', (d) => `translate(${x(parseDate(d.dt)) - barWidth / 2}, ${y(d.newInf)})`)
+            .call((g) => g.select('rect').call(updateStem))
+            .call((g) => g.select('circle').call(updateTip)),
+        (exit) => exit.remove()
+      )
+
+    const entered = () => {
+      barsContainer.selectAll('g').attr('opacity', 0.75).select('circle').attr('r', tipRadius)
+    }
+
+    const moved = () => {
+      const date = dateFmt(x.invert(d3.event.layerX))
+
+      const hoveredBar = barsContainer.select(`#day-${date}`)
+      if (hoveredBar.empty()) {
+        left()
+      } else {
+        entered()
+        hoveredBar
+          .attr('opacity', 1)
+          .select('circle')
+          .attr('r', tipRadius * 1.25)
+      }
+    }
+
+    const left = () => {
+      barsContainer.selectAll('g').attr('opacity', 1).select('circle').attr('r', tipRadius)
+    }
+
+    svg.on('mouseenter', entered)
+    svg.on('mousemove', moved)
+    svg.on('mouseleave', left)
 
     svg
       .select('.xAxis')
@@ -142,6 +205,8 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
     view.marginTop,
     view.ref,
     view.width,
+    zoneColor,
+    highlighted,
   ])
 
   return (
@@ -149,35 +214,12 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
       <div style={{ height: '400px', position: 'relative' }}>
         <div ref={view.ref} className={classes.chartRoot}>
           <svg className={classes.svgRoot} preserveAspectRatio='xMidYMid meet' width={view.width} height={view.height}>
-            <g className='lines' />
+            <g className='bars' />
             <g className={`xAxisGrid ${classes.grid}`} />
             <g className='xAxis' />
             <g className='yAxis' />
-            <g className='lineLabels' />
             <g className='dot'>
               <circle r='2.5' />
-              <text
-                className='count'
-                textAnchor='middle'
-                fontFamily='monospace'
-                y={-28}
-                stroke='#fff'
-                strokeWidth='2px'
-                fill='black'
-                paintOrder='stroke'
-              ></text>
-              <text
-                className='doubling-label'
-                textAnchor='middle'
-                fontFamily='sans-serif'
-                fontSize='11'
-                y={-17}
-                stroke='#fff'
-                strokeWidth='1px'
-                fill='black'
-                paintOrder='stroke'
-              ></text>
-              <path className='slope' d='M-70,0L70,0' stroke='grey' strokeWidth={0.5} />
             </g>
           </svg>
           <div className={'legend'} style={{ position: 'absolute', top: '5px', left: '15px', width: '100%' }}>
