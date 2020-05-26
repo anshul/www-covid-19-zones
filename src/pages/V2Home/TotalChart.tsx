@@ -183,9 +183,7 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
             <Row between='xs'>
               <Col xs={12} md style={{ padding: '0' }}>
                 <Row start='xs md'>
-                  <p style={{ fontWeight: 500 }}>{`Total infections - ${
-                    mode === 'compare' ? '5 day average' : data?.zones[0]?.name || ''
-                  }`}</p>
+                  <p style={{ fontWeight: 500 }}>{`Total infections - ${mode === 'compare' ? '5 day average' : data?.zones[0]?.name || ''}`}</p>
                 </Row>
               </Col>
               <Col xs={12} md>
