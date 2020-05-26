@@ -1,6 +1,6 @@
 /* tslint:disable */
 /* eslint-disable */
-/* @relayHash 4d082f76094e05bdf811c58769e1d3ec */
+/* @relayHash 96b64c27238f8d5584351a7e740cc721 */
 
 import { ConcreteRequest } from "relay-runtime";
 import { FragmentRefs } from "relay-runtime";
@@ -41,6 +41,7 @@ fragment V2HomeRoot_data on V2Stats {
       newInf
       newInfSma5
       totInf
+      totInfSma5
     }
     parent {
       code
@@ -226,6 +227,13 @@ return {
                     "name": "totInf",
                     "args": null,
                     "storageKey": null
+                  },
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "name": "totInfSma5",
+                    "args": null,
+                    "storageKey": null
                   }
                 ]
               },
@@ -252,7 +260,7 @@ return {
     "operationKind": "query",
     "name": "V2HomeQuery",
     "id": null,
-    "text": "query V2HomeQuery(\n  $codes: [String!]!\n) {\n  v2Stats(codes: $codes) {\n    ...V2HomeRoot_data\n  }\n}\n\nfragment V2HomeRoot_data on V2Stats {\n  zones {\n    code\n    category\n    pCategory\n    name\n    ...ZoneCard_zone\n    unitCodes\n    chart {\n      dt\n      newInf\n      newInfSma5\n      totInf\n    }\n    parent {\n      code\n      name\n    }\n  }\n}\n\nfragment ZoneCard_zone on V2Zone {\n  code\n  name\n  fEstPopulation\n  fEstPopulationYear\n  perMillionInfections\n  cumulativeInfections\n}\n",
+    "text": "query V2HomeQuery(\n  $codes: [String!]!\n) {\n  v2Stats(codes: $codes) {\n    ...V2HomeRoot_data\n  }\n}\n\nfragment V2HomeRoot_data on V2Stats {\n  zones {\n    code\n    category\n    pCategory\n    name\n    ...ZoneCard_zone\n    unitCodes\n    chart {\n      dt\n      newInf\n      newInfSma5\n      totInf\n      totInfSma5\n    }\n    parent {\n      code\n      name\n    }\n  }\n}\n\nfragment ZoneCard_zone on V2Zone {\n  code\n  name\n  fEstPopulation\n  fEstPopulationYear\n  perMillionInfections\n  cumulativeInfections\n}\n",
     "metadata": {}
   }
 };

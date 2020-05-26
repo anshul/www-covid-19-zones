@@ -45,6 +45,14 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
   const onSearch = (code: string) => go({ codes: mode === 'compare' ? [code] : [code] })
   const response: MapDataT = useSWR(`/api/maps?codes=in`)
   const [cachedData, setCachedData] = useState(data)
+  const [highlighted, setHighlighted] = useState<{ [key: string]: boolean }>({})
+  const setHighlight = (code: string) => setHighlighted({ [code]: true })
+
+  useEffect(() => {
+    const currentZones = data ? data.zones.filter((z) => codes.includes(z.code)) : []
+    if (data) setCachedData({ ...data, zones: currentZones })
+    if (currentZones.length > 0) setHighlight(currentZones[0].code)
+  }, [codes, data])
   const ipmColor = useMemo(() => d3.scaleThreshold<number, string>().domain(ipmThresholds).range(colors.palette), [])
   const iColor = useMemo(() => d3.scaleThreshold<number, string>().domain(iThresholds).range(['#ffffff', '#eeeeee']), [])
   const zoneColor = useMemo(
@@ -60,14 +68,13 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
       if (aspectRatio < 1) {
         return '500px'
       }
-      return window.innerHeight - 400 > 300 ? `${window.innerHeight - 400}px` : '400px'
+      return '700px'
+      // return window.innerHeight - 400 > 300 ? `${window.innerHeight - 400}px` : '400px'
     }
-    return cachedData && cachedData.zones.length > 1 ? '400px' : '200px'
+    return cachedData && cachedData.zones.length >= 1 ? '500px' : '200px'
   }, [aspectRatio, cachedData])
+
   const firstZone = cachedData && cachedData.zones.length >= 1 ? cachedData.zones[0] : null
-  useEffect(() => {
-    if (data) setCachedData(data)
-  }, [data])
   if (cachedData) {
     if (!MODES.find((m) => m === mode)) return <ErrorPanel onSearch={onSearch} message='Page not found!' />
     if (!firstZone) return <ErrorPanel onSearch={onSearch} message='Invalid zone!' />
@@ -92,14 +99,17 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
         </div>
       </div>
 
-      <Row start='xs'>
+      <Row
+        center={cachedData && cachedData.zones.length < 3 ? 'xs' : undefined}
+        start={cachedData && cachedData.zones.length < 3 ? undefined : 'xs'}
+      >
         {cachedData &&
           cachedData.zones.map((zone, idx) => (
             <Col
               key={`map-${idx}`}
               xs={Math.max(colWidth, 6)}
               md={Math.max(colWidth, 4)}
-              lg={Math.max(colWidth, 4)}
+              lg={Math.max(Math.floor((colWidth * 2) / 3), 4)}
               style={{ height: mapHeight, position: 'relative' }}
             >
               <Choropleth
@@ -130,14 +140,19 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
             </Col>
           ))}
       </Row>
-
-      <Row>
-        <Col xs={12} md={12}>
-          <TrendChart zoneColor={zoneColor} codes={codes} mode={mode} data={cachedData} go={go} />
+      <Row center='xs'>
+        <Col xs={12} md={12} lg={8}>
+          <TrendChart
+            zoneColor={zoneColor}
+            codes={codes}
+            mode={mode}
+            data={cachedData}
+            go={go}
+            highlighted={highlighted}
+            setHighlight={setHighlight}
+          />
         </Col>
-      </Row>
-      <Row>
-        <Col xs={12} md={12}>
+        <Col xs={12} md={12} lg={8}>
           <DailyChart
             zoneColor={zoneColor}
             codes={codes}
@@ -146,6 +161,8 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
             go={go}
             dateRange={dateRange}
             isLogarithmic={isLogarithmic}
+            highlighted={highlighted}
+            setHighlight={setHighlight}
           />
         </Col>
       </Row>
@@ -168,6 +185,7 @@ export default createFragmentContainer(V2HomeRoot, {
           newInf
           newInfSma5
           totInf
+          totInfSma5
         }
         parent {
           code

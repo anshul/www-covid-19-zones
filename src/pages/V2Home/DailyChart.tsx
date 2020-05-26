@@ -1,30 +1,35 @@
 // @ts-nocheck
-import React, { memo, useEffect } from 'react'
+import { Typography, Theme, createStyles, makeStyles } from '@material-ui/core'
 import * as d3 from 'd3'
-import { createStyles, makeStyles } from '@material-ui/core'
+import React, { memo, useEffect } from 'react'
 import useResponsiveView from '../../hooks/useResponsiveView'
 import { DateRangeT, UrlT } from '../../types'
 import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
 import { Col, Row } from 'react-flexbox-grid'
-import { Typography } from '@material-ui/core'
+import * as d3Array from 'd3-array'
 
 interface Props {
-  data: V2HomeRoot_data | null
   zoneColor: d3.ScaleOrdinal<string, string>
+  data: V2HomeRoot_data | null
   codes: string[]
   go: (target: UrlT) => void
   mode: string
   dateRange: DateRangeT
   isLogarithmic: boolean
+  highlighted: { [key: string]: boolean | undefined | null }
+  setHighlight: (key: string) => void
 }
 
-const useStyles = makeStyles(() =>
+const fadedOpacity = 0.2
+const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     chartRoot: {
-      marginTop: '10px',
-      height: '300px',
+      height: '100%',
       minWidth: '400px',
       position: 'relative',
+    },
+    lineLabel: {
+      fontSize: '12px',
     },
     svgRoot: {
       border: '1px solid #eee',
@@ -32,25 +37,41 @@ const useStyles = makeStyles(() =>
     pre: {
       whiteSpace: 'pre-wrap',
     },
-    legendSvg: {
-      background: 'transparent',
-      position: 'absolute',
-      top: '-10px',
+    fadedLine: {
+      opacity: fadedOpacity,
+    },
+    legendItem: {
+      marginRight: theme.spacing(1),
+      display: 'flex',
+      alignItems: 'center',
+    },
+    legendItemIcon: {
+      width: theme.spacing(1.5),
+      height: theme.spacing(1.5),
+      marginRight: theme.spacing(0.5),
     },
   })
 )
 
-const DailyChart: React.FC<Props> = ({ data, go, mode, codes, dateRange, isLogarithmic, zoneColor }) => {
+const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlighted, setHighlight }) => {
   const classes = useStyles()
-  const view = useResponsiveView({ marginTop: 5, marginLeft: 5, marginBottom: 30, marginRight: 50 })
-
+  const view = useResponsiveView({
+    marginTop: 5,
+    marginLeft: 40,
+    marginBottom: 30,
+    marginRight: 5,
+  })
   useEffect(() => {
-    console.log('render daily chart', { data })
+    console.log('render trend chart', { data })
     const maybeDiv: unknown = view.ref.current
     if (!maybeDiv) return
     const el: HTMLElement = maybeDiv as HTMLElement
     const svg = d3.select(el).select('svg')
-    console.log('d3 update', {
+    const dot = svg.select('g.dot')
+    const legendHeight = +d3.select(el).select('.legend').style('height').slice(0, -2)
+    dot.attr('display', 'none')
+    console.log('d3 update: daily chart', {
+      legendHeight,
       w: view.width,
       h: view.height,
       iw: view.innerWidth,
@@ -60,108 +81,36 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, dateRange, isLogar
 
     if (!data) return
 
+    const filteredZones = data.zones.filter((z) => z.chart && z.chart.length >= 1)
+
     const parseTime = d3.timeParse('%Y-%m-%d')
     const parseDt = (dt: string): Date => parseTime(dt) || new Date()
-    const minDate = d3.min(data.zones.flatMap((zone) => zone.chart.map((point) => parseDt(point.dt)))) || new Date('2020', 3, 1)
-    const maxDate = d3.max(data.zones.flatMap((zone) => zone.chart.map((point) => parseDt(point.dt)))) || new Date()
+    const minDate = d3.min(filteredZones.flatMap((zone) => zone.chart.map((point) => parseDt(point.dt)))) || new Date('2020', 3, 1)
+    const maxDate = d3.max(filteredZones.flatMap((zone) => zone.chart.map((point) => parseDt(point.dt)))) || new Date()
 
-    const minValue = d3.min(data.zones.flatMap((zone) => zone.chart.map((point) => point.newInf))) || 0
-    const maxValue = d3.max(data.zones.flatMap((zone) => zone.chart.map((point) => point.newInf))) || 100
+    const minValue = d3.min(filteredZones.flatMap((zone) => zone.chart.map((point) => point.newInf))) || 0
+    const maxValue = d3.max(filteredZones.flatMap((zone) => zone.chart.map((point) => point.newInf))) || 100
 
-    const x = d3.scaleTime().domain([minDate, maxDate]).range([view.marginLeft, view.innerWidth])
-    const y = d3.scaleLinear().domain([minValue, maxValue]).nice().range([view.innerHeight, view.marginTop])
+    const y = d3
+      .scaleLog()
+      .domain([Math.max(minValue, 1), maxValue])
+      .range([view.innerHeight, Math.max(view.marginTop, legendHeight)])
+      .nice()
+    const x = d3.scaleTime().domain([minDate, maxDate]).range([view.marginLeft, view.innerWidth]).nice()
 
-    const barWidth =
-      Math.floor((x.range()[1] - x.range()[0]) / data.zones.flatMap((zone) => zone.chart.map((point) => parseDt(point.dt))).length) - 1
-
-    const gXAxis = svg.select('.xAxis')
-    gXAxis.attr('transform', `translate(0, ${view.height - view.marginBottom})`).call(d3.axisBottom(x).ticks(view.innerWidth / 70))
-    const gYAxis = svg.select('.yAxis')
-    gYAxis.attr('transform', `translate(${view.width - view.marginRight},0)`).call(d3.axisRight(y))
-
-    const t = d3.transition().duration(1000)
-    const gChart = svg.select('.chart')
-    gChart.selectAll('.dot').exit().remove()
-    gChart.selectAll('.line').exit().remove()
-    const newInfLine = d3
-      .line()
-      .x((d) => x(parseDt(d.dt)))
-      .y((d) => y(d.newInfSma5))
-
-    const chartUpdater = (selection) =>
-      selection
-        .classed('bar', true)
-        .attr('fill', () => 'coral')
-        .attr('x', (d) => x(parseDt(d.dt)) - barWidth / 2)
-        .attr('y', (d) => y(d.newInf))
-        .attr('width', barWidth)
-        .attr('height', (d) => view.innerHeight - y(d.newInf))
-
-    const lineUpdater = (selection) =>
-      selection
-        .classed('line', true)
-        .attr('d', (d) => newInfLine(d.chart))
-        .style('fill', 'none')
-        .style('stroke', (d) => zoneColor[d.code])
-        .style('stroke-width', 4)
-
-    gChart
-      .selectAll('.bar')
-      .data(data.zones[0].chart)
-      .join(
-        (enter) => enter.append('rect').call(chartUpdater),
-        (update) => update.call(chartUpdater),
-        (exit) => exit.call((exit) => exit.transition(t).attr('opacity', 0).remove())
-      )
-
-    gChart
-      .selectAll('.line')
-      .data(data.zones, (d) => d.code)
-      .join(
-        (enter) => enter.append('path').call(lineUpdater),
-        (update) => update.call(lineUpdater),
-        (exit) => exit.call((exit) => exit.transition(t).attr('opacity', 0).remove())
-      )
-
-    // const legend = svg.select('.legend')
-    // legend.attr('transform', `translate(${view.marginLeft},${view.marginTop})`)
-
-    // const legendX = 20
-    // const legendRectWidth = 40
-    // const legendRectHeight = 20
-    // const legendUpdater = (selection) =>
-    //   selection
-    //     .call((selection) =>
-    //       selection
-    //         .append('rect')
-    //         .attr('width', legendRectWidth)
-    //         .attr('height', legendRectHeight)
-    //         .attr('x', legendX)
-    //         .attr('y', (_, i) => i * legendRectHeight + i * 10)
-    //         .style('fill', (d) => zoneColor[d.code])
-    //     )
-    //     .call((selection) =>
-    //       selection
-    //         .append('text')
-    //         .attr('x', legendX + legendRectWidth + 10)
-    //         .attr('y', (_, i) => i * legendRectHeight + i * 10)
-    //         .attr('alignment-baseline', 'hanging')
-    //         .text((d) => d.name)
-    //     )
-    // legend
-    //   .selectAll('g')
-    //   .data(data.zones, (d) => d.code)
-    //   .join(
-    //     (enter) => enter.append('g').call(legendUpdater),
-    //     (update) => update.call(legendUpdater),
-    //     (exit) => exit.remove()
-    //   )
+    svg
+      .select('.xAxis')
+      .attr('transform', `translate(0, ${view.height - view.marginBottom})`)
+      .call(d3.axisBottom(x).ticks(view.innerWidth / 70))
+    svg
+      .select('.yAxis')
+      .attr('transform', `translate(${view.marginLeft},0)`)
+      .call(d3.axisLeft(y).tickFormat((d) => y.tickFormat(4, d3.format('.1s'))(d)))
 
     return () => {
       console.log('d3 cleanup')
     }
   }, [
-    zoneColor,
     data,
     view.height,
     view.innerHeight,
@@ -176,14 +125,74 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, dateRange, isLogar
 
   return (
     <>
-      <div ref={view.ref} className={classes.chartRoot}>
-        <svg className={classes.svgRoot} preserveAspectRatio='xMidYMid meet' width={view.width} height={view.height}>
-          <g className='chart' />
-          <g className='xAxis' />
-          <g className='yAxis' />
-          <g className='legend' />
-        </svg>
+      <div style={{ height: '400px', position: 'relative' }}>
+        <div ref={view.ref} className={classes.chartRoot}>
+          <svg className={classes.svgRoot} preserveAspectRatio='xMidYMid meet' width={view.width} height={view.height}>
+            <g className='lines' />
+            <g className='xAxis' />
+            <g className='yAxis' />
+            <g className='lineLabels' />
+            <g className='dot'>
+              <circle r='2.5' />
+              <text
+                className='count'
+                textAnchor='middle'
+                fontFamily='monospace'
+                y={-28}
+                stroke='#fff'
+                strokeWidth='2px'
+                fill='black'
+                paintOrder='stroke'
+              ></text>
+              <text
+                className='doubling-label'
+                textAnchor='middle'
+                fontFamily='sans-serif'
+                fontSize='11'
+                y={-17}
+                stroke='#fff'
+                strokeWidth='1px'
+                fill='black'
+                paintOrder='stroke'
+              ></text>
+              <path className='slope' d='M-70,0L70,0' stroke='grey' strokeWidth={0.5} />
+            </g>
+          </svg>
+          <div className={'legend'} style={{ position: 'absolute', top: '5px', left: '15px', width: '100%' }}>
+            <Row between='xs'>
+              <Col xs={12} md style={{ padding: '0' }}>
+                <Row start='xs md'>
+                  <p style={{ fontWeight: 500 }}>{`Infections by day - ${
+                    mode === 'compare' ? '5 day average' : data?.zones[0]?.name || ''
+                  }`}</p>
+                </Row>
+              </Col>
+              <Col xs={12} md>
+                <Row end='xs md' style={{ paddingRight: '15px' }}>
+                  {data?.zones.map((z) => (
+                    <div
+                      key={z.code}
+                      className={classes.legendItem}
+                      style={{ cursor: 'pointer' }}
+                      onMouseEnter={() => setHighlight(z.code)}
+                      onClick={() => setHighlight(z.code)}
+                    >
+                      <div
+                        className={classes.legendItemIcon}
+                        style={{ backgroundColor: zoneColor(z.code), opacity: highlighted[z.code] ? 1 : fadedOpacity }}
+                      />
+                      <small>{z.name}</small>
+                    </div>
+                  ))}
+                </Row>
+              </Col>
+            </Row>
+          </div>
+        </div>
       </div>
+      <Typography variant='body1' style={{ fontSize: '10.7px' }}>
+        Source: covid19india.org, mohfw.gov.in and various state governments.
+      </Typography>
     </>
   )
 }

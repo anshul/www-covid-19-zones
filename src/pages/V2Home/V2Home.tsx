@@ -48,7 +48,7 @@ const V2Home: React.FC<RouteComponentProps<{ mode: string; codes: string }>> = (
           }
         }
       `}
-      variables={{ codes: codes }}
+      variables={{ codes: [...codes, 'in'] }}
       render={({ error, props }) => {
         if (error) {
           return <ErrorPage error={error} />
