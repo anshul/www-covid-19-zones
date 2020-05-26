@@ -57,7 +57,7 @@ const TrendChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
     marginTop: 5,
     marginLeft: 40,
     marginBottom: 30,
-    marginRight: 50,
+    marginRight: 5,
   })
   const threshold = 10
   function doublingRate(chart, index) {
@@ -109,12 +109,12 @@ const TrendChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
     const y = d3
       .scaleLog()
       .domain([threshold, d3.max(filteredZones.flatMap((z) => z.chart.map((day) => day.totInf)))])
-      .range([view.height - view.marginBottom, Math.max(view.marginTop, legendHeight)])
+      .range([view.innerHeight, Math.max(view.marginTop, legendHeight)])
       .nice()
     const x = d3
       .scaleLinear()
       .domain([0, d3.max(filteredZones.map((z) => z.chart.length)) + 20])
-      .range([view.marginLeft, view.width - view.marginRight])
+      .range([view.marginLeft, view.innerWidth])
       .nice()
 
     svg

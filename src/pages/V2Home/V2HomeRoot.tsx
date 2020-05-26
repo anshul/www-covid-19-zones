@@ -161,6 +161,8 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
             go={go}
             dateRange={dateRange}
             isLogarithmic={isLogarithmic}
+            highlighted={highlighted}
+            setHighlight={setHighlight}
           />
         </Col>
       </Row>
