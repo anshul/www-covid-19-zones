@@ -48,7 +48,6 @@ const useStyles = makeStyles(() =>
   createStyles({
     mapRoot: {
       height: '100%',
-      maxHeight: 'calc(100vh - 300px)',
       minHeight: '160px',
       minWidth: '160px',
       position: 'relative',

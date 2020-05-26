@@ -18,7 +18,7 @@ interface Props {
 const useStyles = makeStyles(() =>
   createStyles({
     chartRoot: {
-      height: '500px',
+      height: '100%',
       minWidth: '400px',
       position: 'relative',
     },

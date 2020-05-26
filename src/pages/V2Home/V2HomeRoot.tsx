@@ -60,10 +60,12 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
       if (aspectRatio < 1) {
         return '500px'
       }
-      return window.innerHeight - 400 > 300 ? `${window.innerHeight - 400}px` : '400px'
+      return '700px'
+      // return window.innerHeight - 400 > 300 ? `${window.innerHeight - 400}px` : '400px'
     }
-    return cachedData && cachedData.zones.length > 1 ? '400px' : '200px'
+    return cachedData && cachedData.zones.length >= 1 ? '400px' : '200px'
   }, [aspectRatio, cachedData])
+
   const firstZone = cachedData && cachedData.zones.length >= 1 ? cachedData.zones[0] : null
   useEffect(() => {
     if (data) setCachedData(data)
@@ -92,14 +94,14 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
         </div>
       </div>
 
-      <Row start='xs'>
+      <Row center='xs'>
         {cachedData &&
           cachedData.zones.map((zone, idx) => (
             <Col
               key={`map-${idx}`}
               xs={Math.max(colWidth, 6)}
               md={Math.max(colWidth, 4)}
-              lg={Math.max(colWidth, 4)}
+              lg={Math.max(Math.floor((colWidth * 2) / 3), 4)}
               style={{ height: mapHeight, position: 'relative' }}
             >
               <Choropleth
@@ -129,15 +131,10 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
               </div>
             </Col>
           ))}
-      </Row>
-
-      <Row>
-        <Col xs={12} md={12}>
+        <Col xs={12} md={12} lg={8} style={{ height: '400px', position: 'relative' }}>
           <TrendChart zoneColor={zoneColor} codes={codes} mode={mode} data={cachedData} go={go} />
         </Col>
-      </Row>
-      <Row>
-        <Col xs={12} md={12}>
+        <Col xs={12} md={12} lg={8} style={{ height: '400px', position: 'relative' }}>
           <DailyChart
             zoneColor={zoneColor}
             codes={codes}
