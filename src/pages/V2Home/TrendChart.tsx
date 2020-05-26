@@ -22,6 +22,9 @@ const useStyles = makeStyles(() =>
       minWidth: '400px',
       position: 'relative',
     },
+    lineLabel: {
+      fontSize: '12px',
+    },
     svgRoot: {
       border: '1px solid #eee',
     },
@@ -29,7 +32,7 @@ const useStyles = makeStyles(() =>
       whiteSpace: 'pre-wrap',
     },
     fadedLine: {
-      opacity: 0.5,
+      opacity: 0.4,
       '& > .line': {
         stroke: 'grey',
       },
@@ -39,8 +42,27 @@ const useStyles = makeStyles(() =>
 
 const TrendChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor }) => {
   const classes = useStyles()
-  const view = useResponsiveView({ marginTop: 20, marginLeft: 40, marginBottom: 30, marginRight: 50 })
+  const view = useResponsiveView({ marginTop: 50, marginLeft: 40, marginBottom: 30, marginRight: 50 })
   const threshold = 10
+  function doublingRate(chart, index) {
+    let i = index
+    if (i < 0) i = Math.max(chart.length - i, 0)
+    if (i > chart.length - 1) i = chart.length - 1
+    const prev = chart[Math.max(i - 1, 0)]
+    const next = chart[Math.min(i + 1, chart.length - 1)]
+    const period = (next.dayCount - prev.dayCount) / (Math.log2(next.totInfSma5) - Math.log2(prev.totInfSma5))
+    const periodFmt = period < 10 ? d3.format('.1f') : d3.format('.0f')
+    const periodLabel = `doubling every ${periodFmt(period)} days`
+    const periodShortLabel = `${periodFmt(period)} days`
+    return {
+      period,
+      prev,
+      next,
+      periodFmt,
+      periodLabel: window.innerWidth < 600 ? periodShortLabel : periodLabel,
+      periodShortLabel,
+    }
+  }
 
   useEffect(() => {
     console.log('render trend chart', { data })
@@ -49,6 +71,7 @@ const TrendChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor }) => {
     const el: HTMLElement = maybeDiv as HTMLElement
     const svg = d3.select(el).select('svg')
     const dot = svg.select('g.dot')
+    dot.attr('display', 'none')
     console.log('d3 update: trend chart', {
       w: view.width,
       h: view.height,
@@ -101,8 +124,8 @@ const TrendChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor }) => {
     const enterLineLabel = (d) =>
       d
         .append('text')
-        .attr('class', 'line-label')
-        .text((d) => d.name)
+        .attr('class', `line-label ${classes.lineLabel}`)
+        .text((d) => `${d.name} (${doublingRate(d.chart, -1).periodLabel})`)
         .call(updateLineLabel)
 
     const trends = svg.select('.lines').selectAll('g')
@@ -149,26 +172,21 @@ const TrendChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor }) => {
         .select('.lines')
         .selectAll('g')
         .filter((d) => d.code !== closestZone.code)
-        .attr('class', classes.fadedLine)
+        .classed(classes.fadedLine, true)
 
       svg
         .select('.lines')
         .selectAll('g')
         .filter((d) => d.code === closestZone.code)
-        .attr('class', '')
+        .classed(classes.fadedLine, false)
 
-      const prev = xValue > 0 ? closestZone.chart[xValue - 1] : closestZone.chart[xValue]
-      const next = xValue < closestZone.chart.length - 1 ? closestZone.chart[xValue + 1] : closestZone.chart[xValue]
-
-      const period = (next.dayCount - prev.dayCount) / (Math.log2(next.totInf) - Math.log2(prev.totInf))
-      const periodFmt = period < 10 ? d3.format('.1f') : d3.format('.0f')
+      const { prev, next, periodLabel } = doublingRate(closestZone.chart, xValue)
       const countFmt = d3.format(',.0f')
       const slope = (y(next.totInf) - y(prev.totInf)) / (x(next.dayCount) - x(prev.dayCount))
       const rot = (Math.atan(slope) * 180) / Math.PI
-
       dot.attr('transform', `translate(${x(xValue)}, ${y(zoneValue(closestZone))})`)
       dot.select('text.count').text(countFmt(zoneValue(closestZone)))
-      dot.select('text.doubling-label').text(`doubling every ${periodFmt(period)} days`)
+      dot.select('text.doubling-label').text(periodLabel)
       dot.select('path.slope').attr('transform', `rotate(${rot})`)
     }
 
@@ -182,6 +200,7 @@ const TrendChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor }) => {
     }
   }, [
     classes.fadedLine,
+    classes.lineLabel,
     data,
     view.height,
     view.innerHeight,

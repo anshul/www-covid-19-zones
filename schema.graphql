@@ -103,6 +103,7 @@ type TsPoint {
   newInf: Float!
   newInfSma5: Float!
   totInf: Float!
+  totInfSma5: Float!
 }
 
 type V2Stats {

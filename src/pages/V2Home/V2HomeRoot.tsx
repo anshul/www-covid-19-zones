@@ -15,6 +15,7 @@ import ErrorPanel from './ErrorPanel'
 import ZoneBar from './ZoneBar'
 import ZoneCard from './ZoneCard'
 import TrendChart from './TrendChart'
+import { Typography } from '@material-ui/core'
 
 interface Props {
   isTouchDevice: boolean
@@ -45,6 +46,9 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
   const onSearch = (code: string) => go({ codes: mode === 'compare' ? [code] : [code] })
   const response: MapDataT = useSWR(`/api/maps?codes=in`)
   const [cachedData, setCachedData] = useState(data)
+  useEffect(() => {
+    if (data) setCachedData({ ...data, zones: data.zones.filter((z) => codes.includes(z.code)) })
+  }, [codes, data])
   const ipmColor = useMemo(() => d3.scaleThreshold<number, string>().domain(ipmThresholds).range(colors.palette), [])
   const iColor = useMemo(() => d3.scaleThreshold<number, string>().domain(iThresholds).range(['#ffffff', '#eeeeee']), [])
   const zoneColor = useMemo(
@@ -67,9 +71,6 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
   }, [aspectRatio, cachedData])
 
   const firstZone = cachedData && cachedData.zones.length >= 1 ? cachedData.zones[0] : null
-  useEffect(() => {
-    if (data) setCachedData(data)
-  }, [data])
   if (cachedData) {
     if (!MODES.find((m) => m === mode)) return <ErrorPanel onSearch={onSearch} message='Page not found!' />
     if (!firstZone) return <ErrorPanel onSearch={onSearch} message='Invalid zone!' />
@@ -94,7 +95,10 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
         </div>
       </div>
 
-      <Row center='xs'>
+      <Row
+        center={cachedData && cachedData.zones.length < 3 ? 'xs' : undefined}
+        start={cachedData && cachedData.zones.length < 3 ? undefined : 'xs'}
+      >
         {cachedData &&
           cachedData.zones.map((zone, idx) => (
             <Col
@@ -131,19 +135,36 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
               </div>
             </Col>
           ))}
-        <Col xs={12} md={12} lg={8} style={{ height: '400px', position: 'relative' }}>
-          <TrendChart zoneColor={zoneColor} codes={codes} mode={mode} data={cachedData} go={go} />
+      </Row>
+      <Row center='xs'>
+        <Col xs={12} md={12} lg={8}>
+          <div style={{ height: '400px', position: 'relative' }}>
+            <TrendChart zoneColor={zoneColor} codes={codes} mode={mode} data={cachedData} go={go} />
+            <div style={{ position: 'absolute', top: '5px', left: '15px' }}>
+              <Typography style={{ fontWeight: 500, fontSize: '16px' }}>Cumulative Infections - Doubling rates</Typography>
+            </div>
+          </div>
+          <Typography variant='body1' style={{ fontSize: '10px' }}>
+            *Doubling rates calculated based on the 5 day moving average of total infections.
+          </Typography>
         </Col>
-        <Col xs={12} md={12} lg={8} style={{ height: '400px', position: 'relative' }}>
-          <DailyChart
-            zoneColor={zoneColor}
-            codes={codes}
-            mode={mode}
-            data={cachedData}
-            go={go}
-            dateRange={dateRange}
-            isLogarithmic={isLogarithmic}
-          />
+        <Col xs={12} md={12} lg={8}>
+          <div style={{ height: '400px', position: 'relative' }}>
+            <DailyChart
+              zoneColor={zoneColor}
+              codes={codes}
+              mode={mode}
+              data={cachedData}
+              go={go}
+              dateRange={dateRange}
+              isLogarithmic={isLogarithmic}
+            />
+            <div style={{ position: 'absolute', top: '5px', left: '15px' }}>
+              <Typography style={{ fontWeight: 500, fontSize: '16px' }}>
+                Infections by day - {mode === 'compare' ? '5 day average' : cachedData && cachedData.zones[0].name}
+              </Typography>
+            </div>
+          </div>
         </Col>
       </Row>
     </Grid>
@@ -165,6 +186,7 @@ export default createFragmentContainer(V2HomeRoot, {
           newInf
           newInfSma5
           totInf
+          totInfSma5
         }
         parent {
           code

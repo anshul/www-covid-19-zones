@@ -15,6 +15,7 @@ export type V2HomeRoot_data = {
             readonly newInf: number;
             readonly newInfSma5: number;
             readonly totInf: number;
+            readonly totInfSma5: number;
         }>;
         readonly parent: {
             readonly code: string;
@@ -122,6 +123,13 @@ return {
               "name": "totInf",
               "args": null,
               "storageKey": null
+            },
+            {
+              "kind": "ScalarField",
+              "alias": null,
+              "name": "totInfSma5",
+              "args": null,
+              "storageKey": null
             }
           ]
         },
@@ -148,5 +156,5 @@ return {
   ]
 };
 })();
-(node as any).hash = '5c1ce4375ab8b3c5dae481e2c0e6c1ed';
+(node as any).hash = 'df9f824adee326246ec4992d8ca3889e';
 export default node;
