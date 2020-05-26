@@ -6,7 +6,6 @@ import useResponsiveView from '../../hooks/useResponsiveView'
 import { DateRangeT, UrlT } from '../../types'
 import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
 import { Col, Row } from 'react-flexbox-grid'
-import * as d3Array from 'd3-array'
 
 interface Props {
   zoneColor: d3.ScaleOrdinal<string, string>
@@ -184,7 +183,7 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
             <Row between='xs'>
               <Col xs={12} md style={{ padding: '0' }}>
                 <Row start='xs md'>
-                  <p style={{ fontWeight: 500 }}>{`Infections by day - ${
+                  <p style={{ fontWeight: 500 }}>{`Total infections - ${
                     mode === 'compare' ? '5 day average' : data?.zones[0]?.name || ''
                   }`}</p>
                 </Row>

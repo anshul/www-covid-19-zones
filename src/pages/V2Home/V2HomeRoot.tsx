@@ -11,6 +11,7 @@ import Choropleth from './Choropleth'
 import ChoroLegend from './ChoroLegend'
 import CompareBar from './CompareBar'
 import DailyChart from './DailyChart'
+import TotalChart from './TotalChart'
 import ErrorPanel from './ErrorPanel'
 import ZoneBar from './ZoneBar'
 import ZoneCard from './ZoneCard'
@@ -98,6 +99,17 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
           <ChoroLegend color={ipmColor} />
         </div>
       </div>
+      <p style={{ textAlign: 'center', fontSize: '10px', width: '100%' }}>
+        Click any area on the map to {mode === 'compare' ? `compare` : `see it's details`}{' '}
+        {mode === 'zones' && cachedData?.zones[0]?.code === 'in' ? (
+          ''
+        ) : (
+          <>
+            (<a href='/v2'>reset</a>)
+          </>
+        )}
+        .
+      </p>
 
       <Row
         center={cachedData && cachedData.zones.length < 3 ? 'xs' : undefined}
@@ -154,6 +166,19 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
         </Col>
         <Col xs={12} md={12} lg={8}>
           <DailyChart
+            zoneColor={zoneColor}
+            codes={codes}
+            mode={mode}
+            data={cachedData}
+            go={go}
+            dateRange={dateRange}
+            isLogarithmic={isLogarithmic}
+            highlighted={highlighted}
+            setHighlight={setHighlight}
+          />
+        </Col>
+        <Col xs={12} md={12} lg={8}>
+          <TotalChart
             zoneColor={zoneColor}
             codes={codes}
             mode={mode}

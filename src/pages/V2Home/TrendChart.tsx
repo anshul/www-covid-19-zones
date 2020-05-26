@@ -18,7 +18,7 @@ interface Props {
   setHighlight: (key: string) => void
 }
 
-const fadedOpacity = 0.2
+const fadedOpacity = 0.5
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     chartRoot: {
