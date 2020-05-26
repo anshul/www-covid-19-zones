@@ -15,7 +15,6 @@ import ErrorPanel from './ErrorPanel'
 import ZoneBar from './ZoneBar'
 import ZoneCard from './ZoneCard'
 import TrendChart from './TrendChart'
-import { Typography } from '@material-ui/core'
 
 interface Props {
   isTouchDevice: boolean
@@ -46,8 +45,13 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
   const onSearch = (code: string) => go({ codes: mode === 'compare' ? [code] : [code] })
   const response: MapDataT = useSWR(`/api/maps?codes=in`)
   const [cachedData, setCachedData] = useState(data)
+  const [highlighted, setHighlighted] = useState<{ [key: string]: boolean }>({})
+  const setHighlight = (code: string) => setHighlighted({ [code]: true })
+
   useEffect(() => {
-    if (data) setCachedData({ ...data, zones: data.zones.filter((z) => codes.includes(z.code)) })
+    const currentZones = data ? data.zones.filter((z) => codes.includes(z.code)) : []
+    if (data) setCachedData({ ...data, zones: currentZones })
+    if (currentZones.length > 0) setHighlight(currentZones[0].code)
   }, [codes, data])
   const ipmColor = useMemo(() => d3.scaleThreshold<number, string>().domain(ipmThresholds).range(colors.palette), [])
   const iColor = useMemo(() => d3.scaleThreshold<number, string>().domain(iThresholds).range(['#ffffff', '#eeeeee']), [])
@@ -67,7 +71,7 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
       return '700px'
       // return window.innerHeight - 400 > 300 ? `${window.innerHeight - 400}px` : '400px'
     }
-    return cachedData && cachedData.zones.length >= 1 ? '400px' : '200px'
+    return cachedData && cachedData.zones.length >= 1 ? '500px' : '200px'
   }, [aspectRatio, cachedData])
 
   const firstZone = cachedData && cachedData.zones.length >= 1 ? cachedData.zones[0] : null
@@ -138,33 +142,26 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
       </Row>
       <Row center='xs'>
         <Col xs={12} md={12} lg={8}>
-          <div style={{ height: '400px', position: 'relative' }}>
-            <TrendChart zoneColor={zoneColor} codes={codes} mode={mode} data={cachedData} go={go} />
-            <div style={{ position: 'absolute', top: '5px', left: '15px' }}>
-              <Typography style={{ fontWeight: 500, fontSize: '16px' }}>Cumulative Infections - Doubling rates</Typography>
-            </div>
-          </div>
-          <Typography variant='body1' style={{ fontSize: '10px' }}>
-            *Doubling rates calculated based on the 5 day moving average of total infections.
-          </Typography>
+          <TrendChart
+            zoneColor={zoneColor}
+            codes={codes}
+            mode={mode}
+            data={cachedData}
+            go={go}
+            highlighted={highlighted}
+            setHighlight={setHighlight}
+          />
         </Col>
         <Col xs={12} md={12} lg={8}>
-          <div style={{ height: '400px', position: 'relative' }}>
-            <DailyChart
-              zoneColor={zoneColor}
-              codes={codes}
-              mode={mode}
-              data={cachedData}
-              go={go}
-              dateRange={dateRange}
-              isLogarithmic={isLogarithmic}
-            />
-            <div style={{ position: 'absolute', top: '5px', left: '15px' }}>
-              <Typography style={{ fontWeight: 500, fontSize: '16px' }}>
-                Infections by day - {mode === 'compare' ? '5 day average' : cachedData && cachedData.zones[0].name}
-              </Typography>
-            </div>
-          </div>
+          <DailyChart
+            zoneColor={zoneColor}
+            codes={codes}
+            mode={mode}
+            data={cachedData}
+            go={go}
+            dateRange={dateRange}
+            isLogarithmic={isLogarithmic}
+          />
         </Col>
       </Row>
     </Grid>

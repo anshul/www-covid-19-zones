@@ -1,12 +1,11 @@
 // @ts-nocheck
 import React, { memo, useEffect } from 'react'
 import * as d3 from 'd3'
-import { createStyles, makeStyles } from '@material-ui/core'
+import { createStyles, makeStyles, Theme } from '@material-ui/core'
 import useResponsiveView from '../../hooks/useResponsiveView'
 import { DateRangeT, UrlT } from '../../types'
 import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
 import { Col, Row } from 'react-flexbox-grid'
-import { Typography } from '@material-ui/core'
 
 interface Props {
   data: V2HomeRoot_data | null
@@ -18,11 +17,11 @@ interface Props {
   isLogarithmic: boolean
 }
 
-const useStyles = makeStyles(() =>
+const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     chartRoot: {
       marginTop: '10px',
-      height: '300px',
+      height: '100%',
       minWidth: '400px',
       position: 'relative',
     },
@@ -32,10 +31,15 @@ const useStyles = makeStyles(() =>
     pre: {
       whiteSpace: 'pre-wrap',
     },
-    legendSvg: {
-      background: 'transparent',
-      position: 'absolute',
-      top: '-10px',
+    legendItem: {
+      marginRight: theme.spacing(1),
+      display: 'flex',
+      alignItems: 'center',
+    },
+    legendItemIcon: {
+      width: theme.spacing(1.5),
+      height: theme.spacing(1.5),
+      marginRight: theme.spacing(0.5),
     },
   })
 )
@@ -176,13 +180,32 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, dateRange, isLogar
 
   return (
     <>
-      <div ref={view.ref} className={classes.chartRoot}>
-        <svg className={classes.svgRoot} preserveAspectRatio='xMidYMid meet' width={view.width} height={view.height}>
-          <g className='chart' />
-          <g className='xAxis' />
-          <g className='yAxis' />
-          <g className='legend' />
-        </svg>
+      <div style={{ height: '400px', position: 'relative' }}>
+        <div ref={view.ref} className={classes.chartRoot}>
+          <svg className={classes.svgRoot} preserveAspectRatio='xMidYMid meet' width={view.width} height={view.height}>
+            <g className='chart' />
+            <g className='xAxis' />
+            <g className='yAxis' />
+            <g className='legend' />
+          </svg>
+        </div>
+        <div style={{ position: 'absolute', top: '5px', left: '15px' }}>
+          <Row start='xl'>
+            <Col xl={4} xs={12} style={{ padding: '0' }}>
+              <p style={{ fontWeight: 500 }}>Infections by day - {mode === 'compare' ? '5 day average' : data?.zones[0].name}</p>
+            </Col>
+            <Col xs>
+              <Row end='xl'>
+                {data?.zones.map((z) => (
+                  <div key={z.code} className={classes.legendItem}>
+                    <div className={classes.legendItemIcon} style={{ backgroundColor: zoneColor(z.code) }} />
+                    <small>{z.name}</small>
+                  </div>
+                ))}
+              </Row>
+            </Col>
+          </Row>
+        </div>
       </div>
     </>
   )
