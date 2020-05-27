@@ -24,7 +24,7 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     chartRoot: {
       height: '100%',
-      minWidth: '400px',
+      minWidth: '300px',
       position: 'relative',
     },
     lineLabel: {
@@ -182,12 +182,12 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
           <div className={'legend'} style={{ position: 'absolute', top: '5px', left: '15px', width: '100%' }}>
             <Row between='xs'>
               <Col xs={12} md style={{ padding: '0' }}>
-                <Row start='xs md'>
+                <Row start='xs'>
                   <p style={{ fontWeight: 500 }}>{`Total infections - ${mode === 'compare' ? '5 day average' : data?.zones[0]?.name || ''}`}</p>
                 </Row>
               </Col>
               <Col xs={12} md>
-                <Row end='xs md' style={{ paddingRight: '15px' }}>
+                <Row end='xs' style={{ paddingRight: '15px' }}>
                   {data?.zones.map((z) => (
                     <div
                       key={z.code}
