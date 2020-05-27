@@ -6,7 +6,6 @@ import useResponsiveView from '../../hooks/useResponsiveView'
 import { DateRangeT, UrlT } from '../../types'
 import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
 import { Col, Row } from 'react-flexbox-grid'
-import * as d3Array from 'd3-array'
 
 interface Props {
   zoneColor: d3.ScaleOrdinal<string, string>
@@ -64,6 +63,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlighted, setHighlight }) => {
   const classes = useStyles()
+  const aspectRatio = window.innerWidth / window.innerHeight
   const view = useResponsiveView({
     marginTop: 5,
     marginLeft: 40,
@@ -211,7 +211,7 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
 
   return (
     <>
-      <div style={{ height: '400px', position: 'relative' }}>
+      <div style={{ height: aspectRatio > 1 ? '400px' : '300px', position: 'relative' }}>
         <div ref={view.ref} className={classes.chartRoot}>
           <svg className={classes.svgRoot} preserveAspectRatio='xMidYMid meet' width={view.width} height={view.height}>
             <g className='bars' />

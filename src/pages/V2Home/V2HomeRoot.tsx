@@ -114,6 +114,7 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
       <Row
         center={cachedData && cachedData.zones.length < 3 ? 'xs' : undefined}
         start={cachedData && cachedData.zones.length < 3 ? undefined : 'xs'}
+        style={{ paddingBottom: '25px' }}
       >
         {cachedData &&
           cachedData.zones.map((zone, idx) => (
@@ -153,7 +154,7 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
           ))}
       </Row>
       <Row center='xs'>
-        <Col xs={12} md={12} lg={8}>
+        <Col xs={12} md={12} lg={8} style={{ paddingBottom: '25px' }}>
           <TrendChart
             zoneColor={zoneColor}
             codes={codes}
@@ -164,7 +165,7 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
             setHighlight={setHighlight}
           />
         </Col>
-        <Col xs={12} md={12} lg={8}>
+        <Col xs={12} md={12} lg={8} style={{ paddingBottom: '25px' }}>
           <DailyChart
             zoneColor={zoneColor}
             codes={codes}
@@ -177,7 +178,7 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
             setHighlight={setHighlight}
           />
         </Col>
-        <Col xs={12} md={12} lg={8}>
+        <Col xs={12} md={12} lg={8} style={{ paddingBottom: '25px' }}>
           <TotalChart
             zoneColor={zoneColor}
             codes={codes}

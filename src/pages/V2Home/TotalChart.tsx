@@ -63,6 +63,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlighted, setHighlight }) => {
   const classes = useStyles()
+  const aspectRatio = window.innerWidth / window.innerHeight
   const view = useResponsiveView({
     marginTop: 5,
     marginLeft: 40,
@@ -145,7 +146,7 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
 
   return (
     <>
-      <div style={{ height: '400px', position: 'relative' }}>
+      <div style={{ height: aspectRatio > 1 ? '400px' : '300px', position: 'relative' }}>
         <div ref={view.ref} className={classes.chartRoot}>
           <svg className={classes.svgRoot} preserveAspectRatio='xMidYMid meet' width={view.width} height={view.height}>
             <g className='lines' />
