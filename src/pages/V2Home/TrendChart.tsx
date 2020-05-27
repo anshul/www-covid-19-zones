@@ -1,12 +1,12 @@
 // @ts-nocheck
-import { Typography, Theme, createStyles, makeStyles } from '@material-ui/core'
+import { createStyles, makeStyles, Theme, Typography } from '@material-ui/core'
 import * as d3 from 'd3'
+import * as d3Array from 'd3-array'
 import React, { memo, useEffect } from 'react'
+import { Col, Row } from 'react-flexbox-grid'
 import useResponsiveView from '../../hooks/useResponsiveView'
 import { UrlT } from '../../types'
 import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
-import { Col, Row } from 'react-flexbox-grid'
-import * as d3Array from 'd3-array'
 
 interface Props {
   zoneColor: d3.ScaleOrdinal<string, string>
@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     chartRoot: {
       height: '100%',
-      minWidth: '400px',
+      minWidth: '300px',
       position: 'relative',
     },
     lineLabel: {
@@ -53,6 +53,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const TrendChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlighted, setHighlight }) => {
   const classes = useStyles()
+  const aspectRatio = window.innerWidth / window.innerHeight
   const view = useResponsiveView({
     marginTop: 5,
     marginLeft: 40,
@@ -242,7 +243,7 @@ const TrendChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
 
   return (
     <>
-      <div style={{ height: '400px', position: 'relative' }}>
+      <div style={{ height: aspectRatio > 1 ? '400px' : '300px', position: 'relative' }}>
         <div ref={view.ref} className={classes.chartRoot}>
           <svg className={classes.svgRoot} preserveAspectRatio='xMidYMid meet' width={view.width} height={view.height}>
             <g className='lines' />
@@ -278,20 +279,14 @@ const TrendChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
           <div className={'legend'} style={{ position: 'absolute', top: '5px', left: '15px', width: '100%' }}>
             <Row between='xs'>
               <Col xs={12} md style={{ padding: '0' }}>
-                <Row start='xs md'>
+                <Row start='xs'>
                   <p style={{ fontWeight: 500 }}>Cumulative Infections - Doubling rates</p>
                 </Row>
               </Col>
               <Col xs={12} md>
-                <Row end='xs md' style={{ paddingRight: '15px' }}>
+                <Row end='xs' style={{ paddingRight: '15px' }}>
                   {data?.zones.map((z) => (
-                    <div
-                      key={z.code}
-                      className={classes.legendItem}
-                      style={{ cursor: 'pointer' }}
-                      onMouseEnter={() => setHighlight(z.code)}
-                      onClick={() => setHighlight(z.code)}
-                    >
+                    <div key={z.code} className={classes.legendItem} style={{ cursor: 'pointer' }} onClick={() => setHighlight(z.code)}>
                       <div
                         className={classes.legendItemIcon}
                         style={{ backgroundColor: zoneColor(z.code), opacity: highlighted[z.code] ? 1 : fadedOpacity }}

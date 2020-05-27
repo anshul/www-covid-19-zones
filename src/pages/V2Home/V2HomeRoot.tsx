@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { Col, Grid, Row } from 'react-flexbox-grid'
 import { createFragmentContainer } from 'react-relay'
 import useSWR from 'swr'
-import { DateRangeT, MapDataT, UrlT } from '../../types'
+import { ChartOptionsT, MapDataT, UrlT } from '../../types'
 import { lineColors } from '../../utils/ColorFactory'
 import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
 import Choropleth from './Choropleth'
@@ -23,8 +23,7 @@ interface Props {
   codes: string[]
   go: (target: UrlT) => void
   mode: string
-  dateRange: DateRangeT
-  isLogarithmic: boolean
+  chartOptions: ChartOptionsT
 }
 
 const MODES = ['compare', 'zones']
@@ -41,7 +40,7 @@ const colors = {
 const ipmThresholds = [3, 10, 20, 50, 75, 100, 250, 500, 1000, 2000, 10000]
 const iThresholds = [0]
 
-const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dateRange, isLogarithmic }) => {
+const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, chartOptions }) => {
   const aspectRatio = window.innerWidth / window.innerHeight
   const onSearch = (code: string) => go({ codes: mode === 'compare' ? [code] : [code] })
   const response: MapDataT = useSWR(`/api/maps?codes=in`)
@@ -64,6 +63,15 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
         .range(lineColors.map((l) => l[500])),
     [cachedData]
   )
+  const zoneSecondaryColor = useMemo(
+    () =>
+      d3
+        .scaleOrdinal<string, string>()
+        .domain(cachedData ? cachedData.zones.map((z) => z.code) : [])
+        .range(lineColors.map((l) => d3.color(l[500])?.brighter(1)?.toString() || '#000000')),
+    [cachedData]
+  )
+
   const mapHeight = useMemo(() => {
     if (cachedData && cachedData.zones.length === 1) {
       if (aspectRatio < 1) {
@@ -114,6 +122,7 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
       <Row
         center={cachedData && cachedData.zones.length < 3 ? 'xs' : undefined}
         start={cachedData && cachedData.zones.length < 3 ? undefined : 'xs'}
+        style={{ paddingBottom: '25px' }}
       >
         {cachedData &&
           cachedData.zones.map((zone, idx) => (
@@ -136,8 +145,6 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
                 ipmColor={ipmColor}
                 iColor={iColor}
                 go={go}
-                dateRange={dateRange}
-                isLogarithmic={isLogarithmic}
               />
               <div style={{ position: 'absolute', top: '5px', left: '15px' }}>
                 <ZoneCard
@@ -153,7 +160,7 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
           ))}
       </Row>
       <Row center='xs'>
-        <Col xs={12} md={12} lg={8}>
+        <Col xs={12} md={12} lg={12} style={{ paddingBottom: '25px' }}>
           <TrendChart
             zoneColor={zoneColor}
             codes={codes}
@@ -164,28 +171,27 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
             setHighlight={setHighlight}
           />
         </Col>
-        <Col xs={12} md={12} lg={8}>
+        <Col xs={12} md={12} lg={12} style={{ paddingBottom: '25px' }}>
           <DailyChart
             zoneColor={zoneColor}
+            zoneSecondaryColor={zoneSecondaryColor}
             codes={codes}
             mode={mode}
             data={cachedData}
             go={go}
-            dateRange={dateRange}
-            isLogarithmic={isLogarithmic}
+            chartOptions={chartOptions}
             highlighted={highlighted}
             setHighlight={setHighlight}
           />
         </Col>
-        <Col xs={12} md={12} lg={8}>
+        <Col xs={12} md={12} lg={12} style={{ paddingBottom: '25px' }}>
           <TotalChart
             zoneColor={zoneColor}
             codes={codes}
             mode={mode}
             data={cachedData}
             go={go}
-            dateRange={dateRange}
-            isLogarithmic={isLogarithmic}
+            chartOptions={chartOptions}
             highlighted={highlighted}
             setHighlight={setHighlight}
           />

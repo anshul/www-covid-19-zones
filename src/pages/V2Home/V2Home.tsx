@@ -17,12 +17,12 @@ import './fade.css'
 const V2Home: React.FC<RouteComponentProps<{ mode: string; codes: string }>> = ({ location, match, history }) => {
   const q = parse(location.search, { ignoreQueryPrefix: true })
   const codes = match.params.codes.split(',')
-  const dateRange: string = ['all', '1w', '1m'].find((x) => x === q.t) || 'all'
+  const dateRange: DateRangeT = (['all', '1w', '1m'].find((x) => x === q.t) || 'all') as DateRangeT
   const isLogarithmic: boolean = `${q.log || ''}`.length > 1 && q.log !== 'no'
   const mode: string = match.params.mode || 'zones'
 
   const go = (target: UrlT) => {
-    const newTarget = { mode, codes, dateRange: q.dateRange, isLogarithmic: q.isLogarithmic, ...target }
+    const newTarget = { mode, codes, dateRange: dateRange, isLogarithmic: isLogarithmic, ...target }
     newTarget.codes = newTarget.codes.filter((x) => x)
 
     const newQ = stringify({ t: newTarget.dateRange, log: `${newTarget.isLogarithmic || ''}`.length > 1 ? 'yes' : undefined })
@@ -34,6 +34,9 @@ const V2Home: React.FC<RouteComponentProps<{ mode: string; codes: string }>> = (
     }
     history.push(`/v2/${newTarget.mode}/${newTarget.codes.join(',')}${query}`)
   }
+
+  const setDateRange = (dateRange: DateRangeT): void => go({ dateRange })
+  const setIsLogarithmic = (isLogarithmic: boolean): void => go({ isLogarithmic })
 
   console.log('Rendering V2Home', { codes, mode, dateRange, isLogarithmic })
 
@@ -65,8 +68,7 @@ const V2Home: React.FC<RouteComponentProps<{ mode: string; codes: string }>> = (
                 codes={codes}
                 mode={mode}
                 go={go}
-                dateRange={dateRange as DateRangeT}
-                isLogarithmic={isLogarithmic}
+                chartOptions={{ isLogarithmic, dateRange, setDateRange, setIsLogarithmic }}
               />
             </SWRConfig>
           )
