@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { memo } from 'react'
 
 import { Row, Col } from 'react-flexbox-grid'
 import { Button, ButtonGroup } from '@material-ui/core'
@@ -63,4 +63,4 @@ const ChartOptionRow: React.FC<Props> = ({ options: { dateRange, setDateRange, i
   )
 }
 
-export default ChartOptionRow
+export default memo(ChartOptionRow)

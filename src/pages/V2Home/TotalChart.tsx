@@ -5,6 +5,7 @@ import React, { memo, useEffect, useState } from 'react'
 import { Col, Row } from 'react-flexbox-grid'
 import useResponsiveView from '../../hooks/useResponsiveView'
 import { ChartOptionsT, UrlT } from '../../types'
+import { filterData } from '../../utils/filterData'
 import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
 import ChartOptionsRow from './ChartOptionsRow'
 
@@ -83,7 +84,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, chartOptions, highlighted, setHighlight }) => {
+const TotalChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, chartOptions, highlighted, setHighlight }) => {
   const classes = useStyles()
   const [tooltip, setTooltip] = useState<{
     title: string
@@ -96,7 +97,7 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, chartOp
   const aspectRatio = window.innerWidth / window.innerHeight
   const view = useResponsiveView({
     marginTop: 5,
-    marginLeft: 40,
+    marginLeft: 50,
     marginBottom: 30,
     marginRight: 5,
   })
@@ -125,7 +126,11 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, chartOp
 
     if (!data) return
 
-    const filteredZones = data.zones.filter((z) => z.chart && z.chart.length >= 1)
+    const filteredZones = data.zones
+      .filter((z) => z.chart && z.chart.length >= 1)
+      .map((z) => ({ ...z, chart: filterData(chartOptions.dateRange, z.chart) }))
+    const zone = filteredZones.find((z) => highlighted[z.code] === true) || filteredZones[0]
+    if (!zone) return
 
     const parseDate = d3.timeParse('%Y-%m-%d')
     const dateFmt = d3.timeFormat('%Y-%m-%d')
@@ -135,14 +140,15 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, chartOp
     const minValue = d3.min(filteredZones.flatMap((zone) => zone.chart.map((point) => point.totInf))) || 0
     const maxValue = d3.max(filteredZones.flatMap((zone) => zone.chart.map((point) => point.totInf))) || 100
 
-    const yScale = chartOptions.isLogarithmic ? d3.scaleLog() : d3.scaleLinear()
-
+    const yScale = chartOptions.isLogarithmic
+      ? d3.scaleLog().domain([Math.max(1, minValue), maxValue])
+      : d3.scaleLinear().domain([minValue, maxValue])
     const y = yScale
-      .domain([Math.max(minValue, 1), maxValue])
       .range([view.innerHeight, Math.max(view.marginTop, legendHeight)])
+      .clamp(true)
       .nice()
-    const x = d3.scaleTime().domain([minDate, maxDate]).range([view.marginLeft, view.innerWidth]).clamp(true).nice()
-    const tickCount = Math.ceil(view.innerWidth / 70)
+    const x = d3.scaleTime().domain([minDate, maxDate]).range([view.marginLeft, view.innerWidth]).nice()
+    const tickCount = Math.ceil(view.innerWidth / 90)
 
     svg
       .select('.xAxisGrid')
@@ -161,7 +167,7 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, chartOp
       .call(d3.axisBottom(x).ticks(tickCount))
     svg
       .select('.yAxis')
-      .attr('transform', `translate(${view.marginLeft},0)`)
+      .attr('transform', `translate(${view.marginLeft - 5},0)`)
       .call(d3.axisLeft(y).tickFormat((d) => y.tickFormat(4, d3.format('.1s'))(d)))
 
     const line = d3
@@ -258,6 +264,7 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, chartOp
     highlighted,
     classes.fadedLine,
     chartOptions.isLogarithmic,
+    chartOptions.dateRange,
   ])
 
   return (
@@ -350,4 +357,4 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, chartOp
   )
 }
 
-export default memo(DailyChart)
+export default memo(TotalChart)

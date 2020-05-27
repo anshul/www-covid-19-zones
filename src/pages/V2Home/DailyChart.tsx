@@ -11,6 +11,7 @@ import ChartOptionsRow from './ChartOptionsRow'
 
 interface Props {
   zoneColor: d3.ScaleOrdinal<string, string>
+  zoneSecondaryColor: d3.ScaleOrdinal<string, string>
   data: V2HomeRoot_data | null
   codes: string[]
   go: (target: UrlT) => void
@@ -21,7 +22,7 @@ interface Props {
 }
 
 const fadedOpacity = 0.2
-const inactiveBarOpacity = 0.5
+const inactiveBarOpacity = 0.3
 const activeBarOpacity = 0.75
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -64,17 +65,16 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-const DailyChart: React.FC<Props> = ({ data, go, mode, codes, chartOptions, zoneColor, highlighted, setHighlight }) => {
+const DailyChart: React.FC<Props> = ({ data, go, mode, codes, chartOptions, zoneColor, zoneSecondaryColor, highlighted, setHighlight }) => {
   const classes = useStyles()
   const aspectRatio = window.innerWidth / window.innerHeight
   const view = useResponsiveView({
     marginTop: 5,
-    marginLeft: 40,
+    marginLeft: 50,
     marginBottom: 30,
     marginRight: 5,
   })
   useEffect(() => {
-    const lineColor = (zoneCode) => d3.color(zoneColor(zoneCode))?.brighter(1)
     console.log('render trend chart', { data })
     const maybeDiv: unknown = view.ref.current
     if (!maybeDiv) return
@@ -82,6 +82,7 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, chartOptions, zone
     const svg = d3.select(el).select('svg')
     const dot = svg.select('g.dot')
     const barsContainer = svg.select('.bars')
+    const tipsContainer = svg.select('.tips')
     const guideContainer = svg.select('.guideContainer')
     const legendHeight = +d3.select(el).select('.legend').style('height').slice(0, -2)
     d3.select(el)
@@ -99,34 +100,39 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, chartOptions, zone
 
     if (!data) return
 
-    const filteredZones = data.zones.filter((z) => z.chart && z.chart.length >= 1)
+    const filteredZones = data.zones
+      .filter((z) => z.chart && z.chart.length >= 1)
+      .map((z) => ({ ...z, chart: filterData(chartOptions.dateRange, z.chart) }))
     const zone = filteredZones.find((z) => highlighted[z.code] === true) || filteredZones[0]
     if (!zone) return
 
     const parseDate = d3.timeParse('%Y-%m-%d')
     const dateFmt = d3.timeFormat('%Y-%m-%d')
-    const minDate =
-      d3.min(filteredZones.flatMap((zone) => filterData(chartOptions.dateRange, zone.chart).map((point) => parseDate(point.dt)))) ||
-      new Date('2020', 3, 1)
-    const maxDate =
-      d3.max(filteredZones.flatMap((zone) => filterData(chartOptions.dateRange, zone.chart).map((point) => parseDate(point.dt)))) || new Date()
+    const minDate = d3.min(filteredZones.flatMap((zone) => zone.chart.map((point) => parseDate(point.dt)))) || new Date('2020', 3, 1)
+    const maxDate = d3.max(filteredZones.flatMap((zone) => zone.chart.map((point) => parseDate(point.dt)))) || new Date()
 
-    const minValue = d3.min(filteredZones.flatMap((zone) => filterData(chartOptions.dateRange, zone.chart).map((point) => point.newInf))) || 0
-    const maxValue = d3.max(filteredZones.flatMap((zone) => filterData(chartOptions.dateRange, zone.chart).map((point) => point.newInf))) || 100
+    const minValue = Math.max(0, d3.min(filteredZones.flatMap((zone) => zone.chart.map((point) => point.newInf))) || 0)
+    const maxValue = d3.max(filteredZones.flatMap((zone) => zone.chart.map((point) => point.newInf))) || 100
 
-    console.log(minDate, maxDate, minValue, maxValue)
-
-    const barWidth = 4
-    const tipRadius = 3
-
-    const y = d3
-      .scaleLinear()
-      .domain([Math.max(minValue, 1), maxValue])
-      .range([view.innerHeight, Math.max(view.marginTop, legendHeight)])
+    const yScale = chartOptions.isLogarithmic
+      ? d3.scaleLog().domain([Math.max(1, minValue), maxValue])
+      : d3.scaleLinear().domain([minValue, maxValue])
+    const effectiveTop = Math.max(view.marginTop, legendHeight)
+    const y = yScale
+      .range([view.height - view.marginBottom, effectiveTop])
+      .clamp(true)
       .nice()
-    const x = d3.scaleTime().domain([minDate, maxDate]).range([view.marginLeft, view.innerWidth]).nice()
+    const x = d3
+      .scaleTime()
+      .domain([minDate, maxDate])
+      .range([view.marginLeft, view.marginLeft + view.innerWidth])
+      .nice()
     const tickCount = Math.ceil(view.innerWidth / 90)
 
+    const xBand = d3.scaleBand().domain(d3.timeDay.range(minDate, maxDate)).range([view.marginLeft, view.innerWidth])
+
+    const barWidth = Math.min(xBand.bandwidth() / 2, 3)
+    const tipRadius = Math.min(3, barWidth * 1.2)
     svg
       .select('.xAxisGrid')
       .attr('transform', `translate(0, ${view.height - view.marginBottom})`)
@@ -153,9 +159,9 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, chartOptions, zone
             .append('path')
             .attr('d', (d) => line(d.chart))
             .attr('fill', 'none')
-            .attr('stroke', (d) => lineColor(d.code))
+            .attr('stroke', (d) => zoneSecondaryColor(d.code))
             .attr('stroke-width', 3),
-        (update) => update.attr('d', (d) => line(d.chart)).attr('stroke', (d) => lineColor(d.code)),
+        (update) => update.attr('d', (d) => line(d.chart)).attr('stroke', (d) => zoneSecondaryColor(d.code)),
         (exit) => exit.remove()
       )
 
@@ -175,44 +181,60 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, chartOptions, zone
         (exit) => exit.remove()
       )
 
+    const yMin = y.domain()[0]
+    const xMin = x.domain()[0]
     const updateStem = (selection) =>
       selection
         .transition()
-        .attr('height', (d) => view.innerHeight - y(d.newInf))
+        .duration(1000)
         .attr('fill', zoneColor(zone.code))
-    const enterStem = (selection) => selection.append('rect').attr('width', barWidth).call(updateStem)
-
-    const updateTip = (selection) => selection.attr('fill', zoneColor(zone.code))
-    const enterTip = (selection) =>
+        .attr('x', (d) => x(parseDate(d.dt)) - barWidth / 2)
+        .attr('y', (d) => y(d.newInf))
+        .attr('width', (d) => barWidth)
+        .attr('height', (d) => Math.max(y(yMin) - y(d.newInf), 0))
+    const updateTip = (selection) =>
       selection
-        .append('circle')
-        .attr('r', tipRadius)
-        .attr('cx', barWidth / 2)
-        .call(updateTip)
+        .transition()
+        .duration(1000)
+        .attr('fill', zoneColor(zone.code))
+        .attr('cx', (d) => x(parseDate(d.dt)))
+        .attr('cy', (d) => y(d.newInf))
+        .attr('r', (d) => tipRadius)
 
     barsContainer
-      .selectAll('g')
+      .selectAll('rect')
       .data(zone.chart, (d) => d.dt)
       .join(
         (enter) =>
           enter
-            .append('g')
+            .append('rect')
             .attr('opacity', inactiveBarOpacity)
             .attr('id', (d) => `day-${d.dt}`)
-            .attr('transform', (d) => `translate(${x(parseDate(d.dt)) - barWidth / 2}, ${view.innerHeight})`)
-            .call((g) => g.transition().attr('transform', (d) => `translate(${x(parseDate(d.dt)) - barWidth / 2}, ${y(d.newInf)})`))
-            .call(enterStem)
-            .call(enterTip),
-        (update) =>
-          update
-            .call((g) => g.transition().attr('transform', (d) => `translate(${x(parseDate(d.dt)) - barWidth / 2}, ${y(d.newInf)})`))
-            .call((g) => g.select('rect').call(updateStem))
-            .call((g) => g.select('circle').call(updateTip)),
+            .attr('x', (d) => x(xMin))
+            .attr('y', (d) => y(yMin))
+            .call(updateStem),
+        (update) => update.call(updateStem),
+        (exit) => exit.remove()
+      )
+
+    barsContainer
+      .selectAll('circle')
+      .data(zone.chart, (d) => d.dt)
+      .join(
+        (enter) =>
+          enter
+            .append('circle')
+            .attr('opacity', inactiveBarOpacity)
+            .attr('cx', (d) => x(xMin))
+            .attr('cy', (d) => y(yMin))
+            .attr('r', 0)
+            .call(updateTip),
+        (update) => update.call(updateTip),
         (exit) => exit.remove()
       )
 
     const entered = () => {
-      barsContainer.selectAll('g').attr('opacity', inactiveBarOpacity).select('circle').attr('r', tipRadius)
+      barsContainer.selectAll('rect').attr('opacity', inactiveBarOpacity).select('circle').attr('r', tipRadius)
       guideContainer.selectAll('circle').attr('display', null)
     }
 
@@ -236,7 +258,7 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, chartOptions, zone
     }
 
     const left = () => {
-      barsContainer.selectAll('g').attr('opacity', inactiveBarOpacity).select('circle').attr('r', tipRadius)
+      barsContainer.selectAll('rect').attr('opacity', inactiveBarOpacity).select('circle').attr('r', tipRadius)
       guideContainer.selectAll('circle').attr('display', 'none')
     }
 
@@ -250,7 +272,7 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, chartOptions, zone
       .call(d3.axisBottom(x).ticks(tickCount))
     svg
       .select('.yAxis')
-      .attr('transform', `translate(${view.marginLeft},0)`)
+      .attr('transform', `translate(${view.marginLeft - 5},0)`)
       .call(d3.axisLeft(y).tickFormat((d) => y.tickFormat(4, d3.format('.1s'))(d)))
 
     return () => {
@@ -270,6 +292,7 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, chartOptions, zone
     zoneColor,
     highlighted,
     chartOptions,
+    zoneSecondaryColor,
   ])
 
   return (
@@ -278,6 +301,7 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, chartOptions, zone
         <div ref={view.ref} className={classes.chartRoot}>
           <svg className={classes.svgRoot} preserveAspectRatio='xMidYMid meet' width={view.width} height={view.height}>
             <g className='bars' />
+            <g className='tips' />
             <g className='lines' />
             <g className='guideContainer'>
               <path className='guideLine' />
