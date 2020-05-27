@@ -1,21 +1,20 @@
+import { createStyles, makeStyles, Theme } from '@material-ui/core'
 import React from 'react'
-
-import { Theme, makeStyles, createStyles } from '@material-ui/core'
+import { Col, Grid, Row } from 'react-flexbox-grid'
 import {
-  LineChart,
   CartesianGrid,
+  Legend,
+  LegendProps,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  TooltipProps,
   XAxis,
   YAxis,
-  Line,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  TooltipProps,
-  LegendProps,
   YAxisProps,
 } from 'recharts'
-import { lineColors, pairedColors, fireBush } from '../../utils/ColorFactory'
-import { Grid, Col, Row } from 'react-flexbox-grid'
+import { fireBush, lineColors, pairedColors } from '../../utils/ColorFactory'
 
 interface Props {
   palette: 'paired' | 'normal'

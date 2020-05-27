@@ -1,12 +1,12 @@
 // @ts-nocheck
 import { createStyles, makeStyles, Theme, Typography } from '@material-ui/core'
 import * as d3 from 'd3'
-import React, { memo, useEffect } from 'react'
+import React, { memo, useEffect, useState } from 'react'
 import { Col, Row } from 'react-flexbox-grid'
 import useResponsiveView from '../../hooks/useResponsiveView'
 import { ChartOptionsT, UrlT } from '../../types'
-import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
 import { filterData } from '../../utils/filterData'
+import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
 import ChartOptionsRow from './ChartOptionsRow'
 
 interface Props {
@@ -59,11 +59,41 @@ const useStyles = makeStyles((theme: Theme) =>
       height: theme.spacing(1.5),
       marginRight: theme.spacing(0.5),
     },
+    tooltipContent: {
+      width: 'fit-content',
+      position: 'absolute',
+      padding: '8px 16px',
+      backgroundColor: 'white',
+      borderRadius: theme.spacing(0.5),
+      boxShadow: '0 10px 24px 0 rgba(0,0,0, 0.12)',
+    },
+    tootipTitle: {
+      fontSize: '14px',
+      paddingBottom: '8px',
+    },
+    tooltipItemContainer: {
+      display: 'flex',
+      alignItems: 'center',
+      padding: '4px 0',
+    },
+    tooltipItemIcon: {
+      width: theme.spacing(1.5),
+      height: theme.spacing(1.5),
+      marginRight: theme.spacing(0.5),
+    },
   })
 )
 
 const TotalChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, chartOptions, highlighted, setHighlight }) => {
   const classes = useStyles()
+  const [tooltip, setTooltip] = useState<{
+    title: string
+    items: {
+      color: string
+      name: string
+      value: string
+    }[]
+  }>(null)
   const aspectRatio = window.innerWidth / window.innerHeight
   const view = useResponsiveView({
     marginTop: 5,
@@ -78,6 +108,8 @@ const TotalChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, chartOp
     const el: HTMLElement = maybeDiv as HTMLElement
     const svg = d3.select(el).select('svg')
     const dot = svg.select('g.dot')
+    const tooltip = d3.select(el).select('.total-tooltip')
+    const guideContainer = svg.select('.guideContainer')
     const legendHeight = +d3.select(el).select('.legend').style('height').slice(0, -2)
     d3.select(el)
       .select('.legend2')
@@ -164,6 +196,56 @@ const TotalChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, chartOp
         (exit) => exit.remove()
       )
 
+    guideContainer
+      .selectAll('circle')
+      .data(filteredZones, (d) => d.code)
+      .join(
+        (enter) =>
+          enter
+            .append('circle')
+            .attr('r', 3)
+            .attr('fill', '#e39548')
+            .attr('stroke-width', 8)
+            .attr('stroke', 'white')
+            .attr('paint-order', 'stroke'),
+        (update) => update,
+        (exit) => exit.remove()
+      )
+
+    const entered = () => {
+      // const date = dateFmt(x.invert(d3.event.layerX))
+
+      // tooltip.style('left', `${x(parseDate(date))}px`)
+      guideContainer.selectAll('circle').attr('display', null)
+    }
+
+    const moved = () => {
+      const date = dateFmt(x.invert(d3.event.layerX))
+
+      setTooltip({
+        title: date.toString(),
+        items: filteredZones.map((zone) => {
+          return { name: zone.name, color: zoneColor(zone.code), value: zone.chart.find((d) => d.dt === date)?.totInf }
+        }),
+      })
+
+      tooltip.style('left', `${x(parseDate(date))}px`)
+
+      guideContainer
+        .selectAll('circle')
+        .attr('cx', () => x(parseDate(date)))
+        .attr('cy', (d) => y(d.chart.find((d) => d.dt === date)?.totInf))
+    }
+
+    const left = () => {
+      setTooltip(null)
+      guideContainer.selectAll('circle').attr('display', 'none')
+    }
+
+    svg.on('mouseenter', entered)
+    svg.on('mousemove', moved)
+    svg.on('mouseleave', left)
+
     return () => {
       console.log('d3 cleanup')
     }
@@ -191,6 +273,9 @@ const TotalChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, chartOp
         <div ref={view.ref} className={classes.chartRoot}>
           <svg className={classes.svgRoot} preserveAspectRatio='xMidYMid meet' width={view.width} height={view.height}>
             <g className='lines' />
+            <g className='guideContainer'>
+              <path className='guideLine' />
+            </g>
             <g className={`xAxisGrid ${classes.grid}`} />
             <g className='xAxis' />
             <g className='yAxis' />
@@ -221,6 +306,23 @@ const TotalChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, chartOp
               <path className='slope' d='M-70,0L70,0' stroke='grey' strokeWidth={0.5} />
             </g>
           </svg>
+          <div className={`total-tooltip ${classes.tooltipContent}`} style={{ display: tooltip ? 'block' : 'none' }}>
+            {tooltip && (
+              <>
+                <h5 className={classes.tootipTitle}>
+                  <strong>{tooltip.title}</strong>
+                </h5>
+                {tooltip.items.map((item) => (
+                  <div key={item.title} className={classes.tooltipItemContainer}>
+                    <div className={classes.tooltipItemIcon} style={{ backgroundColor: item.color }} />
+                    <small>
+                      {item.value} {item.name}
+                    </small>
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
           <div className={'legend'} style={{ position: 'absolute', top: '5px', left: '15px', width: '100%' }}>
             <Row between='xs'>
               <Col xs={12} md style={{ padding: '0' }}>
