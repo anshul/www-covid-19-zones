@@ -3,7 +3,7 @@ import { Typography, Theme, createStyles, makeStyles } from '@material-ui/core'
 import * as d3 from 'd3'
 import React, { memo, useEffect } from 'react'
 import useResponsiveView from '../../hooks/useResponsiveView'
-import { DateRangeT, UrlT } from '../../types'
+import { ChartOptionsT, UrlT } from '../../types'
 import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
 import { Col, Row } from 'react-flexbox-grid'
 
@@ -13,8 +13,7 @@ interface Props {
   codes: string[]
   go: (target: UrlT) => void
   mode: string
-  dateRange: DateRangeT
-  isLogarithmic: boolean
+  chartOptions: ChartOptionsT
   highlighted: { [key: string]: boolean | undefined | null }
   setHighlight: (key: string) => void
 }

@@ -23,8 +23,6 @@ interface Props {
   codes: string[]
   go: (target: UrlT) => void
   mode: string
-  dateRange: DateRangeT
-  isLogarithmic: boolean
   isTouchDevice: boolean
 }
 interface TooltipRowT {

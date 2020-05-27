@@ -3,9 +3,10 @@ import { Typography, Theme, createStyles, makeStyles } from '@material-ui/core'
 import * as d3 from 'd3'
 import React, { memo, useEffect } from 'react'
 import useResponsiveView from '../../hooks/useResponsiveView'
-import { DateRangeT, UrlT } from '../../types'
+import { ChartOptionsT, UrlT } from '../../types'
 import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
 import { Col, Row } from 'react-flexbox-grid'
+import ChartOptionsRow from './ChartOptionsRow'
 
 interface Props {
   zoneColor: d3.ScaleOrdinal<string, string>
@@ -13,8 +14,7 @@ interface Props {
   codes: string[]
   go: (target: UrlT) => void
   mode: string
-  dateRange: DateRangeT
-  isLogarithmic: boolean
+  chartOptions: ChartOptionsT
   highlighted: { [key: string]: boolean | undefined | null }
   setHighlight: (key: string) => void
 }
@@ -61,7 +61,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlighted, setHighlight }) => {
+const DailyChart: React.FC<Props> = ({ data, go, mode, codes, chartOptions, zoneColor, highlighted, setHighlight }) => {
   const classes = useStyles()
   const aspectRatio = window.innerWidth / window.innerHeight
   const view = useResponsiveView({
@@ -79,6 +79,9 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
     const dot = svg.select('g.dot')
     const barsContainer = svg.select('.bars')
     const legendHeight = +d3.select(el).select('.legend').style('height').slice(0, -2)
+    d3.select(el)
+      .select('.legend2')
+      .style('top', `${legendHeight - 10}px`)
     dot.attr('display', 'none')
     console.log('d3 update: daily chart', {
       legendHeight,
@@ -269,6 +272,9 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
                 </Row>
               </Col>
             </Row>
+          </div>
+          <div className={'legend2'} style={{ position: 'absolute', top: '70px', left: '40px', width: '100%' }}>
+            <ChartOptionsRow options={chartOptions} />
           </div>
         </div>
       </div>

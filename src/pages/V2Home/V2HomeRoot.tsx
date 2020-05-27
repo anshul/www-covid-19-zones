@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { Col, Grid, Row } from 'react-flexbox-grid'
 import { createFragmentContainer } from 'react-relay'
 import useSWR from 'swr'
-import { DateRangeT, MapDataT, UrlT } from '../../types'
+import { ChartOptionsT, MapDataT, UrlT } from '../../types'
 import { lineColors } from '../../utils/ColorFactory'
 import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
 import Choropleth from './Choropleth'
@@ -23,8 +23,7 @@ interface Props {
   codes: string[]
   go: (target: UrlT) => void
   mode: string
-  dateRange: DateRangeT
-  isLogarithmic: boolean
+  chartOptions: ChartOptionsT
 }
 
 const MODES = ['compare', 'zones']
@@ -41,7 +40,7 @@ const colors = {
 const ipmThresholds = [3, 10, 20, 50, 75, 100, 250, 500, 1000, 2000, 10000]
 const iThresholds = [0]
 
-const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dateRange, isLogarithmic }) => {
+const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, chartOptions }) => {
   const aspectRatio = window.innerWidth / window.innerHeight
   const onSearch = (code: string) => go({ codes: mode === 'compare' ? [code] : [code] })
   const response: MapDataT = useSWR(`/api/maps?codes=in`)
@@ -137,8 +136,6 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
                 ipmColor={ipmColor}
                 iColor={iColor}
                 go={go}
-                dateRange={dateRange}
-                isLogarithmic={isLogarithmic}
               />
               <div style={{ position: 'absolute', top: '5px', left: '15px' }}>
                 <ZoneCard
@@ -172,8 +169,7 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
             mode={mode}
             data={cachedData}
             go={go}
-            dateRange={dateRange}
-            isLogarithmic={isLogarithmic}
+            chartOptions={chartOptions}
             highlighted={highlighted}
             setHighlight={setHighlight}
           />
@@ -185,8 +181,7 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, dat
             mode={mode}
             data={cachedData}
             go={go}
-            dateRange={dateRange}
-            isLogarithmic={isLogarithmic}
+            chartOptions={chartOptions}
             highlighted={highlighted}
             setHighlight={setHighlight}
           />

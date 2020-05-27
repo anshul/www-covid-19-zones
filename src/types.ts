@@ -5,5 +5,12 @@ export interface UrlT {
   mode?: string
   codes?: string[]
   dateRange?: DateRangeT
-  logScale?: boolean
+  isLogarithmic?: boolean
+}
+
+export interface ChartOptionsT {
+  dateRange: DateRangeT
+  isLogarithmic: boolean
+  setDateRange: (dateRange: DateRangeT) => void
+  setIsLogarithmic: (isLogarithmic: boolean) => void
 }
