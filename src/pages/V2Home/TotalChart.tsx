@@ -6,6 +6,7 @@ import { Col, Row } from 'react-flexbox-grid'
 import useResponsiveView from '../../hooks/useResponsiveView'
 import { ChartOptionsT, UrlT } from '../../types'
 import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
+import ChartOptionsRow from './ChartOptionsRow'
 
 interface Props {
   zoneColor: d3.ScaleOrdinal<string, string>
@@ -60,7 +61,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlighted, setHighlight }) => {
+const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, chartOptions, highlighted, setHighlight }) => {
   const classes = useStyles()
   const aspectRatio = window.innerWidth / window.innerHeight
   const view = useResponsiveView({
@@ -77,6 +78,9 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
     const svg = d3.select(el).select('svg')
     const dot = svg.select('g.dot')
     const legendHeight = +d3.select(el).select('.legend').style('height').slice(0, -2)
+    d3.select(el)
+      .select('.legend2')
+      .style('top', `${legendHeight - 10}px`)
     dot.attr('display', 'none')
     console.log('d3 update: daily chart', {
       legendHeight,
@@ -98,8 +102,9 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
     const minValue = d3.min(filteredZones.flatMap((zone) => zone.chart.map((point) => point.totInf))) || 0
     const maxValue = d3.max(filteredZones.flatMap((zone) => zone.chart.map((point) => point.totInf))) || 100
 
-    const y = d3
-      .scaleLog()
+    const yScale = chartOptions.isLogarithmic ? d3.scaleLog() : d3.scaleLinear()
+
+    const y = yScale
       .domain([Math.max(minValue, 1), maxValue])
       .range([view.innerHeight, Math.max(view.marginTop, legendHeight)])
       .nice()
@@ -169,6 +174,7 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
     zoneColor,
     highlighted,
     classes.fadedLine,
+    chartOptions.isLogarithmic,
   ])
 
   return (
@@ -228,6 +234,9 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
                 </Row>
               </Col>
             </Row>
+          </div>
+          <div className={'legend2'} style={{ position: 'absolute', top: '70px', left: '40px', width: '100%' }}>
+            <ChartOptionsRow options={chartOptions} />
           </div>
         </div>
       </div>
