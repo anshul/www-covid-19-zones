@@ -24,7 +24,7 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     chartRoot: {
       height: '100%',
-      minWidth: '400px',
+      minWidth: '300px',
       position: 'relative',
     },
     lineLabel: {
@@ -63,6 +63,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlighted, setHighlight }) => {
   const classes = useStyles()
+  const aspectRatio = window.innerWidth / window.innerHeight
   const view = useResponsiveView({
     marginTop: 5,
     marginLeft: 40,
@@ -96,11 +97,11 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
 
     const parseDate = d3.timeParse('%Y-%m-%d')
     const dateFmt = d3.timeFormat('%Y-%m-%d')
-    const minDate = d3.min(zone.chart.map((point) => parseDate(point.dt) || new Date())) || new Date('2020', 3, 1)
-    const maxDate = d3.max(zone.chart.map((point) => parseDate(point.dt) || new Date())) || new Date()
+    const minDate = d3.min(filteredZones.flatMap((zone) => zone.chart.map((point) => parseDate(point.dt)))) || new Date('2020', 3, 1)
+    const maxDate = d3.max(filteredZones.flatMap((zone) => zone.chart.map((point) => parseDate(point.dt)))) || new Date()
 
-    const minValue = d3.min(zone.chart.map((point) => point.newInf)) || 0
-    const maxValue = d3.max(zone.chart.map((point) => point.newInf)) || 100
+    const minValue = d3.min(filteredZones.flatMap((zone) => zone.chart.map((point) => point.newInf))) || 0
+    const maxValue = d3.max(filteredZones.flatMap((zone) => zone.chart.map((point) => point.newInf))) || 100
 
     const barWidth = 4
     const tipRadius = 3
@@ -232,7 +233,7 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
 
   return (
     <>
-      <div style={{ height: '400px', position: 'relative' }}>
+      <div style={{ height: aspectRatio > 1 ? '400px' : '300px', position: 'relative' }}>
         <div ref={view.ref} className={classes.chartRoot}>
           <svg className={classes.svgRoot} preserveAspectRatio='xMidYMid meet' width={view.width} height={view.height}>
             <g className='bars' />
@@ -247,25 +248,20 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
           <div className={'legend'} style={{ position: 'absolute', top: '5px', left: '15px', width: '100%' }}>
             <Row between='xs'>
               <Col xs={12} md style={{ padding: '0' }}>
-                <Row start='xs md'>
+                <Row start='xs'>
                   <p style={{ fontWeight: 500 }}>{`Infections by day - ${
                     mode === 'compare' ? '5 day average' : data?.zones[0]?.name || ''
                   }`}</p>
                 </Row>
               </Col>
               <Col xs={12} md>
-                <Row end='xs md' style={{ paddingRight: '15px' }}>
+                <Row end='xs' style={{ paddingRight: '15px' }}>
                   {data?.zones.map((z) => (
-                    <div
-                      key={z.code}
-                      className={classes.legendItem}
-                      style={{ cursor: 'pointer' }}
-                      onMouseEnter={() => setHighlight(z.code)}
-                      onClick={() => setHighlight(z.code)}
-                    >
+                    <div key={z.code} className={classes.legendItem} style={{ cursor: 'pointer' }} onClick={() => setHighlight(z.code)}>
                       <div
                         className={classes.legendItemIcon}
                         style={{ backgroundColor: zoneColor(z.code), opacity: highlighted[z.code] ? 1 : fadedOpacity }}
+                        title={`click for daily values of ${z.name}`}
                       />
                       <small>{z.name}</small>
                     </div>

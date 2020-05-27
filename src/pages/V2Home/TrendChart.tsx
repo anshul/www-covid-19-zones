@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     chartRoot: {
       height: '100%',
-      minWidth: '400px',
+      minWidth: '300px',
       position: 'relative',
     },
     lineLabel: {
@@ -53,6 +53,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const TrendChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlighted, setHighlight }) => {
   const classes = useStyles()
+  const aspectRatio = window.innerWidth / window.innerHeight
   const view = useResponsiveView({
     marginTop: 5,
     marginLeft: 40,
@@ -242,7 +243,7 @@ const TrendChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
 
   return (
     <>
-      <div style={{ height: '400px', position: 'relative' }}>
+      <div style={{ height: aspectRatio > 1 ? '400px' : '300px', position: 'relative' }}>
         <div ref={view.ref} className={classes.chartRoot}>
           <svg className={classes.svgRoot} preserveAspectRatio='xMidYMid meet' width={view.width} height={view.height}>
             <g className='lines' />
@@ -278,12 +279,12 @@ const TrendChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
           <div className={'legend'} style={{ position: 'absolute', top: '5px', left: '15px', width: '100%' }}>
             <Row between='xs'>
               <Col xs={12} md style={{ padding: '0' }}>
-                <Row start='xs md'>
+                <Row start='xs'>
                   <p style={{ fontWeight: 500 }}>Cumulative Infections - Doubling rates</p>
                 </Row>
               </Col>
               <Col xs={12} md>
-                <Row end='xs md' style={{ paddingRight: '15px' }}>
+                <Row end='xs' style={{ paddingRight: '15px' }}>
                   {data?.zones.map((z) => (
                     <div
                       key={z.code}
