@@ -63,6 +63,15 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, cha
         .range(lineColors.map((l) => l[500])),
     [cachedData]
   )
+  const zoneSecondaryColor = useMemo(
+    () =>
+      d3
+        .scaleOrdinal<string, string>()
+        .domain(cachedData ? cachedData.zones.map((z) => z.code) : [])
+        .range(lineColors.map((l) => d3.color(l[500])?.brighter(1)?.toString() || '#000000')),
+    [cachedData]
+  )
+
   const mapHeight = useMemo(() => {
     if (cachedData && cachedData.zones.length === 1) {
       if (aspectRatio < 1) {
@@ -165,6 +174,7 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, cha
         <Col xs={12} md={12} lg={8} style={{ paddingBottom: '25px' }}>
           <DailyChart
             zoneColor={zoneColor}
+            zoneSecondaryColor={zoneSecondaryColor}
             codes={codes}
             mode={mode}
             data={cachedData}
