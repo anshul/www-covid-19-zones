@@ -160,7 +160,7 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, cha
           ))}
       </Row>
       <Row center='xs'>
-        <Col xs={12} md={12} lg={8} style={{ paddingBottom: '25px' }}>
+        <Col xs={12} md={12} lg={12} style={{ paddingBottom: '25px' }}>
           <TrendChart
             zoneColor={zoneColor}
             codes={codes}
@@ -171,7 +171,7 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, cha
             setHighlight={setHighlight}
           />
         </Col>
-        <Col xs={12} md={12} lg={8} style={{ paddingBottom: '25px' }}>
+        <Col xs={12} md={12} lg={12} style={{ paddingBottom: '25px' }}>
           <DailyChart
             zoneColor={zoneColor}
             zoneSecondaryColor={zoneSecondaryColor}
@@ -184,7 +184,7 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, cha
             setHighlight={setHighlight}
           />
         </Col>
-        <Col xs={12} md={12} lg={8} style={{ paddingBottom: '25px' }}>
+        <Col xs={12} md={12} lg={12} style={{ paddingBottom: '25px' }}>
           <TotalChart
             zoneColor={zoneColor}
             codes={codes}
