@@ -20,7 +20,8 @@ interface Props {
 }
 
 const fadedOpacity = 0.2
-const inactiveBarOpacity = 0.75
+const inactiveBarOpacity = 0.5
+const activeBarOpacity = 0.75
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     chartRoot: {
@@ -80,6 +81,7 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, chartOptions, zone
     const svg = d3.select(el).select('svg')
     const dot = svg.select('g.dot')
     const barsContainer = svg.select('.bars')
+    const guideContainer = svg.select('.guideContainer')
     const legendHeight = +d3.select(el).select('.legend').style('height').slice(0, -2)
     d3.select(el)
       .select('.legend2')
@@ -151,6 +153,22 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, chartOptions, zone
         (exit) => exit.remove()
       )
 
+    guideContainer
+      .selectAll('circle')
+      .data(filteredZones, (d) => d.code)
+      .join(
+        (enter) =>
+          enter
+            .append('circle')
+            .attr('r', 3)
+            .attr('fill', '#e39548')
+            .attr('stroke-width', 8)
+            .attr('stroke', 'white')
+            .attr('paint-order', 'stroke'),
+        (update) => update,
+        (exit) => exit.remove()
+      )
+
     const updateStem = (selection) =>
       selection
         .transition()
@@ -189,6 +207,7 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, chartOptions, zone
 
     const entered = () => {
       barsContainer.selectAll('g').attr('opacity', inactiveBarOpacity).select('circle').attr('r', tipRadius)
+      guideContainer.selectAll('circle').attr('display', null)
     }
 
     const moved = () => {
@@ -200,14 +219,19 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, chartOptions, zone
       } else {
         entered()
         hoveredBar
-          .attr('opacity', 1)
+          .attr('opacity', activeBarOpacity)
           .select('circle')
           .attr('r', tipRadius * 1.25)
       }
+      guideContainer.selectAll('circle').attr(`transform`, (zone) => {
+        const day = zone.chart.find((d) => d.dt === date)
+        return `translate(${x(parseDate(date))}, ${y(day?.newInfSma5 || 0)})`
+      })
     }
 
     const left = () => {
       barsContainer.selectAll('g').attr('opacity', inactiveBarOpacity).select('circle').attr('r', tipRadius)
+      guideContainer.selectAll('circle').attr('display', 'none')
     }
 
     svg.on('mouseenter', entered)
@@ -249,6 +273,9 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, chartOptions, zone
           <svg className={classes.svgRoot} preserveAspectRatio='xMidYMid meet' width={view.width} height={view.height}>
             <g className='bars' />
             <g className='lines' />
+            <g className='guideContainer'>
+              <path className='guideLine' />
+            </g>
             <g className={`xAxisGrid ${classes.grid}`} />
             <g className='xAxis' />
             <g className='yAxis' />
