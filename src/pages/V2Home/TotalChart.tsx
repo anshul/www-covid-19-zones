@@ -1,11 +1,11 @@
 // @ts-nocheck
-import { Typography, Theme, createStyles, makeStyles } from '@material-ui/core'
+import { createStyles, makeStyles, Theme, Typography } from '@material-ui/core'
 import * as d3 from 'd3'
 import React, { memo, useEffect } from 'react'
+import { Col, Row } from 'react-flexbox-grid'
 import useResponsiveView from '../../hooks/useResponsiveView'
 import { DateRangeT, UrlT } from '../../types'
 import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
-import { Col, Row } from 'react-flexbox-grid'
 
 interface Props {
   zoneColor: d3.ScaleOrdinal<string, string>
@@ -92,13 +92,12 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
 
     const filteredZones = data.zones.filter((z) => z.chart && z.chart.length >= 1)
 
-    const parseTime = d3.timeParse('%Y-%m-%d')
-    const parseDt = (dt: string): Date => parseTime(dt) || new Date()
-    const minDate = d3.min(filteredZones.flatMap((zone) => zone.chart.map((point) => parseDt(point.dt)))) || new Date('2020', 3, 1)
-    const maxDate = d3.max(filteredZones.flatMap((zone) => zone.chart.map((point) => parseDt(point.dt)))) || new Date()
+    const parseDate = d3.timeParse('%Y-%m-%d')
+    const minDate = d3.min(filteredZones.flatMap((zone) => zone.chart.map((point) => parseDate(point.dt)))) || new Date('2020', 3, 1)
+    const maxDate = d3.max(filteredZones.flatMap((zone) => zone.chart.map((point) => parseDate(point.dt)))) || new Date()
 
-    const minValue = d3.min(filteredZones.flatMap((zone) => zone.chart.map((point) => point.newInf))) || 0
-    const maxValue = d3.max(filteredZones.flatMap((zone) => zone.chart.map((point) => point.newInf))) || 100
+    const minValue = d3.min(filteredZones.flatMap((zone) => zone.chart.map((point) => point.totInf))) || 0
+    const maxValue = d3.max(filteredZones.flatMap((zone) => zone.chart.map((point) => point.totInf))) || 100
 
     const y = d3
       .scaleLog()
@@ -128,6 +127,32 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
       .attr('transform', `translate(${view.marginLeft},0)`)
       .call(d3.axisLeft(y).tickFormat((d) => y.tickFormat(4, d3.format('.1s'))(d)))
 
+    const line = d3
+      .line()
+      .x((d) => x(parseDate(d.dt)))
+      .y((d) => y(d.totInf))
+
+    svg
+      .select('.lines')
+      .selectAll('path')
+      .data(filteredZones, (d) => d.code)
+      .join(
+        (enter) =>
+          enter
+            .append('path')
+            .attr('d', (d) => line(d.chart))
+            .attr('fill', 'none')
+            .attr('stroke', (d) => zoneColor(d.code))
+            .attr('stroke-width', 3)
+            .classed(classes.fadedLine, (d) => !highlighted[d.code]),
+        (update) =>
+          update
+            .attr('d', (d) => line(d.chart))
+            .attr('stroke', (d) => zoneColor(d.code))
+            .classed(classes.fadedLine, (d) => !highlighted[d.code]),
+        (exit) => exit.remove()
+      )
+
     return () => {
       console.log('d3 cleanup')
     }
@@ -142,6 +167,9 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
     view.marginTop,
     view.ref,
     view.width,
+    zoneColor,
+    highlighted,
+    classes.fadedLine,
   ])
 
   return (
@@ -190,13 +218,7 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
               <Col xs={12} md>
                 <Row end='xs' style={{ paddingRight: '15px' }}>
                   {data?.zones.map((z) => (
-                    <div
-                      key={z.code}
-                      className={classes.legendItem}
-                      style={{ cursor: 'pointer' }}
-                      onMouseEnter={() => setHighlight(z.code)}
-                      onClick={() => setHighlight(z.code)}
-                    >
+                    <div key={z.code} className={classes.legendItem} style={{ cursor: 'pointer' }} onClick={() => setHighlight(z.code)}>
                       <div
                         className={classes.legendItemIcon}
                         style={{ backgroundColor: zoneColor(z.code), opacity: highlighted[z.code] ? 1 : fadedOpacity }}

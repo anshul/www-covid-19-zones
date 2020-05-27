@@ -1,11 +1,11 @@
 // @ts-nocheck
-import { Typography, Theme, createStyles, makeStyles } from '@material-ui/core'
+import { createStyles, makeStyles, Theme, Typography } from '@material-ui/core'
 import * as d3 from 'd3'
 import React, { memo, useEffect } from 'react'
+import { Col, Row } from 'react-flexbox-grid'
 import useResponsiveView from '../../hooks/useResponsiveView'
 import { DateRangeT, UrlT } from '../../types'
 import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
-import { Col, Row } from 'react-flexbox-grid'
 
 interface Props {
   zoneColor: d3.ScaleOrdinal<string, string>
