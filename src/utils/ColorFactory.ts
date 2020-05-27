@@ -47,7 +47,7 @@ export const pickTextColor = (bgColor: string, lightColor = '#fff', darkColor = 
   // return L > 0.179 ? darkColor : lightColor
 }
 
-const colorGenerator = (color: string): Colors => {
+export const colorGenerator = (color: string): Colors => {
   const colors: Colors = {}
   for (let i = 1; i < 10; i++) {
     colors[i * 100] = TintAndShades(color, 10 - i, i <= 5 ? 'tint' : 'shade')

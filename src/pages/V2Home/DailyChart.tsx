@@ -6,7 +6,6 @@ import useResponsiveView from '../../hooks/useResponsiveView'
 import { DateRangeT, UrlT } from '../../types'
 import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
 import { Col, Row } from 'react-flexbox-grid'
-import * as d3Array from 'd3-array'
 
 interface Props {
   zoneColor: d3.ScaleOrdinal<string, string>
@@ -125,6 +124,27 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
           .tickFormat('')
       )
 
+    const line = d3
+      .line()
+      .x((d) => x(parseDate(d.dt)))
+      .y((d) => y(d.newInfSma5))
+
+    svg
+      .select('.lines')
+      .selectAll('path')
+      .data(filteredZones, (d) => d.code)
+      .join(
+        (enter) =>
+          enter
+            .append('path')
+            .attr('d', (d) => line(d.chart))
+            .attr('fill', 'none')
+            .attr('stroke', (d) => zoneColor(d.code))
+            .attr('stroke-width', 3),
+        (update) => update.attr('d', (d) => line(d.chart)).attr('stroke', (d) => zoneColor(d.code)),
+        (exit) => exit.remove()
+      )
+
     const updateStem = (selection) => selection.attr('height', (d) => view.innerHeight - y(d.newInf)).attr('fill', zoneColor(zone.code))
     const enterStem = (selection) => selection.append('rect').attr('width', barWidth).call(updateStem)
 
@@ -143,6 +163,7 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
         (enter) =>
           enter
             .append('g')
+            .attr('opacity', '0.75')
             .attr('id', (d) => `day-${d.dt}`)
             .attr('transform', (d) => `translate(${x(parseDate(d.dt)) - barWidth / 2}, ${y(d.newInf)})`)
             .call(enterStem)
@@ -175,7 +196,7 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
     }
 
     const left = () => {
-      barsContainer.selectAll('g').attr('opacity', 1).select('circle').attr('r', tipRadius)
+      barsContainer.selectAll('g').attr('opacity', 0.75).select('circle').attr('r', tipRadius)
     }
 
     svg.on('mouseenter', entered)
@@ -215,6 +236,7 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
         <div ref={view.ref} className={classes.chartRoot}>
           <svg className={classes.svgRoot} preserveAspectRatio='xMidYMid meet' width={view.width} height={view.height}>
             <g className='bars' />
+            <g className='lines' />
             <g className={`xAxisGrid ${classes.grid}`} />
             <g className='xAxis' />
             <g className='yAxis' />
