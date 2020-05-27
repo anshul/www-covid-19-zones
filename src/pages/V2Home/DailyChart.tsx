@@ -5,6 +5,7 @@ import React, { memo, useEffect } from 'react'
 import { Col, Row } from 'react-flexbox-grid'
 import useResponsiveView from '../../hooks/useResponsiveView'
 import { ChartOptionsT, UrlT } from '../../types'
+import { filterData } from '../../utils/filterData'
 import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
 import ChartOptionsRow from './ChartOptionsRow'
 
@@ -72,8 +73,8 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, chartOptions, zone
     marginBottom: 30,
     marginRight: 5,
   })
-  const lineColor = (zoneCode) => d3.color(zoneColor(zoneCode))?.brighter(1)
   useEffect(() => {
+    const lineColor = (zoneCode) => d3.color(zoneColor(zoneCode))?.brighter(1)
     console.log('render trend chart', { data })
     const maybeDiv: unknown = view.ref.current
     if (!maybeDiv) return
@@ -104,11 +105,16 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, chartOptions, zone
 
     const parseDate = d3.timeParse('%Y-%m-%d')
     const dateFmt = d3.timeFormat('%Y-%m-%d')
-    const minDate = d3.min(filteredZones.flatMap((zone) => zone.chart.map((point) => parseDate(point.dt)))) || new Date('2020', 3, 1)
-    const maxDate = d3.max(filteredZones.flatMap((zone) => zone.chart.map((point) => parseDate(point.dt)))) || new Date()
+    const minDate =
+      d3.min(filteredZones.flatMap((zone) => filterData(chartOptions.dateRange, zone.chart).map((point) => parseDate(point.dt)))) ||
+      new Date('2020', 3, 1)
+    const maxDate =
+      d3.max(filteredZones.flatMap((zone) => filterData(chartOptions.dateRange, zone.chart).map((point) => parseDate(point.dt)))) || new Date()
 
-    const minValue = d3.min(filteredZones.flatMap((zone) => zone.chart.map((point) => point.newInf))) || 0
-    const maxValue = d3.max(filteredZones.flatMap((zone) => zone.chart.map((point) => point.newInf))) || 100
+    const minValue = d3.min(filteredZones.flatMap((zone) => filterData(chartOptions.dateRange, zone.chart).map((point) => point.newInf))) || 0
+    const maxValue = d3.max(filteredZones.flatMap((zone) => filterData(chartOptions.dateRange, zone.chart).map((point) => point.newInf))) || 100
+
+    console.log(minDate, maxDate, minValue, maxValue)
 
     const barWidth = 4
     const tipRadius = 3
@@ -263,7 +269,7 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, chartOptions, zone
     view.width,
     zoneColor,
     highlighted,
-    lineColor,
+    chartOptions,
   ])
 
   return (
