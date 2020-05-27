@@ -1,11 +1,11 @@
 // @ts-nocheck
-import { Typography, Theme, createStyles, makeStyles } from '@material-ui/core'
+import { createStyles, makeStyles, Theme, Typography } from '@material-ui/core'
 import * as d3 from 'd3'
 import React, { memo, useEffect } from 'react'
+import { Col, Row } from 'react-flexbox-grid'
 import useResponsiveView from '../../hooks/useResponsiveView'
 import { ChartOptionsT, UrlT } from '../../types'
 import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
-import { Col, Row } from 'react-flexbox-grid'
 import ChartOptionsRow from './ChartOptionsRow'
 
 interface Props {
@@ -20,6 +20,7 @@ interface Props {
 }
 
 const fadedOpacity = 0.2
+const inactiveBarOpacity = 0.75
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     chartRoot: {
@@ -70,6 +71,7 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, chartOptions, zone
     marginBottom: 30,
     marginRight: 5,
   })
+  const lineColor = (zoneCode) => d3.color(zoneColor(zoneCode))?.brighter(1)
   useEffect(() => {
     console.log('render trend chart', { data })
     const maybeDiv: unknown = view.ref.current
@@ -143,13 +145,17 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, chartOptions, zone
             .append('path')
             .attr('d', (d) => line(d.chart))
             .attr('fill', 'none')
-            .attr('stroke', (d) => zoneColor(d.code))
+            .attr('stroke', (d) => lineColor(d.code))
             .attr('stroke-width', 3),
-        (update) => update.attr('d', (d) => line(d.chart)).attr('stroke', (d) => zoneColor(d.code)),
+        (update) => update.attr('d', (d) => line(d.chart)).attr('stroke', (d) => lineColor(d.code)),
         (exit) => exit.remove()
       )
 
-    const updateStem = (selection) => selection.attr('height', (d) => view.innerHeight - y(d.newInf)).attr('fill', zoneColor(zone.code))
+    const updateStem = (selection) =>
+      selection
+        .transition()
+        .attr('height', (d) => view.innerHeight - y(d.newInf))
+        .attr('fill', zoneColor(zone.code))
     const enterStem = (selection) => selection.append('rect').attr('width', barWidth).call(updateStem)
 
     const updateTip = (selection) => selection.attr('fill', zoneColor(zone.code))
@@ -167,21 +173,22 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, chartOptions, zone
         (enter) =>
           enter
             .append('g')
-            .attr('opacity', '0.75')
+            .attr('opacity', inactiveBarOpacity)
             .attr('id', (d) => `day-${d.dt}`)
-            .attr('transform', (d) => `translate(${x(parseDate(d.dt)) - barWidth / 2}, ${y(d.newInf)})`)
+            .attr('transform', (d) => `translate(${x(parseDate(d.dt)) - barWidth / 2}, ${view.innerHeight})`)
+            .call((g) => g.transition().attr('transform', (d) => `translate(${x(parseDate(d.dt)) - barWidth / 2}, ${y(d.newInf)})`))
             .call(enterStem)
             .call(enterTip),
         (update) =>
           update
-            .attr('transform', (d) => `translate(${x(parseDate(d.dt)) - barWidth / 2}, ${y(d.newInf)})`)
+            .call((g) => g.transition().attr('transform', (d) => `translate(${x(parseDate(d.dt)) - barWidth / 2}, ${y(d.newInf)})`))
             .call((g) => g.select('rect').call(updateStem))
             .call((g) => g.select('circle').call(updateTip)),
         (exit) => exit.remove()
       )
 
     const entered = () => {
-      barsContainer.selectAll('g').attr('opacity', 0.75).select('circle').attr('r', tipRadius)
+      barsContainer.selectAll('g').attr('opacity', inactiveBarOpacity).select('circle').attr('r', tipRadius)
     }
 
     const moved = () => {
@@ -200,7 +207,7 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, chartOptions, zone
     }
 
     const left = () => {
-      barsContainer.selectAll('g').attr('opacity', 0.75).select('circle').attr('r', tipRadius)
+      barsContainer.selectAll('g').attr('opacity', inactiveBarOpacity).select('circle').attr('r', tipRadius)
     }
 
     svg.on('mouseenter', entered)
@@ -232,6 +239,7 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, chartOptions, zone
     view.width,
     zoneColor,
     highlighted,
+    lineColor,
   ])
 
   return (

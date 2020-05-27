@@ -1,12 +1,12 @@
 // @ts-nocheck
-import { Typography, Theme, createStyles, makeStyles } from '@material-ui/core'
+import { createStyles, makeStyles, Theme, Typography } from '@material-ui/core'
 import * as d3 from 'd3'
+import * as d3Array from 'd3-array'
 import React, { memo, useEffect } from 'react'
+import { Col, Row } from 'react-flexbox-grid'
 import useResponsiveView from '../../hooks/useResponsiveView'
 import { UrlT } from '../../types'
 import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
-import { Col, Row } from 'react-flexbox-grid'
-import * as d3Array from 'd3-array'
 
 interface Props {
   zoneColor: d3.ScaleOrdinal<string, string>
@@ -286,13 +286,7 @@ const TrendChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
               <Col xs={12} md>
                 <Row end='xs' style={{ paddingRight: '15px' }}>
                   {data?.zones.map((z) => (
-                    <div
-                      key={z.code}
-                      className={classes.legendItem}
-                      style={{ cursor: 'pointer' }}
-                      onMouseEnter={() => setHighlight(z.code)}
-                      onClick={() => setHighlight(z.code)}
-                    >
+                    <div key={z.code} className={classes.legendItem} style={{ cursor: 'pointer' }} onClick={() => setHighlight(z.code)}>
                       <div
                         className={classes.legendItemIcon}
                         style={{ backgroundColor: zoneColor(z.code), opacity: highlighted[z.code] ? 1 : fadedOpacity }}
