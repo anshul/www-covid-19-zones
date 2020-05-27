@@ -22,7 +22,7 @@ const V2Home: React.FC<RouteComponentProps<{ mode: string; codes: string }>> = (
   const mode: string = match.params.mode || 'zones'
 
   const go = (target: UrlT) => {
-    const newTarget = { mode, codes, dateRange: q.dateRange, isLogarithmic: q.isLogarithmic, ...target }
+    const newTarget = { mode, codes, dateRange: dateRange, isLogarithmic: isLogarithmic, ...target }
     newTarget.codes = newTarget.codes.filter((x) => x)
 
     const newQ = stringify({ t: newTarget.dateRange, log: `${newTarget.isLogarithmic || ''}`.length > 1 ? 'yes' : undefined })
