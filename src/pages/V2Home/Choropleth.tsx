@@ -1,8 +1,8 @@
 // @ts-nocheck
-import React, { memo, useEffect, useState } from 'react'
-import * as d3 from 'd3'
-import * as topojson from 'topojson'
 import { createStyles, makeStyles } from '@material-ui/core'
+import * as d3 from 'd3'
+import React, { memo, useEffect, useState } from 'react'
+import * as topojson from 'topojson'
 import useResponsiveView from '../../hooks/useResponsiveView'
 import { MapDataT } from '../../types'
 import NumberPill from './NumberPill'
@@ -108,20 +108,7 @@ const useStyles = makeStyles(() =>
   })
 )
 
-const Choropleth: React.FC<Props> = ({
-  titleCode,
-  map,
-  zones,
-  go,
-  mode,
-  codes,
-  dateRange,
-  isLogarithmic,
-  zoneColor,
-  ipmColor,
-  iColor,
-  isTouchDevice,
-}) => {
+const Choropleth: React.FC<Props> = ({ titleCode, map, zones, go, mode, codes, ipmColor, iColor, isTouchDevice }) => {
   const classes = useStyles()
   const view = useResponsiveView({ marginTop: 5, marginLeft: 5, marginBottom: 5, marginRight: 5 })
   const [tooltip, setTooltip] = useState<TooltipT>(null)
