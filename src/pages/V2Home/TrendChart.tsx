@@ -159,11 +159,7 @@ const TrendChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, highlig
         (update) => update.call((d) => updateTrendLine(d.select('path.line'))).call((d) => updateLineLabel(d.select('text.line-label'))),
         (exit) => exit.remove()
       )
-    if ('ontouchstart' in document) {
-      svg.style('-webkit-tap-highlight-color', 'transparent').on('touchstart', entered).on('touchmove', moved).on('touchend', left)
-    } else {
-      svg.on('mouseenter', entered).on('mousemove', moved).on('mouseleave', left)
-    }
+    svg.on('mouseenter', entered).on('mousemove', moved).on('mouseleave', left)
 
     function entered() {
       dot.attr('display', null)
