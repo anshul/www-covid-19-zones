@@ -1,7 +1,6 @@
-import React, { memo } from 'react'
-
-import { Row, Col } from 'react-flexbox-grid'
 import { Button, ButtonGroup } from '@material-ui/core'
+import React, { memo } from 'react'
+import { Col, Row } from 'react-flexbox-grid'
 import { ChartOptionsT, DateRangeT } from '../../types'
 
 interface Props {
@@ -11,8 +10,8 @@ interface Props {
 const ChartOptionRow: React.FC<Props> = ({ options: { dateRange, setDateRange, isLogarithmic, setIsLogarithmic } }) => {
   const dateRanges: { label: string; value: DateRangeT }[] = [
     { label: 'All', value: 'all' },
-    { label: '1M', value: '1m' },
-    { label: '7D', value: '1w' },
+    { label: '1 Month', value: '1m' },
+    { label: '7 Days', value: '1w' },
   ]
 
   return (

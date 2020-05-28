@@ -7,15 +7,15 @@ import useSWR from 'swr'
 import { ChartOptionsT, MapDataT, UrlT } from '../../types'
 import { lineColors } from '../../utils/ColorFactory'
 import { V2HomeRoot_data } from '../../__generated__/V2HomeRoot_data.graphql'
-import Choropleth from './Choropleth'
 import ChoroLegend from './ChoroLegend'
+import Choropleth from './Choropleth'
 import CompareBar from './CompareBar'
 import DailyChart from './DailyChart'
-import TotalChart from './TotalChart'
 import ErrorPanel from './ErrorPanel'
+import TotalChart from './TotalChart'
+import TrendChart from './TrendChart'
 import ZoneBar from './ZoneBar'
 import ZoneCard from './ZoneCard'
-import TrendChart from './TrendChart'
 
 interface Props {
   isTouchDevice: boolean
@@ -183,18 +183,18 @@ const V2HomeRoot: React.FC<Props> = ({ data, isTouchDevice, codes, mode, go, cha
             highlighted={highlighted}
             setHighlight={setHighlight}
           />
-        </Col>
-        <Col xs={12} md={12} lg={12} style={{ paddingBottom: '25px' }}>
-          <TotalChart
-            zoneColor={zoneColor}
-            codes={codes}
-            mode={mode}
-            data={cachedData}
-            go={go}
-            chartOptions={chartOptions}
-            highlighted={highlighted}
-            setHighlight={setHighlight}
-          />
+          <Col xs={12} md={12} lg={12} style={{ paddingBottom: '25px', height: '500px' }}>
+            <TotalChart
+              zoneColor={zoneColor}
+              codes={codes}
+              mode={mode}
+              data={cachedData}
+              go={go}
+              chartOptions={chartOptions}
+              highlighted={highlighted}
+              setHighlight={setHighlight}
+            />
+          </Col>
         </Col>
       </Row>
     </Grid>

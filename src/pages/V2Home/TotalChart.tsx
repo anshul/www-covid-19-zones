@@ -60,12 +60,15 @@ const useStyles = makeStyles((theme: Theme) =>
       marginRight: theme.spacing(0.5),
     },
     tooltipContent: {
-      width: 'fit-content',
+      pointerEvents: 'none',
+      overflow: 'hidden',
       position: 'absolute',
+      top: 0,
       padding: '8px 16px',
       backgroundColor: 'white',
       borderRadius: theme.spacing(0.5),
       boxShadow: '0 10px 24px 0 rgba(0,0,0, 0.12)',
+      // transition: 'transform 30ms ease 0s',
     },
     tootipTitle: {
       fontSize: '14px',
@@ -108,7 +111,7 @@ const TotalChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, chartOp
     const el: HTMLElement = maybeDiv as HTMLElement
     const svg = d3.select(el).select('svg')
     const dot = svg.select('g.dot')
-    const tooltip = d3.select(el).select('.total-tooltip')
+    const divTooltip = d3.select(el).select('.total-tooltip')
     const guideContainer = svg.select('.guideContainer')
     const legendHeight = +d3.select(el).select('.legend').style('height').slice(0, -2)
     d3.select(el)
@@ -213,13 +216,6 @@ const TotalChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, chartOp
       )
 
     const entered = () => {
-      // const date = dateFmt(x.invert(d3.event.layerX))
-
-      // tooltip.style('left', `${x(parseDate(date))}px`)
-      guideContainer.selectAll('circle').attr('display', null)
-    }
-
-    const moved = () => {
       const date = dateFmt(x.invert(d3.event.layerX))
 
       setTooltip({
@@ -229,7 +225,21 @@ const TotalChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, chartOp
         }),
       })
 
-      tooltip.style('left', `${x(parseDate(date))}px`)
+      guideContainer.selectAll('circle').attr('display', 'block')
+    }
+
+    const moved = () => {
+      const date = dateFmt(x.invert(d3.event.layerX))
+      const m = d3.mouse(el)
+
+      setTooltip({
+        title: date.toString(),
+        items: filteredZones.map((zone) => {
+          return { name: zone.name, color: zoneColor(zone.code), value: zone.chart.find((d) => d.dt === date)?.totInf }
+        }),
+      })
+
+      divTooltip.style('left', `${m[0] + 20}px`).style('top', `${m[1] + 5}px`)
 
       guideContainer
         .selectAll('circle')
@@ -271,6 +281,23 @@ const TotalChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, chartOp
     <>
       <div style={{ height: aspectRatio > 1 ? '400px' : '300px', position: 'relative' }}>
         <div ref={view.ref} className={classes.chartRoot}>
+          <div key='tooltip' className={`total-tooltip ${classes.tooltipContent}`} style={{ display: tooltip ? 'block' : 'none' }}>
+            {tooltip && (
+              <>
+                <h5 className={classes.tootipTitle}>
+                  <strong>{tooltip.title}</strong>
+                </h5>
+                {tooltip.items.map((item) => (
+                  <div key={item.title} className={classes.tooltipItemContainer}>
+                    <div className={classes.tooltipItemIcon} style={{ backgroundColor: item.color }} />
+                    <small>
+                      {item.value} {item.name}
+                    </small>
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
           <svg className={classes.svgRoot} preserveAspectRatio='xMidYMid meet' width={view.width} height={view.height}>
             <g className='lines' />
             <g className='guideContainer'>
@@ -306,23 +333,6 @@ const TotalChart: React.FC<Props> = ({ data, go, mode, codes, zoneColor, chartOp
               <path className='slope' d='M-70,0L70,0' stroke='grey' strokeWidth={0.5} />
             </g>
           </svg>
-          <div className={`total-tooltip ${classes.tooltipContent}`} style={{ display: tooltip ? 'block' : 'none' }}>
-            {tooltip && (
-              <>
-                <h5 className={classes.tootipTitle}>
-                  <strong>{tooltip.title}</strong>
-                </h5>
-                {tooltip.items.map((item) => (
-                  <div key={item.title} className={classes.tooltipItemContainer}>
-                    <div className={classes.tooltipItemIcon} style={{ backgroundColor: item.color }} />
-                    <small>
-                      {item.value} {item.name}
-                    </small>
-                  </div>
-                ))}
-              </>
-            )}
-          </div>
           <div className={'legend'} style={{ position: 'absolute', top: '5px', left: '15px', width: '100%' }}>
             <Row between='xs'>
               <Col xs={12} md style={{ padding: '0' }}>

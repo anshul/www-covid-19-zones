@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { createStyles, makeStyles, Theme, Typography } from '@material-ui/core'
 import * as d3 from 'd3'
-import React, { memo, useEffect } from 'react'
+import React, { memo, useEffect, useState } from 'react'
 import { Col, Row } from 'react-flexbox-grid'
 import useResponsiveView from '../../hooks/useResponsiveView'
 import { ChartOptionsT, UrlT } from '../../types'
@@ -62,11 +62,44 @@ const useStyles = makeStyles((theme: Theme) =>
       height: theme.spacing(1.5),
       marginRight: theme.spacing(0.5),
     },
+    tooltipContent: {
+      pointerEvents: 'none',
+      width: 'fit-content',
+      position: 'absolute',
+      padding: '8px 16px',
+      backgroundColor: 'white',
+      borderRadius: theme.spacing(0.5),
+      boxShadow: '0 10px 24px 0 rgba(0,0,0, 0.12)',
+      // transitionDuration: '40ms',
+      // transitionTimingFunction: 'ease',
+    },
+    tootipTitle: {
+      fontSize: '14px',
+      paddingBottom: '8px',
+    },
+    tooltipItemContainer: {
+      display: 'flex',
+      alignItems: 'center',
+      padding: '4px 0',
+    },
+    tooltipItemIcon: {
+      width: theme.spacing(1.5),
+      height: theme.spacing(1.5),
+      marginRight: theme.spacing(0.5),
+    },
   })
 )
 
 const DailyChart: React.FC<Props> = ({ data, go, mode, codes, chartOptions, zoneColor, zoneSecondaryColor, highlighted, setHighlight }) => {
   const classes = useStyles()
+  const [tooltip, setTooltip] = useState<{
+    title: string
+    items: {
+      color: string
+      name: string
+      value: string
+    }[]
+  }>(null)
   const aspectRatio = window.innerWidth / window.innerHeight
   const view = useResponsiveView({
     marginTop: 5,
@@ -82,7 +115,8 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, chartOptions, zone
     const svg = d3.select(el).select('svg')
     const dot = svg.select('g.dot')
     const barsContainer = svg.select('.bars')
-    const tipsContainer = svg.select('.tips')
+    // const tipsContainer = svg.select('.tips')
+    const tooltip = d3.select(el).select('.daily-tooltip')
     const guideContainer = svg.select('.guideContainer')
     const legendHeight = +d3.select(el).select('.legend').style('height').slice(0, -2)
     d3.select(el)
@@ -234,12 +268,35 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, chartOptions, zone
       )
 
     const entered = () => {
+      const date = dateFmt(x.invert(d3.event.layerX))
+      const mouse = d3.mouse(el)
+
+      setTooltip({
+        title: date.toString(),
+        items: filteredZones.map((zone) => {
+          return { name: zone.name, color: zoneColor(zone.code), value: zone.chart.find((d) => d.dt === date)?.newInfSma5 }
+        }),
+      })
+
+      tooltip.style('left', `${mouse[0] + 20}px`)
+      tooltip.style('top', `${mouse[1] + 5}px`)
       barsContainer.selectAll('rect').attr('opacity', inactiveBarOpacity).select('circle').attr('r', tipRadius)
       guideContainer.selectAll('circle').attr('display', null)
     }
 
     const moved = () => {
       const date = dateFmt(x.invert(d3.event.layerX))
+      const mouse = d3.mouse(el)
+
+      setTooltip({
+        title: date.toString(),
+        items: filteredZones.map((zone) => {
+          return { name: zone.name, color: zoneColor(zone.code), value: zone.chart.find((d) => d.dt === date)?.newInfSma5 }
+        }),
+      })
+
+      tooltip.style('left', `${mouse[0] + 20}px`)
+      tooltip.style('top', `${mouse[1] + 5}px`)
 
       const hoveredBar = barsContainer.select(`#day-${date}`)
       if (hoveredBar.empty()) {
@@ -258,6 +315,7 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, chartOptions, zone
     }
 
     const left = () => {
+      setTooltip(null)
       barsContainer.selectAll('rect').attr('opacity', inactiveBarOpacity).select('circle').attr('r', tipRadius)
       guideContainer.selectAll('circle').attr('display', 'none')
     }
@@ -299,6 +357,23 @@ const DailyChart: React.FC<Props> = ({ data, go, mode, codes, chartOptions, zone
     <>
       <div style={{ height: aspectRatio > 1 ? '400px' : '300px', position: 'relative' }}>
         <div ref={view.ref} className={classes.chartRoot}>
+          <div key='tooltip' className={`daily-tooltip ${classes.tooltipContent}`} style={{ display: tooltip ? 'block' : 'none' }}>
+            {tooltip && (
+              <>
+                <h5 className={classes.tootipTitle}>
+                  <strong>{tooltip.title}</strong>
+                </h5>
+                {tooltip.items.map((item) => (
+                  <div key={item.title} className={classes.tooltipItemContainer}>
+                    <div className={classes.tooltipItemIcon} style={{ backgroundColor: item.color }} />
+                    <small>
+                      {item.value} {item.name}
+                    </small>
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
           <svg className={classes.svgRoot} preserveAspectRatio='xMidYMid meet' width={view.width} height={view.height}>
             <g className='bars' />
             <g className='tips' />

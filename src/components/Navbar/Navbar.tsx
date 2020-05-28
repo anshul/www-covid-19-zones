@@ -1,6 +1,5 @@
-import { AppBar, Fade, IconButton, Menu, MenuItem, Theme, Toolbar, Typography } from '@material-ui/core'
+import { AppBar, createStyles, Fade, IconButton, makeStyles, Menu, MenuItem, Theme, Toolbar, Typography } from '@material-ui/core'
 import { MenuOpen } from '@material-ui/icons'
-import { createStyles, makeStyles } from '@material-ui/core'
 import React, { SyntheticEvent, useState } from 'react'
 import { Grid } from 'react-flexbox-grid'
 import { Link, RouteComponentProps } from 'react-router-dom'
@@ -53,6 +52,7 @@ const menuItems: MenuDefinition = {
 }
 
 const Navbar: React.FC<RouteComponentProps<{}>> = ({ match, history }) => {
+  const rootPath = history.location.pathname.split('/').includes('v2') ? '/v2' : '/'
   const classes = useStyles()
   const [anchorEl, setAnchorEl] = useState<(EventTarget & Element) | null>(null)
   const open = Boolean(anchorEl)
@@ -91,7 +91,7 @@ const Navbar: React.FC<RouteComponentProps<{}>> = ({ match, history }) => {
               </>
             )}
 
-            <Link to='/' className={classes.link}>
+            <Link to={rootPath} className={classes.link}>
               <Typography variant='h6' className={classes.title}>
                 Covid-19 <span>Zones</span>
               </Typography>
