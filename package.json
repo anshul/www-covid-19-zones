@@ -23,7 +23,7 @@
     "@types/recharts": "^1.8.10",
     "@types/relay-runtime": "^8.0.6",
     "@types/topojson": "^3.2.2",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "chart.js": "^2.9.3",
     "clsx": "^1.1.0",
     "d3": "^5.16.0",
