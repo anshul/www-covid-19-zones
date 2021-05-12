@@ -24,7 +24,7 @@
     "@types/relay-runtime": "^8.0.6",
     "@types/topojson": "^3.2.2",
     "axios": "^0.19.2",
-    "chart.js": "^2.9.3",
+    "chart.js": "^2.9.4",
     "clsx": "^1.1.0",
     "d3": "^5.16.0",
     "d3-array": "^2.4.0",
